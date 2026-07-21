@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Printer, ChevronRight, Circle } from "lucide-react";
 
-export const Route = createFileRoute("/projects/$id")({
+export const Route = createFileRoute("/projects/")({
   head: () => ({ meta: [{ title: "Project | AL HARIB CCTV COMPANY" }] }),
   component: ProjectDetail,
 });

@@ -15,18 +15,17 @@ import { Route as ServiceRouteImport } from './routes/service'
 import { Route as SalesRouteImport } from './routes/sales'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as QuotationsRouteImport } from './routes/quotations'
-import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as DocumentsRouteImport } from './routes/documents'
-import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as CustomersIndexRouteImport } from './routes/customers.index'
 import { Route as CustomersIdRouteImport } from './routes/customers.$id'
-import { Route as ProjectsRouteImport } from './routes/projects.'
 
 const SurveysRoute = SurveysRouteImport.update({
   id: '/surveys',
@@ -56,11 +55,6 @@ const ReportsRoute = ReportsRouteImport.update({
 const QuotationsRoute = QuotationsRouteImport.update({
   id: '/quotations',
   path: '/quotations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProcurementRoute = ProcurementRouteImport.update({
@@ -93,11 +87,6 @@ const DocumentsRoute = DocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CustomersRoute = CustomersRouteImport.update({
-  id: '/customers',
-  path: '/customers',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -108,41 +97,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CustomersIdRoute = CustomersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => CustomersRoute,
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProjectsRoute,
+const CustomersIndexRoute = CustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomersIdRoute = CustomersIdRouteImport.update({
+  id: '/customers/$id',
+  path: '/customers/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
-  '/customers': typeof CustomersRouteWithChildren
   '/documents': typeof DocumentsRoute
   '/employees': typeof EmployeesRoute
   '/equipment': typeof EquipmentRoute
   '/field': typeof FieldRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
-  '/projects': typeof ProjectsRouteWithChildren
   '/quotations': typeof QuotationsRoute
   '/reports': typeof ReportsRoute
   '/sales': typeof SalesRoute
   '/service': typeof ServiceRoute
   '/settings': typeof SettingsRoute
   '/surveys': typeof SurveysRoute
-  '/projects/': typeof ProjectsRoute
   '/customers/$id': typeof CustomersIdRoute
+  '/customers/': typeof CustomersIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
-  '/customers': typeof CustomersRouteWithChildren
   '/documents': typeof DocumentsRoute
   '/employees': typeof EmployeesRoute
   '/equipment': typeof EquipmentRoute
@@ -155,56 +147,54 @@ export interface FileRoutesByTo {
   '/service': typeof ServiceRoute
   '/settings': typeof SettingsRoute
   '/surveys': typeof SurveysRoute
-  '/projects': typeof ProjectsRoute
   '/customers/$id': typeof CustomersIdRoute
+  '/customers': typeof CustomersIndexRoute
+  '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
-  '/customers': typeof CustomersRouteWithChildren
   '/documents': typeof DocumentsRoute
   '/employees': typeof EmployeesRoute
   '/equipment': typeof EquipmentRoute
   '/field': typeof FieldRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
-  '/projects': typeof ProjectsRouteWithChildren
   '/quotations': typeof QuotationsRoute
   '/reports': typeof ReportsRoute
   '/sales': typeof SalesRoute
   '/service': typeof ServiceRoute
   '/settings': typeof SettingsRoute
   '/surveys': typeof SurveysRoute
-  '/projects/': typeof ProjectsRoute
   '/customers/$id': typeof CustomersIdRoute
+  '/customers/': typeof CustomersIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/calendar'
-    | '/customers'
     | '/documents'
     | '/employees'
     | '/equipment'
     | '/field'
     | '/notifications'
     | '/procurement'
-    | '/projects'
     | '/quotations'
     | '/reports'
     | '/sales'
     | '/service'
     | '/settings'
     | '/surveys'
-    | '/projects/'
     | '/customers/$id'
+    | '/customers/'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calendar'
-    | '/customers'
     | '/documents'
     | '/employees'
     | '/equipment'
@@ -217,47 +207,48 @@ export interface FileRouteTypes {
     | '/service'
     | '/settings'
     | '/surveys'
-    | '/projects'
     | '/customers/$id'
+    | '/customers'
+    | '/projects'
   id:
     | '__root__'
     | '/'
     | '/calendar'
-    | '/customers'
     | '/documents'
     | '/employees'
     | '/equipment'
     | '/field'
     | '/notifications'
     | '/procurement'
-    | '/projects'
     | '/quotations'
     | '/reports'
     | '/sales'
     | '/service'
     | '/settings'
     | '/surveys'
-    | '/projects/'
     | '/customers/$id'
+    | '/customers/'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
-  CustomersRoute: typeof CustomersRouteWithChildren
   DocumentsRoute: typeof DocumentsRoute
   EmployeesRoute: typeof EmployeesRoute
   EquipmentRoute: typeof EquipmentRoute
   FieldRoute: typeof FieldRoute
   NotificationsRoute: typeof NotificationsRoute
   ProcurementRoute: typeof ProcurementRoute
-  ProjectsRoute: typeof ProjectsRouteWithChildren
   QuotationsRoute: typeof QuotationsRoute
   ReportsRoute: typeof ReportsRoute
   SalesRoute: typeof SalesRoute
   ServiceRoute: typeof ServiceRoute
   SettingsRoute: typeof SettingsRoute
   SurveysRoute: typeof SurveysRoute
+  CustomersIdRoute: typeof CustomersIdRoute
+  CustomersIndexRoute: typeof CustomersIndexRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -304,13 +295,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuotationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/procurement': {
       id: '/procurement'
       path: '/procurement'
@@ -353,13 +337,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/customers': {
-      id: '/customers'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof CustomersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -374,64 +351,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/customers/$id': {
-      id: '/customers/$id'
-      path: '/$id'
-      fullPath: '/customers/$id'
-      preLoaderRoute: typeof CustomersIdRouteImport
-      parentRoute: typeof CustomersRoute
-    }
     '/projects/': {
       id: '/projects/'
-      path: '/'
+      path: '/projects'
       fullPath: '/projects/'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof ProjectsRoute
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customers/': {
+      id: '/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof CustomersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customers/$id': {
+      id: '/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/customers/$id'
+      preLoaderRoute: typeof CustomersIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface CustomersRouteChildren {
-  CustomersIdRoute: typeof CustomersIdRoute
-}
-
-const CustomersRouteChildren: CustomersRouteChildren = {
-  CustomersIdRoute: CustomersIdRoute,
-}
-
-const CustomersRouteWithChildren = CustomersRoute._addFileChildren(
-  CustomersRouteChildren,
-)
-
-interface ProjectsRouteChildren {
-  ProjectsRoute: typeof ProjectsRoute
-}
-
-const ProjectsRouteChildren: ProjectsRouteChildren = {
-  ProjectsRoute: ProjectsRoute,
-}
-
-const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
-  ProjectsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
-  CustomersRoute: CustomersRouteWithChildren,
   DocumentsRoute: DocumentsRoute,
   EmployeesRoute: EmployeesRoute,
   EquipmentRoute: EquipmentRoute,
   FieldRoute: FieldRoute,
   NotificationsRoute: NotificationsRoute,
   ProcurementRoute: ProcurementRoute,
-  ProjectsRoute: ProjectsRouteWithChildren,
   QuotationsRoute: QuotationsRoute,
   ReportsRoute: ReportsRoute,
   SalesRoute: SalesRoute,
   ServiceRoute: ServiceRoute,
   SettingsRoute: SettingsRoute,
   SurveysRoute: SurveysRoute,
+  CustomersIdRoute: CustomersIdRoute,
+  CustomersIndexRoute: CustomersIndexRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

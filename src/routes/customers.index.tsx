@@ -5,7 +5,7 @@ import { PageHeader, StatusPill } from "@/components/app/common";
 import { fmtQAR, fmtDate } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-export const Route = createFileRoute("/customers")({ head: () => ({ meta: [{ title: "Customers | AL HARIB CCTV COMPANY" }] }), component: CustomersPage });
+export const Route = createFileRoute("/customers/")({ head: () => ({ meta: [{ title: "Customers | AL HARIB CCTV COMPANY" }] }), component: CustomersPage });
 function CustomersPage() {
   const d = useData();
   const [q, setQ] = useState("");

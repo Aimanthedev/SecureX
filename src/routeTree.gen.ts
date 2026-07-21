@@ -25,6 +25,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as CustomersIndexRouteImport } from './routes/customers.index'
+import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as CustomersIdRouteImport } from './routes/customers.$id'
 
 const SurveysRoute = SurveysRouteImport.update({
@@ -107,6 +108,11 @@ const CustomersIndexRoute = CustomersIndexRouteImport.update({
   path: '/customers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIdRoute = ProjectsIdRouteImport.update({
+  id: '/projects/$id',
+  path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomersIdRoute = CustomersIdRouteImport.update({
   id: '/customers/$id',
   path: '/customers/$id',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/surveys': typeof SurveysRoute
   '/customers/$id': typeof CustomersIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
   '/customers/': typeof CustomersIndexRoute
   '/projects/': typeof ProjectsIndexRoute
 }
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/surveys': typeof SurveysRoute
   '/customers/$id': typeof CustomersIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
   '/customers': typeof CustomersIndexRoute
   '/projects': typeof ProjectsIndexRoute
 }
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/surveys': typeof SurveysRoute
   '/customers/$id': typeof CustomersIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
   '/customers/': typeof CustomersIndexRoute
   '/projects/': typeof ProjectsIndexRoute
 }
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/surveys'
     | '/customers/$id'
+    | '/projects/$id'
     | '/customers/'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/surveys'
     | '/customers/$id'
+    | '/projects/$id'
     | '/customers'
     | '/projects'
   id:
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/surveys'
     | '/customers/$id'
+    | '/projects/$id'
     | '/customers/'
     | '/projects/'
   fileRoutesById: FileRoutesById
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SurveysRoute: typeof SurveysRoute
   CustomersIdRoute: typeof CustomersIdRoute
+  ProjectsIdRoute: typeof ProjectsIdRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/$id': {
+      id: '/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customers/$id': {
       id: '/customers/$id'
       path: '/customers/$id'
@@ -391,9 +411,20 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SurveysRoute: SurveysRoute,
   CustomersIdRoute: CustomersIdRoute,
+  ProjectsIdRoute: ProjectsIdRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -9,38 +9,354 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SurveysRouteImport } from './routes/surveys'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ServiceRouteImport } from './routes/service'
+import { Route as SalesRouteImport } from './routes/sales'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as QuotationsRouteImport } from './routes/quotations'
+import { Route as ProcurementRouteImport } from './routes/procurement'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as FieldRouteImport } from './routes/field'
+import { Route as EquipmentRouteImport } from './routes/equipment'
+import { Route as EmployeesRouteImport } from './routes/employees'
+import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as CustomersIndexRouteImport } from './routes/customers.index'
+import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as CustomersIdRouteImport } from './routes/customers.$id'
 
+const SurveysRoute = SurveysRouteImport.update({
+  id: '/surveys',
+  path: '/surveys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceRoute = ServiceRouteImport.update({
+  id: '/service',
+  path: '/service',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesRoute = SalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuotationsRoute = QuotationsRouteImport.update({
+  id: '/quotations',
+  path: '/quotations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcurementRoute = ProcurementRouteImport.update({
+  id: '/procurement',
+  path: '/procurement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FieldRoute = FieldRouteImport.update({
+  id: '/field',
+  path: '/field',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentRoute = EquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeesRoute = EmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomersIndexRoute = CustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsIdRoute = ProjectsIdRouteImport.update({
+  id: '/projects/$id',
+  path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomersIdRoute = CustomersIdRouteImport.update({
+  id: '/customers/$id',
+  path: '/customers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/documents': typeof DocumentsRoute
+  '/employees': typeof EmployeesRoute
+  '/equipment': typeof EquipmentRoute
+  '/field': typeof FieldRoute
+  '/notifications': typeof NotificationsRoute
+  '/procurement': typeof ProcurementRoute
+  '/quotations': typeof QuotationsRoute
+  '/reports': typeof ReportsRoute
+  '/sales': typeof SalesRoute
+  '/service': typeof ServiceRoute
+  '/settings': typeof SettingsRoute
+  '/surveys': typeof SurveysRoute
+  '/customers/$id': typeof CustomersIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/customers/': typeof CustomersIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/documents': typeof DocumentsRoute
+  '/employees': typeof EmployeesRoute
+  '/equipment': typeof EquipmentRoute
+  '/field': typeof FieldRoute
+  '/notifications': typeof NotificationsRoute
+  '/procurement': typeof ProcurementRoute
+  '/quotations': typeof QuotationsRoute
+  '/reports': typeof ReportsRoute
+  '/sales': typeof SalesRoute
+  '/service': typeof ServiceRoute
+  '/settings': typeof SettingsRoute
+  '/surveys': typeof SurveysRoute
+  '/customers/$id': typeof CustomersIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/customers': typeof CustomersIndexRoute
+  '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/documents': typeof DocumentsRoute
+  '/employees': typeof EmployeesRoute
+  '/equipment': typeof EquipmentRoute
+  '/field': typeof FieldRoute
+  '/notifications': typeof NotificationsRoute
+  '/procurement': typeof ProcurementRoute
+  '/quotations': typeof QuotationsRoute
+  '/reports': typeof ReportsRoute
+  '/sales': typeof SalesRoute
+  '/service': typeof ServiceRoute
+  '/settings': typeof SettingsRoute
+  '/surveys': typeof SurveysRoute
+  '/customers/$id': typeof CustomersIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/customers/': typeof CustomersIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/documents'
+    | '/employees'
+    | '/equipment'
+    | '/field'
+    | '/notifications'
+    | '/procurement'
+    | '/quotations'
+    | '/reports'
+    | '/sales'
+    | '/service'
+    | '/settings'
+    | '/surveys'
+    | '/customers/$id'
+    | '/projects/$id'
+    | '/customers/'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/calendar'
+    | '/documents'
+    | '/employees'
+    | '/equipment'
+    | '/field'
+    | '/notifications'
+    | '/procurement'
+    | '/quotations'
+    | '/reports'
+    | '/sales'
+    | '/service'
+    | '/settings'
+    | '/surveys'
+    | '/customers/$id'
+    | '/projects/$id'
+    | '/customers'
+    | '/projects'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar'
+    | '/documents'
+    | '/employees'
+    | '/equipment'
+    | '/field'
+    | '/notifications'
+    | '/procurement'
+    | '/quotations'
+    | '/reports'
+    | '/sales'
+    | '/service'
+    | '/settings'
+    | '/surveys'
+    | '/customers/$id'
+    | '/projects/$id'
+    | '/customers/'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalendarRoute: typeof CalendarRoute
+  DocumentsRoute: typeof DocumentsRoute
+  EmployeesRoute: typeof EmployeesRoute
+  EquipmentRoute: typeof EquipmentRoute
+  FieldRoute: typeof FieldRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ProcurementRoute: typeof ProcurementRoute
+  QuotationsRoute: typeof QuotationsRoute
+  ReportsRoute: typeof ReportsRoute
+  SalesRoute: typeof SalesRoute
+  ServiceRoute: typeof ServiceRoute
+  SettingsRoute: typeof SettingsRoute
+  SurveysRoute: typeof SurveysRoute
+  CustomersIdRoute: typeof CustomersIdRoute
+  ProjectsIdRoute: typeof ProjectsIdRoute
+  CustomersIndexRoute: typeof CustomersIndexRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/surveys': {
+      id: '/surveys'
+      path: '/surveys'
+      fullPath: '/surveys'
+      preLoaderRoute: typeof SurveysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service': {
+      id: '/service'
+      path: '/service'
+      fullPath: '/service'
+      preLoaderRoute: typeof ServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales': {
+      id: '/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof SalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quotations': {
+      id: '/quotations'
+      path: '/quotations'
+      fullPath: '/quotations'
+      preLoaderRoute: typeof QuotationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/procurement': {
+      id: '/procurement'
+      path: '/procurement'
+      fullPath: '/procurement'
+      preLoaderRoute: typeof ProcurementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/field': {
+      id: '/field'
+      path: '/field'
+      fullPath: '/field'
+      preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment': {
+      id: '/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof EquipmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employees': {
+      id: '/employees'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof EmployeesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +364,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customers/': {
+      id: '/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof CustomersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$id': {
+      id: '/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customers/$id': {
+      id: '/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/customers/$id'
+      preLoaderRoute: typeof CustomersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalendarRoute: CalendarRoute,
+  DocumentsRoute: DocumentsRoute,
+  EmployeesRoute: EmployeesRoute,
+  EquipmentRoute: EquipmentRoute,
+  FieldRoute: FieldRoute,
+  NotificationsRoute: NotificationsRoute,
+  ProcurementRoute: ProcurementRoute,
+  QuotationsRoute: QuotationsRoute,
+  ReportsRoute: ReportsRoute,
+  SalesRoute: SalesRoute,
+  ServiceRoute: ServiceRoute,
+  SettingsRoute: SettingsRoute,
+  SurveysRoute: SurveysRoute,
+  CustomersIdRoute: CustomersIdRoute,
+  ProjectsIdRoute: ProjectsIdRoute,
+  CustomersIndexRoute: CustomersIndexRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -127,6 +127,9 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     setThemeState(t);
     if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", t === "dark");
   }, []);
+  React.useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
   return <UIContext.Provider value={{ theme, setTheme, role, setRole, lang, setLang, density, setDensity }}>{children}</UIContext.Provider>;
 }
 export function useUI() {

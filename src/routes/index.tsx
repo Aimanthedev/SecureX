@@ -233,3 +233,36 @@ function CommandCenter() {
 function Kpi({ label, v, tone }: { label: string; v: React.ReactNode; tone?: "success"|"warning" }) {
   return <div className="border hairline rounded-md p-2"><div className="text-[10px] uppercase text-muted-foreground">{label}</div><div className={`num text-lg font-semibold ${tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : ""}`}>{v}</div></div>;
 }
+
+function HeroTile({ className, label, value, delta, sub, spark, tone, big, icon, onClick }: {
+  className?: string; label: string; value: string; delta?: string; sub?: string; spark?: number[];
+  tone?: "critical"|"warning"|"success"; big?: boolean; icon?: React.ReactNode; onClick?: () => void;
+}) {
+  const toneCls = tone === "critical" ? "text-critical" : tone === "warning" ? "text-warning" : tone === "success" ? "text-success" : "text-foreground/70";
+  const Comp: "button" | "div" = onClick ? "button" : "div";
+  return (
+    <Comp onClick={onClick} className={`${className} group relative overflow-hidden text-left rounded-xl glass card-lift p-4 ${onClick ? "cursor-pointer" : ""}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] uppercase tracking-[0.16em] text-foreground/60 font-medium flex items-center gap-1.5">{icon}{label}</div>
+        {delta && <div className={`text-[11px] num inline-flex items-center gap-0.5 ${delta.startsWith("-") ? "text-critical" : "text-success"}`}><TrendingUp className="w-3 h-3" />{delta}</div>}
+      </div>
+      <div className={`mt-2 font-display font-semibold num tracking-tight ${big ? "text-5xl md:text-6xl" : "text-3xl"} text-foreground`}>{value}</div>
+      {sub && <div className={`text-[11px] mt-1 ${toneCls}`}>{sub}</div>}
+      {spark && spark.length > 0 && (
+        <div className={`mt-3 ${big ? "h-16" : "h-8"}`}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={spark.map((v, i) => ({ i, v }))}>
+              <defs>
+                <linearGradient id={`sp-${label.replace(/\s/g,"")}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--hero-from)" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="var(--hero-to)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke="var(--hero-from)" strokeWidth={1.6} fill={`url(#sp-${label.replace(/\s/g,"")})`} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </Comp>
+  );
+}

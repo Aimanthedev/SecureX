@@ -119,7 +119,7 @@ const UIContext = createContext<UICtx | null>(null);
 export const ROLES: Role[] = ["Owner","Operations Manager","Project Manager","Salesperson","Site Engineer","Technician","Accounts Viewer"];
 
 export function UIProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [theme, setThemeState] = useState<ThemeMode>("dark");
   const [role, setRole] = useState<Role>("Owner");
   const [lang, setLang] = useState<Lang>("en");
   const [density, setDensity] = useState<"compact"|"comfortable">("comfortable");
@@ -127,6 +127,9 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     setThemeState(t);
     if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", t === "dark");
   }, []);
+  React.useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
   return <UIContext.Provider value={{ theme, setTheme, role, setRole, lang, setLang, density, setDensity }}>{children}</UIContext.Provider>;
 }
 export function useUI() {

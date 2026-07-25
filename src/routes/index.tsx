@@ -5,8 +5,8 @@ import { KpiCard, PageHeader, HealthBadge, ProgressBar, MonoChip, StatusPill, Ri
 import { fmtQAR, fmtNum, fmtDate, daysFromToday } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Package, Users2 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell, FunnelChart, Funnel, LabelList } from "recharts";
+import { ArrowRight, ClipboardCheck, Users2, Activity, TrendingUp } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, FunnelChart, Funnel, LabelList, Area, AreaChart } from "recharts";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Command Center | AL HARIB CCTV COMPANY" }, { name: "description", content: "Live operations overview for AL HARIB CCTV COMPANY." }] }),
@@ -61,22 +61,38 @@ function CommandCenter() {
 
   return (
     <div>
-      <PageHeader title="Command Center" subtitle="Today, 20 Jul 2026 · Live view of sales, projects, service, and financials"
-        actions={<><Button variant="outline" size="sm">Last 30 days</Button><Button size="sm" className="bg-signal text-signal-foreground hover:bg-signal/90">Weekly briefing</Button></>} />
+      {/* Hero bento band */}
+      <div className="relative overflow-hidden rounded-2xl hero-gradient hero-ring p-6 md:p-8 mb-6">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-foreground/70">
+              <span className="live-dot" /> Live · 20 Jul 2026 · 14:32 AST
+            </div>
+            <h1 className="mt-2 text-3xl md:text-4xl font-display font-semibold tracking-tight">Command Center</h1>
+            <p className="text-sm text-foreground/70 mt-1 max-w-xl">Real-time view of sales, delivery, field operations, service, and financials across the AL HARIB portfolio.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="glass">Last 30 days</Button>
+            <Button size="sm" className="bg-signal text-signal-foreground hover:bg-signal/90 shadow-[0_10px_30px_-12px_var(--glow)]">Weekly briefing</Button>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
-        <KpiCard label="Active projects" value={active} delta="+1" spark={[3,4,4,3,4]} onClick={() => nav({ to: "/projects" })} />
-        <KpiCard label="Projects at risk" value={atRisk} sub="Review recommended" tone="critical" spark={[0,1,1,2,2]} onClick={() => nav({ to: "/projects" })} />
-        <KpiCard label="Delayed" value={delayed} tone="warning" spark={[0,0,1,1,0]} />
-        <KpiCard label="Open quotations" value={openQuotes} delta="+2" spark={[1,2,3,3,4]} onClick={() => nav({ to: "/quotations" })} />
-        <KpiCard label="Weighted pipeline" value={fmtQAR(pipeline, { compact: true })} delta="+8%" spark={[6,7,7,8,9]} onClick={() => nav({ to: "/sales" })} />
-        <KpiCard label="Revenue under execution" value={fmtQAR(revenue, { compact: true })} spark={[10,10,11,12,12]} />
-        <KpiCard label="Outstanding collections" value={fmtQAR(outstanding, { compact: true })} tone="warning" sub="12 items aged" spark={[3,3,4,4,4]} />
-        <KpiCard label="Active AMC" value={activeAmc} spark={[2,2,2,3,3]} onClick={() => nav({ to: "/service" })} />
+        <div className="grid grid-cols-12 gap-3 md:gap-4">
+          <HeroTile className="col-span-12 md:col-span-6 xl:col-span-5" label="Revenue under execution" value={fmtQAR(revenue, { compact: true })} delta="+12.4%" spark={[8,9,9,10,11,12,12]} big />
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-3" label="Weighted pipeline" value={fmtQAR(pipeline, { compact: true })} delta="+8%" spark={[6,7,7,8,9,9,10]} onClick={() => nav({ to: "/sales" })} />
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Active projects" value={String(active)} delta="+1" onClick={() => nav({ to: "/projects" })} />
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="At risk" value={String(atRisk)} tone="critical" sub="Review recommended" onClick={() => nav({ to: "/projects" })} />
+
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-3" label="Outstanding" value={fmtQAR(outstanding, { compact: true })} tone="warning" sub="12 items aged" />
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Open quotations" value={String(openQuotes)} delta="+2" onClick={() => nav({ to: "/quotations" })} />
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Delayed" value={String(delayed)} tone="warning" />
+          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Active AMC" value={String(activeAmc)} onClick={() => nav({ to: "/service" })} />
+          <HeroTile className="col-span-12 xl:col-span-3" label="Teams on site" value="3" sub="6 installs, 4 tests today" icon={<Activity className="w-4 h-4" />} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-6">
-        <Card className="xl:col-span-2 p-4">
+        <Card className="xl:col-span-2 p-4 card-lift">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="font-display font-semibold text-lg">Requires Attention</h3>
@@ -99,7 +115,7 @@ function CommandCenter() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 card-lift">
           <h3 className="font-display font-semibold text-lg mb-3">Portfolio Health</h3>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
@@ -216,4 +232,37 @@ function CommandCenter() {
 }
 function Kpi({ label, v, tone }: { label: string; v: React.ReactNode; tone?: "success"|"warning" }) {
   return <div className="border hairline rounded-md p-2"><div className="text-[10px] uppercase text-muted-foreground">{label}</div><div className={`num text-lg font-semibold ${tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : ""}`}>{v}</div></div>;
+}
+
+function HeroTile({ className, label, value, delta, sub, spark, tone, big, icon, onClick }: {
+  className?: string; label: string; value: string; delta?: string; sub?: string; spark?: number[];
+  tone?: "critical"|"warning"|"success"; big?: boolean; icon?: React.ReactNode; onClick?: () => void;
+}) {
+  const toneCls = tone === "critical" ? "text-critical" : tone === "warning" ? "text-warning" : tone === "success" ? "text-success" : "text-foreground/70";
+  const Comp: "button" | "div" = onClick ? "button" : "div";
+  return (
+    <Comp onClick={onClick} className={`${className} group relative overflow-hidden text-left rounded-xl glass card-lift p-4 ${onClick ? "cursor-pointer" : ""}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] uppercase tracking-[0.16em] text-foreground/60 font-medium flex items-center gap-1.5">{icon}{label}</div>
+        {delta && <div className={`text-[11px] num inline-flex items-center gap-0.5 ${delta.startsWith("-") ? "text-critical" : "text-success"}`}><TrendingUp className="w-3 h-3" />{delta}</div>}
+      </div>
+      <div className={`mt-2 font-display font-semibold num tracking-tight ${big ? "text-5xl md:text-6xl" : "text-3xl"} text-foreground`}>{value}</div>
+      {sub && <div className={`text-[11px] mt-1 ${toneCls}`}>{sub}</div>}
+      {spark && spark.length > 0 && (
+        <div className={`mt-3 ${big ? "h-16" : "h-8"}`}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={spark.map((v, i) => ({ i, v }))}>
+              <defs>
+                <linearGradient id={`sp-${label.replace(/\s/g,"")}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--hero-from)" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="var(--hero-to)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke="var(--hero-from)" strokeWidth={1.6} fill={`url(#sp-${label.replace(/\s/g,"")})`} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </Comp>
+  );
 }

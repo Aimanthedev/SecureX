@@ -119,7 +119,7 @@ const UIContext = createContext<UICtx | null>(null);
 export const ROLES: Role[] = ["Owner","Operations Manager","Project Manager","Salesperson","Site Engineer","Technician","Accounts Viewer"];
 
 export function UIProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [theme, setThemeState] = useState<ThemeMode>("dark");
   const [role, setRole] = useState<Role>("Owner");
   const [lang, setLang] = useState<Lang>("en");
   const [density, setDensity] = useState<"compact"|"comfortable">("comfortable");

@@ -125,7 +125,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
     return parts.length ? parts : ["command-center"];
   }, [path]);
   return (
-    <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur border-b hairline">
+    <header className="sticky top-0 z-40 glass border-b hairline">
       <div className="flex items-center gap-2 px-3 md:px-6 h-14">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenu}><PanelLeftOpen className="w-5 h-5" /></Button>
         <nav className="hidden md:flex items-center text-xs text-muted-foreground gap-1 min-w-0">

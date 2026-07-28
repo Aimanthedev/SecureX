@@ -64,7 +64,7 @@ function ProjectDetail() {
     setTab(sub);
   };
   const collected = p.collected; const invoiced = Math.max(1, p.invoiced);
-  const camsInstalled = projectDevices.filter((x) => x.status !== "Planned").length;
+  const camsInstalled = projectDevices.filter((x) => x.status === "Installed" || x.status === "Configured" || x.status === "Tested" || x.status === "Handed Over").length;
   const testsPassed = projectDevices.filter((x) => x.testResult === "Pass").length;
   const testsFailed = projectDevices.filter((x) => x.testResult === "Fail").length;
   const daysLeft = daysFromToday(p.plannedEnd);
@@ -396,14 +396,14 @@ function CommandTile({ label, value, sub, tone = "info", kind, ring, bar, icon: 
 function IntelligenceRail({ section, project, health, milestones, materials, tasks, devices, payments, docs, handoverItems, comms, onJump }: {
   section: string;
   project: import("@/lib/mock-data").Project;
-  health: ReturnType<import("@/lib/data-context").DataContextType["computeHealth"]>;
+  health: ReturnType<typeof import("@/lib/mock-data").computeHealth>;
   milestones: import("@/lib/mock-data").Milestone[];
   materials: import("@/lib/mock-data").Material[];
   tasks: import("@/lib/mock-data").Task[];
   approvals: import("@/lib/mock-data").Approval[];
   devices: import("@/lib/mock-data").Device[];
   payments: import("@/lib/mock-data").PaymentMilestone[];
-  docs: import("@/lib/mock-data").Document[];
+  docs: import("@/lib/mock-data").Doc[];
   handoverItems: import("@/lib/mock-data").HandoverItem[];
   comms: import("@/lib/mock-data").Communication[];
   onJump: (v: string) => void;

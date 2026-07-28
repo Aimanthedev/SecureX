@@ -25,7 +25,7 @@ import {
   ComposedChart, Line, Area, Bar, BarChart, PieChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 
-export const Route = createFileRoute("/projects/$id")({
+export const Route = createFileRoute("/projects/")({
   head: () => ({ meta: [{ title: "Project | AL HARIB CCTV COMPANY" }] }),
   component: ProjectDetail,
 });

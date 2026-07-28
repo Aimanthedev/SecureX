@@ -11,23 +11,35 @@ import { ROLES, useData, useUI } from "@/lib/data-context";
 import { toast } from "sonner";
 import { MonoChip } from "./common";
 
-const NAV = [
-  { to: "/", label: "Command Center", icon: LayoutDashboard },
-  { to: "/sales", label: "Sales", icon: Users },
-  { to: "/quotations", label: "Quotations", icon: FileText },
-  { to: "/surveys", label: "Site Surveys", icon: ClipboardList },
-  { to: "/projects", label: "Projects", icon: HardHat },
-  { to: "/field", label: "Field Operations", icon: Wrench },
-  { to: "/calendar", label: "Calendar", icon: Calendar },
-  { to: "/customers", label: "Customers", icon: UserCircle2 },
-  { to: "/equipment", label: "Equipment", icon: Package },
-  { to: "/procurement", label: "Procurement", icon: ShoppingCart },
-  { to: "/service", label: "Service and AMC", icon: ShieldCheck },
-  { to: "/documents", label: "Documents", icon: FolderOpen },
-  { to: "/employees", label: "Employees", icon: UsersRound },
-  { to: "/reports", label: "Reports", icon: BarChart3 },
-  { to: "/notifications", label: "Notifications", icon: Bell },
-  { to: "/settings", label: "Settings", icon: Settings },
+const NAV_GROUPS = [
+  { group: "Operations", items: [
+    { to: "/", label: "Command Center", icon: LayoutDashboard },
+    { to: "/projects", label: "Projects", icon: HardHat },
+    { to: "/field", label: "Field Operations", icon: Wrench },
+    { to: "/calendar", label: "Calendar", icon: Calendar },
+    { to: "/surveys", label: "Site Surveys", icon: ClipboardList },
+  ]},
+  { group: "Commercial", items: [
+    { to: "/sales", label: "Sales", icon: Users },
+    { to: "/quotations", label: "Quotations", icon: FileText },
+    { to: "/customers", label: "Customers", icon: UserCircle2 },
+  ]},
+  { group: "Resources", items: [
+    { to: "/equipment", label: "Equipment", icon: Package },
+    { to: "/procurement", label: "Procurement", icon: ShoppingCart },
+    { to: "/employees", label: "Employees", icon: UsersRound },
+  ]},
+  { group: "After-Sales", items: [
+    { to: "/service", label: "Service and AMC", icon: ShieldCheck },
+    { to: "/documents", label: "Documents", icon: FolderOpen },
+  ]},
+  { group: "Intelligence", items: [
+    { to: "/reports", label: "Reports", icon: BarChart3 },
+    { to: "/notifications", label: "Notifications", icon: Bell },
+  ]},
+  { group: "System", items: [
+    { to: "/settings", label: "Settings", icon: Settings },
+  ]},
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -41,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex bg-background text-foreground">
       {/* Sidebar - desktop */}
-      <aside className={cn("hidden md:flex flex-col shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-[width] duration-200", collapsed ? "w-16" : "w-60")}>
+      <aside className={cn("hidden md:flex flex-col shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-[width] duration-200", collapsed ? "w-16" : "w-[220px]")}>
         <SidebarInner collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       </aside>
       {/* Sidebar - mobile */}
@@ -67,42 +79,63 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
   const { role } = useUI();
   return (
     <>
-      <div className={cn("flex items-center gap-2 px-3 py-4 border-b border-sidebar-border", collapsed && "justify-center")}>
-        <div className="w-8 h-8 rounded-md bg-brand grid place-items-center text-brand-foreground font-display font-bold shrink-0">A</div>
+      <div className={cn("flex items-center gap-2.5 px-3.5 py-4 border-b border-sidebar-border", collapsed && "justify-center px-0")}>
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand to-brand/70 grid place-items-center text-brand-foreground font-display font-bold shrink-0 shadow-lg shadow-brand/20">A</div>
         {!collapsed && (
-          <div className="min-w-0">
-            <div className="font-display font-bold text-[15px] leading-tight tracking-wide text-sidebar-primary-foreground">AL HARIB</div>
-            <div className="text-[10px] uppercase tracking-widest text-brand font-medium">CCTV COMPANY</div>
+          <div className="min-w-0 flex-1">
+            <div className="font-display font-bold text-[14px] leading-tight tracking-wide text-sidebar-primary-foreground">AL HARIB</div>
+            <div className="text-[9px] uppercase tracking-[0.15em] text-sidebar-foreground/70 font-medium">CCTV COMPANY</div>
+          </div>
+        )}
+        {!collapsed && (
+          <div className="flex items-center gap-1 text-[9px] text-success uppercase tracking-wider font-medium">
+            <span className="live-dot" />
+            <span>Live</span>
           </div>
         )}
       </div>
-      <nav className="flex-1 overflow-y-auto py-2">
-        {NAV.map((n) => {
-          const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
-          const Icon = n.icon;
-          return (
-            <Link
-              key={n.to}
-              to={n.to}
-              onClick={onNavigate}
-              className={cn(
-                "flex items-center gap-3 mx-2 my-0.5 px-3 py-2 rounded-md text-[13px] transition-colors",
-                active ? "bg-signal text-signal-foreground font-medium" : "hover:bg-sidebar-accent text-sidebar-foreground",
-                collapsed && "justify-center px-0"
-              )}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {!collapsed && <span className="truncate">{n.label}</span>}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto py-3 space-y-3">
+        {NAV_GROUPS.map((g) => (
+          <div key={g.group}>
+            {!collapsed && (
+              <div className="px-4 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-sidebar-foreground/50 font-semibold">{g.group}</div>
+            )}
+            {g.items.map((n) => {
+              const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
+              const Icon = n.icon;
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={onNavigate}
+                  title={collapsed ? n.label : undefined}
+                  className={cn(
+                    "flex items-center gap-2.5 mx-2 my-0.5 px-2.5 py-2 rounded-lg text-[12.5px] transition-all",
+                    active
+                      ? "bg-signal text-signal-foreground font-medium shadow-md shadow-signal/25"
+                      : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground",
+                    collapsed && "justify-center px-0 mx-1.5"
+                  )}
+                >
+                  <Icon className={cn("w-[15px] h-[15px] shrink-0", active ? "text-white" : "")} />
+                  {!collapsed && <span className="truncate">{n.label}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
       <div className="border-t border-sidebar-border p-3">
         {!collapsed && (
-          <div className="mb-2 text-[11px]">
-            <div className="font-medium text-sidebar-primary-foreground">Yousef Al-Emadi</div>
-            <div className="text-sidebar-foreground/70">{role}</div>
-            <div className="text-sidebar-foreground/50 mt-0.5">AL HARIB CCTV COMPANY</div>
+          <div className="mb-2 flex items-center gap-2.5">
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-signal/15 text-signal grid place-items-center text-[11px] font-semibold">YE</div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success border-2 border-sidebar" />
+            </div>
+            <div className="min-w-0 flex-1 text-[11px]">
+              <div className="font-medium text-sidebar-primary-foreground truncate">Yousef Al-Emadi</div>
+              <div className="text-sidebar-foreground/70 truncate">{role}</div>
+            </div>
           </div>
         )}
         <div className={cn("flex items-center gap-1", collapsed && "flex-col")}>

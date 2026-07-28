@@ -1,268 +1,344 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
-import { KpiCard, PageHeader, HealthBadge, ProgressBar, MonoChip, StatusPill, Ring } from "@/components/app/common";
-import { fmtQAR, fmtNum, fmtDate, daysFromToday } from "@/lib/format";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, ClipboardCheck, Users2, Activity, TrendingUp } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, FunnelChart, Funnel, LabelList, Area, AreaChart } from "recharts";
+import {
+  MetricCard, Panel, PanelHead, Donut, ProgressBar, StatusPill, HealthBadge, MonoChip,
+  Segmented, QuickAction, AlertCard, TableShell, axisProps, ChartTooltip, ACCENT,
+} from "@/components/app/common";
+import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
+import {
+  ArrowRight, Wallet, TrendingUp, Banknote, HardHat, Camera, ClipboardCheck, Package,
+  FileSignature, CircleDollarSign, AlertTriangle, Plus, FileBarChart, Radio, Building2,
+} from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "Command Center | AL HARIB CCTV COMPANY" }, { name: "description", content: "Live operations overview for AL HARIB CCTV COMPANY." }] }),
+  head: () => ({ meta: [
+    { title: "Command Center | AL HARIB CCTV COMPANY" },
+    { name: "description", content: "Live operations command center for AL HARIB CCTV COMPANY — projects, pipeline, collections and field execution." },
+    { property: "og:title", content: "Command Center | AL HARIB CCTV COMPANY" },
+    { property: "og:description", content: "Live operations command center for AL HARIB CCTV COMPANY." },
+  ] }),
   component: CommandCenter,
 });
+
+const MONTHS = ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
 
 function CommandCenter() {
   const d = useData();
   const nav = useNavigate();
-  const projectsWithHealth = useMemo(() => d.projects.map((p) => ({ p, h: d.computeHealth(p, d.approvals, d.devices, d.materials) })), [d]);
+  const [month, setMonth] = useState("Jul");
+  const [range, setRange] = useState<"m" | "q" | "y">("q");
+
+  const projectsWithHealth = useMemo(
+    () => d.projects.map((p) => ({ p, h: d.computeHealth(p, d.approvals, d.devices, d.materials) })),
+    [d],
+  );
   const active = projectsWithHealth.length;
-  const atRisk = projectsWithHealth.filter((x) => x.h.label === "At Risk" || x.h.label === "Delayed" || x.h.label === "Awaiting Materials").length;
-  const delayed = projectsWithHealth.filter((x) => x.h.label === "Delayed").length;
-  const openQuotes = d.quotations.filter((q) => q.status === "Sent" || q.status === "Draft" || (q.status as string) === "Negotiation").length;
+  const atRisk = projectsWithHealth.filter((x) => x.h.label !== "On Track").length;
   const pipeline = d.leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").reduce((s, l) => s + l.value * (l.probability / 100), 0);
   const revenue = d.projects.reduce((s, p) => s + p.contractValue, 0);
-  const outstanding = d.projects.reduce((s, p) => s + (p.invoiced - p.collected), 0);
-  const activeAmc = d.amc.filter((a) => a.renewalStatus !== "Expired").length;
+  const invoiced = d.projects.reduce((s, p) => s + p.invoiced, 0);
+  const collected = d.projects.reduce((s, p) => s + p.collected, 0);
+  const outstanding = invoiced - collected;
+  const avgCompletion = Math.round(d.projects.reduce((s, p) => s + p.actualProgress, 0) / Math.max(1, d.projects.length));
 
-  const alerts = useMemo(() => {
-    const items: { severity: "critical"|"warning"|"info"; title: string; sub: string; owner: string; action: string; go: () => void }[] = [];
-    projectsWithHealth.forEach(({ p, h }) => {
-      h.drivers.filter((x) => x.severity !== "info").forEach((dr) => {
-        items.push({ severity: dr.severity, title: dr.text, sub: `${p.number} · ${p.name}`, owner: d.employees.find((e) => e.id === p.pmId)?.name || "", action: "Open project", go: () => nav({ to: "/projects/$id", params: { id: p.id } }) });
-      });
-    });
-    d.purchaseOrders.filter((po) => po.deliveryStatus === "Overdue").forEach((po) => items.push({ severity: "critical", title: `PO ${po.number} overdue`, sub: `${po.supplier} · ${fmtQAR(po.amount)}`, owner: "Aisha Rahman", action: "Open PO", go: () => nav({ to: "/procurement" }) }));
-    d.amc.filter((a) => a.renewalStatus === "Expiring Soon" || a.renewalStatus === "Expired").forEach((a) => {
-      const days = daysFromToday(a.end);
-      items.push({ severity: days < 0 ? "critical" : "warning", title: `AMC ${a.number} ${days < 0 ? "expired" : `expires in ${days} days`}`, sub: `${d.customers.find((c) => c.id === a.customerId)?.name || ""}`, owner: "Bilal Farooq", action: "Open AMC", go: () => nav({ to: "/service" }) });
-    });
-    d.approvals.filter((a) => a.status === "Pending" && a.critical).forEach((a) => items.push({ severity: "warning", title: `Approval pending: ${a.title}`, sub: `Owner: ${a.owner}`, owner: a.owner, action: "Open approval", go: () => nav({ to: "/projects/$id", params: { id: a.projectId } }) }));
-    return items.sort((a, b) => (a.severity === "critical" ? -1 : 0) - (b.severity === "critical" ? -1 : 0)).slice(0, 12);
-  }, [projectsWithHealth, d, nav]);
+  const execData = useMemo(
+    () => MONTHS.map((m, i) => ({
+      m,
+      planned: 46 + i * 7 + ((i * 13) % 9),
+      actual: 38 + i * 6 + ((i * 7) % 11),
+      completed: 120 + i * 26,
+      delayed: 60 - i * 5 + ((i * 11) % 14),
+    })),
+    [],
+  );
 
-  const stackData = useMemo(() => {
+  const distribution = useMemo(() => {
     const byPhase: Record<string, number> = {};
     d.projects.forEach((p) => { byPhase[p.phase] = (byPhase[p.phase] || 0) + 1; });
-    return Object.entries(byPhase).map(([phase, count]) => ({ phase, count }));
+    const order = ["Installation", "Testing", "Procurement", "Handover", "Maintenance"];
+    const colors = ["#2F83FF", "#18D5FF", "#9654FF", "#E447C4", "#20D39A"];
+    const known = order.map((name, i) => ({ name, value: byPhase[name] || 0, color: colors[i] }));
+    Object.entries(byPhase).filter(([k]) => !order.includes(k)).forEach(([name, value], i) => {
+      known.push({ name, value, color: colors[(order.length + i) % colors.length] });
+    });
+    return known.filter((x) => x.value > 0);
   }, [d.projects]);
 
-  const funnelData = useMemo(() => {
-    const stages = ["Qualified","Site Survey Scheduled","Survey Completed","Quotation Sent","Negotiation","Verbal Approval","Won"] as const;
-    return stages.map((s, i) => ({ name: s, value: 100 - i * 12, fill: ["#3b82c4","#4f8fc9","#65a5c9","#7bb0c5","#8dbdc0","#a2c8b2","#1f9d63"][i] }));
-  }, []);
+  const alerts = useMemo(() => {
+    const items: { severity: "critical" | "warning"; title: string; owner: string; sub: string; action: string; go: () => void }[] = [];
+    projectsWithHealth.forEach(({ p, h }) => {
+      h.drivers.filter((x) => x.severity !== "info").forEach((dr) => {
+        items.push({
+          severity: dr.severity as "critical" | "warning",
+          title: dr.text,
+          sub: `${p.number} · ${p.name}`,
+          owner: d.employees.find((e) => e.id === p.pmId)?.name || "—",
+          action: "Open project",
+          go: () => nav({ to: "/projects/$id", params: { id: p.id } }),
+        });
+      });
+    });
+    d.purchaseOrders.filter((po) => po.deliveryStatus === "Overdue").forEach((po) =>
+      items.push({ severity: "critical", title: `PO ${po.number} overdue`, sub: po.supplier, owner: "Procurement", action: "Open PO", go: () => nav({ to: "/procurement" }) }));
+    d.amc.filter((a) => a.renewalStatus === "Expiring Soon" || a.renewalStatus === "Expired").forEach((a) => {
+      const days = daysFromToday(a.end);
+      items.push({ severity: days < 0 ? "critical" : "warning", title: `AMC ${a.number} ${days < 0 ? "expired" : `expires in ${days} days`}`, sub: d.customers.find((c) => c.id === a.customerId)?.name || "", owner: "Service", action: "Open AMC", go: () => nav({ to: "/service" }) });
+    });
+    return items.sort((a, b) => (a.severity === "critical" ? -1 : 1) - (b.severity === "critical" ? -1 : 1)).slice(0, 6);
+  }, [projectsWithHealth, d, nav]);
 
   const totalCameras = d.devices.length;
-  const installed = d.devices.filter((x) => x.status !== "Faulty").length;
-  const configured = d.devices.filter((x) => x.status === "Configured" || x.status === "Tested" || x.status === "Handed Over").length;
   const tested = d.devices.filter((x) => x.status === "Tested" || x.status === "Handed Over").length;
-  const failed = d.devices.filter((x) => x.testResult === "Fail").length;
+
+  const recent = useMemo(() => {
+    const rows: { icon: any; accent: keyof typeof ACCENT; title: string; activity: string; owner: string; value: string; status: string; tone: any; time: string }[] = [];
+    d.projects.slice(0, 6).forEach((p, i) => {
+      const pm = d.employees.find((e) => e.id === p.pmId)?.name || "—";
+      const set = [
+        { icon: Camera, accent: "blue" as const, activity: "Cameras installed", value: `${8 + i * 2} units`, status: "Completed", tone: "success", time: `${i + 1}h ago` },
+        { icon: ClipboardCheck, accent: "cyan" as const, activity: "Site survey completed", value: "24 points", status: "Reviewed", tone: "info", time: `${i + 3}h ago` },
+        { icon: Package, accent: "purple" as const, activity: "Material request approved", value: fmtQAR(18400 + i * 3100, { compact: true }), status: "Approved", tone: "purple", time: `${i + 5}h ago` },
+        { icon: FileSignature, accent: "magenta" as const, activity: "Quotation submitted", value: fmtQAR(126000 + i * 8400, { compact: true }), status: "Sent", tone: "info", time: "Yesterday" },
+        { icon: CircleDollarSign, accent: "green" as const, activity: "Client payment received", value: fmtQAR(74000 + i * 5200, { compact: true }), status: "Cleared", tone: "success", time: "Yesterday" },
+        { icon: AlertTriangle, accent: "red" as const, activity: "Testing failure reported", value: "2 devices", status: "Open", tone: "critical", time: "2 days ago" },
+      ][i % 6];
+      rows.push({ ...set, title: p.name, owner: pm });
+    });
+    return rows;
+  }, [d]);
 
   return (
-    <div>
-      {/* Hero bento band */}
-      <div className="relative overflow-hidden rounded-2xl hero-gradient hero-ring p-6 md:p-8 mb-6">
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-foreground/70">
-              <span className="live-dot" /> Live · 20 Jul 2026 · 14:32 AST
-            </div>
-            <h1 className="mt-2 text-3xl md:text-4xl font-display font-semibold tracking-tight">Command Center</h1>
-            <p className="text-sm text-foreground/70 mt-1 max-w-xl">Real-time view of sales, delivery, field operations, service, and financials across the AL HARIB portfolio.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="glass">Last 30 days</Button>
-            <Button size="sm" className="bg-signal text-signal-foreground hover:bg-signal/90 shadow-[0_10px_30px_-12px_var(--glow)]">Weekly briefing</Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-12 gap-3 md:gap-4">
-          <HeroTile className="col-span-12 md:col-span-6 xl:col-span-5" label="Revenue under execution" value={fmtQAR(revenue, { compact: true })} delta="+12.4%" spark={[8,9,9,10,11,12,12]} big />
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-3" label="Weighted pipeline" value={fmtQAR(pipeline, { compact: true })} delta="+8%" spark={[6,7,7,8,9,9,10]} onClick={() => nav({ to: "/sales" })} />
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Active projects" value={String(active)} delta="+1" onClick={() => nav({ to: "/projects" })} />
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="At risk" value={String(atRisk)} tone="critical" sub="Review recommended" onClick={() => nav({ to: "/projects" })} />
-
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-3" label="Outstanding" value={fmtQAR(outstanding, { compact: true })} tone="warning" sub="12 items aged" />
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Open quotations" value={String(openQuotes)} delta="+2" onClick={() => nav({ to: "/quotations" })} />
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Delayed" value={String(delayed)} tone="warning" />
-          <HeroTile className="col-span-6 md:col-span-3 xl:col-span-2" label="Active AMC" value={String(activeAmc)} onClick={() => nav({ to: "/service" })} />
-          <HeroTile className="col-span-12 xl:col-span-3" label="Teams on site" value="3" sub="6 installs, 4 tests today" icon={<Activity className="w-4 h-4" />} />
-        </div>
+    <div className="space-y-4">
+      {/* Top metric row */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rise rise-1"><MetricCard label="Active project value" value={fmtQAR(revenue, { compact: true })} delta="+12.4%" sub="vs last quarter" accent="blue" motif="camera" icon={<Wallet className="h-3.5 w-3.5" />} spark={[8, 9, 9, 10, 11, 12, 13]} onClick={() => nav({ to: "/projects" })} /></div>
+        <div className="rise rise-2"><MetricCard label="Open sales pipeline" value={fmtQAR(pipeline, { compact: true })} delta="+8.1%" sub="weighted forecast" accent="purple" motif="nodes" icon={<TrendingUp className="h-3.5 w-3.5" />} spark={[6, 7, 6, 8, 9, 9, 11]} onClick={() => nav({ to: "/sales" })} /></div>
+        <div className="rise rise-3"><MetricCard label="Outstanding collections" value={fmtQAR(outstanding, { compact: true })} delta="-3.2%" sub="12 invoices aged" accent="amber" motif="channels" icon={<Banknote className="h-3.5 w-3.5" />} spark={[9, 9, 8, 8, 7, 7, 6]} onClick={() => nav({ to: "/reports" })} /></div>
+        <div className="rise rise-4"><MetricCard label="Active projects" value={String(active)} delta="+1" sub={`${atRisk} need attention`} accent="cyan" motif="waves" icon={<HardHat className="h-3.5 w-3.5" />} spark={[4, 4, 5, 5, 6, 6, 6]} onClick={() => nav({ to: "/projects" })} /></div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-6">
-        <Card className="xl:col-span-2 p-4 card-lift">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="font-display font-semibold text-lg">Requires Attention</h3>
-              <p className="text-xs text-muted-foreground">Prioritized signals from projects, procurement, service, and approvals.</p>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        {/* Main analytics */}
+        <div className="space-y-4 xl:col-span-8">
+          <Panel className="rise rise-2" texture="grid">
+            <PanelHead
+              title="Project Execution Performance"
+              sub="Planned versus actual monthly progress across the delivery portfolio"
+              icon={<BarChart3Icon />}
+              right={<Segmented size="sm" value={range} onChange={setRange} options={[{ value: "m", label: "Month" }, { value: "q", label: "Quarter" }, { value: "y", label: "Year" }]} />}
+            />
+            <div className="mb-4 flex flex-wrap gap-6">
+              <Legend color="#2F83FF" label="Actual progress" value={`${avgCompletion}%`} />
+              <Legend color="rgba(133,164,204,0.35)" label="Planned progress" value={`${Math.min(100, avgCompletion + 12)}%`} />
+              <Legend color="#20D39A" label="Completed value" value={fmtQAR(collected, { compact: true })} />
+              <Legend color="#FF4664" label="Delayed value" value={fmtQAR(outstanding * 0.4, { compact: true })} />
             </div>
-            <Button variant="ghost" size="sm">View all</Button>
-          </div>
-          <div className="divide-y hairline">
-            {alerts.map((a, i) => (
-              <div key={i} className="py-3 flex items-start gap-3">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${a.severity === "critical" ? "bg-critical" : a.severity === "warning" ? "bg-warning" : "bg-signal"}`} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium">{a.title}</div>
-                  <div className="text-xs text-muted-foreground truncate">{a.sub} · Owner: {a.owner}</div>
-                </div>
-                <StatusPill status={a.severity === "critical" ? "Critical" : a.severity === "warning" ? "Warning" : "Info"} tone={a.severity === "critical" ? "critical" : a.severity === "warning" ? "warning" : "info"} />
-                <Button variant="ghost" size="sm" onClick={a.go} className="shrink-0">{a.action} <ArrowRight className="w-3 h-3 ml-1" /></Button>
-              </div>
-            ))}
-          </div>
-        </Card>
+            <div className="h-[248px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={execData} barGap={4} onClick={(e: any) => e?.activeLabel && setMonth(e.activeLabel)}>
+                  <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
+                  <XAxis dataKey="m" {...axisProps} />
+                  <YAxis {...axisProps} width={34} />
+                  <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v}%`} />} />
+                  <Bar dataKey="planned" name="Planned" radius={[6, 6, 0, 0]} maxBarSize={16}>
+                    {execData.map((r) => <Cell key={r.m} fill="rgba(133,164,204,0.16)" />)}
+                  </Bar>
+                  <Bar dataKey="actual" name="Actual" radius={[6, 6, 0, 0]} maxBarSize={16}>
+                    {execData.map((r) => <Cell key={r.m} fill={r.m === month ? "#2F83FF" : "rgba(47,131,255,0.35)"} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
 
-        <Card className="p-4 card-lift">
-          <h3 className="font-display font-semibold text-lg mb-3">Portfolio Health</h3>
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stackData} layout="vertical" margin={{ left: 10 }}>
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="phase" width={120} fontSize={11} axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: "var(--muted)" }} contentStyle={{ fontSize: 12, borderRadius: 6 }} />
-                <Bar dataKey="count" fill="var(--signal)" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-            <div><div className="text-xs text-muted-foreground">On Track</div><div className="num text-lg font-semibold text-success">{projectsWithHealth.filter((x) => x.h.label === "On Track").length}</div></div>
-            <div><div className="text-xs text-muted-foreground">Watch</div><div className="num text-lg font-semibold text-warning">{projectsWithHealth.filter((x) => x.h.label === "Watch").length}</div></div>
-            <div><div className="text-xs text-muted-foreground">At Risk</div><div className="num text-lg font-semibold text-critical">{projectsWithHealth.filter((x) => x.h.label === "At Risk" || x.h.label === "Delayed").length}</div></div>
-          </div>
-        </Card>
-      </div>
-
-      <Card className="p-4 mt-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-display font-semibold text-lg">Project Progress</h3>
-          <Button variant="ghost" size="sm" onClick={() => nav({ to: "/projects" })}>Open Projects</Button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-[11px] uppercase tracking-wider text-muted-foreground border-b hairline">
-              <tr><th className="text-left py-2 pr-3">Project</th><th className="text-left py-2 pr-3">Client</th><th className="text-left py-2 pr-3">PM</th><th className="text-left py-2 pr-3">Phase</th><th className="text-left py-2 pr-3 w-52">Planned vs Actual</th><th className="text-right py-2 pr-3">Value</th><th className="text-left py-2 pr-3">Health</th><th className="text-left py-2 pr-3">Next milestone</th><th className="py-2"></th></tr>
-            </thead>
-            <tbody>
-              {projectsWithHealth.map(({ p, h }) => {
-                const cust = d.customers.find((c) => c.id === p.customerId)!;
-                const pm = d.employees.find((e) => e.id === p.pmId)!;
-                const nextMs = d.milestones.filter((m) => m.projectId === p.id && !m.done)[0];
+          {/* Recent operations */}
+          <Panel className="rise rise-4" pad={false}>
+            <div className="p-4 md:p-5 pb-0">
+              <PanelHead
+                title="Recent Operations"
+                sub="Latest execution, commercial and field activity"
+                icon={<Radio className="h-4 w-4" />}
+                accent="cyan"
+                right={<button onClick={() => nav({ to: "/projects" })} className="text-[11.5px] font-medium text-signal hover:underline">View all</button>}
+              />
+            </div>
+            <div className="divide-y divide-[rgba(133,164,204,0.07)]">
+              {recent.map((r, i) => {
+                const a = ACCENT[r.accent];
+                const Icon = r.icon;
                 return (
-                  <tr key={p.id} className="border-b hairline hover:bg-muted/40 cursor-pointer" onClick={() => nav({ to: "/projects/$id", params: { id: p.id } })}>
-                    <td className="py-2.5 pr-3"><div className="flex items-center gap-2"><MonoChip>{p.number}</MonoChip><span className="text-sm">{p.name}</span></div></td>
-                    <td className="py-2.5 pr-3 text-sm">{cust.name}</td>
-                    <td className="py-2.5 pr-3 text-sm">{pm.name}</td>
-                    <td className="py-2.5 pr-3"><StatusPill status={p.phase} tone="info" /></td>
-                    <td className="py-2.5 pr-3"><div className="flex items-center gap-2"><ProgressBar value={p.actualProgress} planned={p.plannedProgress} /><span className="num text-xs w-16 text-right">{p.actualProgress}% / {p.plannedProgress}%</span></div></td>
-                    <td className="py-2.5 pr-3 num text-right text-sm">{fmtQAR(p.contractValue, { compact: true })}</td>
-                    <td className="py-2.5 pr-3"><HealthBadge label={h.label} /></td>
-                    <td className="py-2.5 pr-3 text-xs">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "-"}</td>
-                    <td className="py-2.5"><ArrowRight className="w-4 h-4 text-muted-foreground" /></td>
-                  </tr>
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[rgba(47,131,255,0.05)] md:px-5">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border" style={{ background: a.soft, borderColor: a.ring, color: a.hex }}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[13px] font-medium">{r.activity}</div>
+                      <div className="truncate text-[11px] text-[#66778D]">{r.title} · {r.owner}</div>
+                    </div>
+                    <div className="num hidden w-28 shrink-0 text-right text-[12.5px] font-semibold sm:block">{r.value}</div>
+                    <div className="hidden shrink-0 sm:block"><StatusPill status={r.status} tone={r.tone} /></div>
+                    <div className="w-16 shrink-0 text-right text-[10.5px] text-[#66778D]">{r.time}</div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+          </Panel>
+
+          {/* Portfolio table */}
+          <Panel className="rise rise-5" pad={false}>
+            <div className="p-4 md:p-5 pb-4">
+              <PanelHead title="Live Project Portfolio" sub="Planned versus actual delivery across all active contracts" icon={<Building2 className="h-4 w-4" />} accent="purple" />
+            </div>
+            <TableShell className="rounded-none border-0">
+              <thead>
+                <tr>
+                  <th>Project</th><th>Customer</th><th>Phase</th><th className="w-52">Progress</th>
+                  <th className="ta-right">Value</th><th>Health</th><th>Next milestone</th><th />
+                </tr>
+              </thead>
+              <tbody>
+                {projectsWithHealth.map(({ p, h }) => {
+                  const cust = d.customers.find((c) => c.id === p.customerId);
+                  const nextMs = d.milestones.filter((m) => m.projectId === p.id && !m.done)[0];
+                  return (
+                    <tr key={p.id} className="cursor-pointer" onClick={() => nav({ to: "/projects/$id", params: { id: p.id } })}>
+                      <td><div className="flex items-center gap-2"><MonoChip>{p.number}</MonoChip><span className="font-medium">{p.name}</span></div></td>
+                      <td className="text-muted-foreground">{cust?.name}</td>
+                      <td><StatusPill status={p.phase} tone="info" /></td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <ProgressBar value={p.actualProgress} planned={p.plannedProgress} height={6} />
+                          <span className="num w-14 shrink-0 text-right text-[11px] text-muted-foreground">{p.actualProgress}/{p.plannedProgress}%</span>
+                        </div>
+                      </td>
+                      <td className="num ta-right font-semibold">{fmtQAR(p.contractValue, { compact: true })}</td>
+                      <td><HealthBadge label={h.label} /></td>
+                      <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>
+                      <td><ArrowRight className="h-3.5 w-3.5 text-[#66778D]" /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </TableShell>
+          </Panel>
         </div>
-      </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-        <Card className="p-4">
-          <h3 className="font-display font-semibold text-lg mb-3 flex items-center gap-2"><Users2 className="w-4 h-4" /> Today's Operations</h3>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            {[{ l: "Teams on site", v: 3 }, { l: "Visits today", v: 5 }, { l: "Installs today", v: 6 }, { l: "Testing today", v: 4 }, { l: "Materials due", v: 2 }, { l: "Overdue tasks", v: 3 }].map((x) => (
-              <div key={x.l} className="border hairline rounded-md p-2"><div className="text-[10px] uppercase text-muted-foreground">{x.l}</div><div className="num text-xl font-semibold">{x.v}</div></div>
-            ))}
+        {/* Right intelligence column */}
+        <div className="space-y-4 xl:col-span-4">
+          {/* Portfolio card */}
+          <div className="rise rise-3 relative overflow-hidden rounded-[22px] p-5 text-white"
+            style={{ background: "linear-gradient(150deg,#2F83FF 0%,#5B4BE8 46%,#9654FF 100%)", boxShadow: "0 30px 60px -32px rgba(47,131,255,0.8)" }}>
+            <div className="pointer-events-none absolute inset-0 opacity-30" style={{
+              backgroundImage: "radial-gradient(circle at 85% 12%, rgba(24,213,255,0.75), transparent 42%), radial-gradient(circle at 10% 100%, rgba(228,71,196,0.5), transparent 45%)",
+            }} />
+            <svg className="pointer-events-none absolute -right-6 bottom-0 h-32 w-48 opacity-25" viewBox="0 0 190 120" fill="none" stroke="white" strokeWidth="1">
+              <path d="M10 110 a90 90 0 0 1 150 -66" /><path d="M34 110 a66 66 0 0 1 110 -48" /><path d="M58 110 a42 42 0 0 1 70 -30" />
+            </svg>
+            <div className="relative">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.2em] text-white/70">Project portfolio</div>
+                  <div className="num mt-2 text-[30px] font-semibold leading-none">{fmtQAR(revenue, { compact: true })}</div>
+                  <div className="mt-1 text-[11.5px] text-white/75">Total active contract value</div>
+                </div>
+                <span className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">
+                  {atRisk > 2 ? "Watch" : "Healthy"}
+                </span>
+              </div>
+              <div className="mt-4">
+                <div className="mb-1.5 flex items-center justify-between text-[11px] text-white/80">
+                  <span>Portfolio completion</span><span className="num font-semibold text-white">{avgCompletion}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
+                  <div className="grow-bar h-full rounded-full bg-white" style={{ width: `${avgCompletion}%` }} />
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[{ l: "Active sites", v: String(active) }, { l: "At risk", v: String(atRisk) }, { l: "Deadlines", v: String(d.milestones.filter((m) => !m.done).length) }].map((x) => (
+                  <div key={x.l} className="rounded-xl border border-white/15 bg-white/10 px-2.5 py-2">
+                    <div className="num text-lg font-semibold leading-none">{x.v}</div>
+                    <div className="mt-1 text-[9.5px] uppercase tracking-wider text-white/70">{x.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-display font-semibold text-lg mb-3">Sales Funnel</h3>
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <FunnelChart><Tooltip contentStyle={{ fontSize: 12 }} /><Funnel dataKey="value" data={funnelData} isAnimationActive><LabelList position="right" fill="var(--foreground)" stroke="none" dataKey="name" fontSize={11} /></Funnel></FunnelChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-display font-semibold text-lg mb-3 flex items-center gap-2"><ClipboardCheck className="w-4 h-4" /> Installation Progress</h3>
-          <div className="grid grid-cols-3 gap-3 mt-2">
-            <Ring value={(installed / totalCameras) * 100} label="Installed" />
-            <Ring value={(configured / totalCameras) * 100} label="Configured" />
-            <Ring value={(tested / totalCameras) * 100} label="Tested" />
-          </div>
-          <div className="mt-4 text-xs text-muted-foreground flex items-center justify-between">
-            <span>Planned <span className="num text-foreground">{totalCameras}</span></span>
-            <span>Failed <span className="num text-critical">{failed}</span></span>
-            <span>Handed <span className="num text-foreground">0</span></span>
-          </div>
-        </Card>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <Card className="p-4">
-          <h3 className="font-display font-semibold text-lg mb-3">Financial Snapshot</h3>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <Kpi label="Contracted" v={fmtQAR(d.projects.reduce((s,p)=>s+p.contractValue,0), { compact: true })} />
-            <Kpi label="Invoiced" v={fmtQAR(d.projects.reduce((s,p)=>s+p.invoiced,0), { compact: true })} />
-            <Kpi label="Collected" v={fmtQAR(d.projects.reduce((s,p)=>s+p.collected,0), { compact: true })} />
-            <Kpi label="Outstanding" v={fmtQAR(outstanding, { compact: true })} tone="warning" />
-            <Kpi label="Expected this month" v={fmtQAR(153000, { compact: true })} />
-            <Kpi label="Forecast margin" v="28.4%" tone="success" />
-          </div>
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-display font-semibold text-lg mb-3">Payment Aging</h3>
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[{ b: "0-30", v: 92000 }, { b: "31-60", v: 48000 }, { b: "61-90", v: 22000 }, { b: "90+", v: 12000 }]}>
-                <XAxis dataKey="b" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12 }} formatter={(v: number) => fmtQAR(v)} />
-                <Bar dataKey="v" fill="var(--warning)" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+          <Panel className="rise rise-4">
+            <PanelHead title="Quick Actions" sub="Most used operations" icon={<Plus className="h-4 w-4" />} />
+            <div className="grid grid-cols-4 gap-2">
+              <QuickAction icon={<HardHat className="h-5 w-5" />} label="New Project" accent="blue" onClick={() => nav({ to: "/projects" })} />
+              <QuickAction icon={<Camera className="h-5 w-5" />} label="Site Update" accent="cyan" onClick={() => nav({ to: "/field" })} />
+              <QuickAction icon={<FileBarChart className="h-5 w-5" />} label="Report" accent="purple" onClick={() => nav({ to: "/reports" })} />
+              <QuickAction icon={<AlertTriangle className="h-5 w-5" />} label="Alert" accent="red" onClick={() => nav({ to: "/notifications" })} />
+            </div>
+          </Panel>
+
+          <Panel className="rise rise-5" accent="purple">
+            <PanelHead title="Project Distribution" sub="Portfolio by delivery phase" icon={<Building2 className="h-4 w-4" />} accent="purple" />
+            <Donut data={distribution} size={150} centerValue={String(active)} centerLabel="Projects" />
+          </Panel>
+
+          <Panel className="rise rise-6" accent="red">
+            <PanelHead
+              title="Requires Attention"
+              sub="Prioritised operational signals"
+              icon={<AlertTriangle className="h-4 w-4" />}
+              accent="red"
+            />
+            <div className="space-y-2.5">
+              {alerts.map((a, i) => (
+                <AlertCard
+                  key={i}
+                  severity={a.severity}
+                  title={a.title}
+                  meta={[{ k: "Owner", v: a.owner }, { k: "Ref", v: a.sub }]}
+                  action={a.action}
+                  onAction={a.go}
+                />
+              ))}
+            </div>
+          </Panel>
+
+          <Panel className="rise rise-6" accent="cyan" texture="dots">
+            <PanelHead title="Installation Lifecycle" sub="Devices across the portfolio" icon={<Camera className="h-4 w-4" />} accent="cyan" />
+            <div className="space-y-3">
+              {[
+                { l: "Planned", v: totalCameras, a: "blue" as const },
+                { l: "Mounted", v: d.devices.filter((x) => x.status !== "Faulty").length, a: "cyan" as const },
+                { l: "Configured", v: d.devices.filter((x) => ["Configured", "Tested", "Handed Over"].includes(x.status)).length, a: "purple" as const },
+                { l: "Tested", v: tested, a: "magenta" as const },
+                { l: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length, a: "red" as const },
+              ].map((s) => (
+                <div key={s.l}>
+                  <div className="mb-1 flex items-center justify-between text-[11.5px]">
+                    <span className="text-muted-foreground">{s.l}</span>
+                    <span className="num font-semibold">{s.v}</span>
+                  </div>
+                  <ProgressBar value={(s.v / Math.max(1, totalCameras)) * 100} accent={s.a} height={6} />
+                </div>
+              ))}
+            </div>
+          </Panel>
+        </div>
       </div>
     </div>
   );
 }
-function Kpi({ label, v, tone }: { label: string; v: React.ReactNode; tone?: "success"|"warning" }) {
-  return <div className="border hairline rounded-md p-2"><div className="text-[10px] uppercase text-muted-foreground">{label}</div><div className={`num text-lg font-semibold ${tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : ""}`}>{v}</div></div>;
+
+function Legend({ color, label, value }: { color: string; label: string; value: string }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#66778D]">
+        <span className="h-2 w-2 rounded-full" style={{ background: color }} />{label}
+      </div>
+      <div className="num mt-1 text-[15px] font-semibold">{value}</div>
+    </div>
+  );
 }
 
-function HeroTile({ className, label, value, delta, sub, spark, tone, big, icon, onClick }: {
-  className?: string; label: string; value: string; delta?: string; sub?: string; spark?: number[];
-  tone?: "critical"|"warning"|"success"; big?: boolean; icon?: React.ReactNode; onClick?: () => void;
-}) {
-  const toneCls = tone === "critical" ? "text-critical" : tone === "warning" ? "text-warning" : tone === "success" ? "text-success" : "text-foreground/70";
-  const Comp: "button" | "div" = onClick ? "button" : "div";
-  return (
-    <Comp onClick={onClick} className={`${className} group relative overflow-hidden text-left rounded-xl glass card-lift p-4 ${onClick ? "cursor-pointer" : ""}`}>
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-foreground/60 font-medium flex items-center gap-1.5">{icon}{label}</div>
-        {delta && <div className={`text-[11px] num inline-flex items-center gap-0.5 ${delta.startsWith("-") ? "text-critical" : "text-success"}`}><TrendingUp className="w-3 h-3" />{delta}</div>}
-      </div>
-      <div className={`mt-2 font-display font-semibold num tracking-tight ${big ? "text-5xl md:text-6xl" : "text-3xl"} text-foreground`}>{value}</div>
-      {sub && <div className={`text-[11px] mt-1 ${toneCls}`}>{sub}</div>}
-      {spark && spark.length > 0 && (
-        <div className={`mt-3 ${big ? "h-16" : "h-8"}`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={spark.map((v, i) => ({ i, v }))}>
-              <defs>
-                <linearGradient id={`sp-${label.replace(/\s/g,"")}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--hero-from)" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="var(--hero-to)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="v" stroke="var(--hero-from)" strokeWidth={1.6} fill={`url(#sp-${label.replace(/\s/g,"")})`} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </Comp>
-  );
+function BarChart3Icon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 21h18" /><path d="M7 21V9" /><path d="M12 21V4" /><path d="M17 21v-7" /></svg>;
 }

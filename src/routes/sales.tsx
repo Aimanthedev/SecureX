@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
-import { KpiCard, PageHeader, MonoChip, StatusPill } from "@/components/app/common";
+import {
+  PageHeader, MonoChip, StatusPill, MetricCard, Panel, PanelHead, ProgressBar, TableShell, AlertCard,
+  Ring, axisProps, ChartTooltip,
+} from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
 import { LEAD_STAGES, type Lead, type LeadStage } from "@/lib/mock-data";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -12,8 +14,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { GripVertical, Trash2 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { GripVertical, Trash2, TrendingUp, Target, Clock, Trophy } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 
 export const Route = createFileRoute("/sales")({
   head: () => ({ meta: [{ title: "Sales | AL HARIB CCTV COMPANY" }, { name: "description", content: "Lead pipeline, forecasts, and follow-ups." }] }),
@@ -28,28 +30,81 @@ function SalesPage() {
   const [newOpen, setNewOpen] = useState(false);
   const active = d.leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost");
   const weighted = active.reduce((s, l) => s + l.value * (l.probability / 100), 0);
+  const wonThisMonth = d.leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0);
+  const followupsToday = d.leads.filter((l) => l.nextFollowUp && daysFromToday(l.nextFollowUp) <= 0 && l.stage !== "Won" && l.stage !== "Lost").length;
 
   return (
     <div>
       <PageHeader title="Sales" subtitle="Pipeline, leads, and forecast for AL HARIB CCTV COMPANY"
-        actions={<><Button variant="outline" size="sm">Import leads</Button><Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-signal-foreground hover:bg-signal/90">New lead</Button></>} />
+        actions={<><Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)]">Import leads</Button><Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-white hover:bg-signal/90">New lead</Button></>} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <KpiCard label="Active leads" value={active.length} />
-        <KpiCard label="Weighted pipeline" value={fmtQAR(weighted, { compact: true })} tone="success" />
-        <KpiCard label="Won this month" value={fmtQAR(d.leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0), { compact: true })} />
-        <KpiCard label="Win rate" value="62%" />
+        <MetricCard label="Open Pipeline" value={active.length} sub="active opportunities" icon={<TrendingUp className="w-4 h-4" />} accent="blue" motif="nodes" />
+        <MetricCard label="Weighted Forecast" value={fmtQAR(weighted, { compact: true })} sub="probability-adjusted" icon={<Target className="w-4 h-4" />} accent="cyan" motif="waves" />
+        <MetricCard label="Follow-Ups Today" value={followupsToday} sub="due or overdue" icon={<Clock className="w-4 h-4" />} accent="amber" motif="grid" />
+        <MetricCard label="Won This Month" value={fmtQAR(wonThisMonth, { compact: true })} sub="closed-won value" icon={<Trophy className="w-4 h-4" />} accent="green" motif="channels" />
       </div>
 
       <Tabs value={view} onValueChange={(v) => setView(v as never)}>
-        <TabsList><TabsTrigger value="pipeline">Pipeline</TabsTrigger><TabsTrigger value="leads">Leads</TabsTrigger><TabsTrigger value="followups">Follow-Ups</TabsTrigger><TabsTrigger value="activities">Activities</TabsTrigger><TabsTrigger value="targets">Targets</TabsTrigger><TabsTrigger value="analytics">Analytics</TabsTrigger></TabsList>
+        <TabsList className="bg-[#091321] border border-[rgba(133,164,204,0.12)] rounded-xl p-1">
+          <TabsTrigger value="pipeline">Pipeline</TabsTrigger><TabsTrigger value="leads">Leads</TabsTrigger><TabsTrigger value="followups">Follow-Ups</TabsTrigger><TabsTrigger value="activities">Activities</TabsTrigger><TabsTrigger value="targets">Targets</TabsTrigger><TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
 
-        <TabsContent value="pipeline" className="mt-4"><PipelineBoard /></TabsContent>
+        <TabsContent value="pipeline" className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div className="xl:col-span-2">
+              <StageChart />
+            </div>
+            <MonthlyTarget />
+          </div>
+          <PipelineBoard />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <PriorityQueue />
+            <Leaderboard />
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <QuotationActivity />
+            <LeadSourceChart />
+          </div>
+        </TabsContent>
+
         <TabsContent value="leads" className="mt-4"><LeadsTable /></TabsContent>
         <TabsContent value="followups" className="mt-4"><FollowUps /></TabsContent>
-        <TabsContent value="activities" className="mt-4"><Card className="p-4"><h3 className="font-display font-semibold text-lg mb-3">Recent Activities</h3><ol className="relative border-l hairline ml-2 space-y-4">{d.leads.slice(0, 10).map((l) => (<li key={l.id} className="ml-4"><div className="absolute w-2 h-2 rounded-full bg-signal -left-1 mt-1.5" /><div className="text-sm">{l.company} · {l.stage}</div><div className="text-xs text-muted-foreground num">{fmtDate(l.lastActivity)}</div></li>))}</ol></Card></TabsContent>
-        <TabsContent value="targets" className="mt-4"><Card className="p-4"><h3 className="font-display font-semibold text-lg mb-3">Quarterly Targets</h3><div className="grid grid-cols-3 gap-3">{d.employees.filter((e)=>e.department==="Sales").map((e) => (<div key={e.id} className="border hairline rounded-lg p-3"><div className="text-sm font-medium">{e.name}</div><div className="text-xs text-muted-foreground">{e.role}</div><div className="mt-2 text-2xl font-display num">{fmtQAR(320000 + Math.random() * 400000, {compact:true})}</div><div className="text-xs text-muted-foreground">of {fmtQAR(1000000, {compact:true})} target</div></div>))}</div></Card></TabsContent>
-        <TabsContent value="analytics" className="mt-4"><Card className="p-4"><h3 className="font-display font-semibold text-lg mb-3">Stage distribution</h3><div className="h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={LEAD_STAGES.map((s) => ({ stage: s, count: d.leads.filter((l) => l.stage === s).length }))}><XAxis dataKey="stage" fontSize={10} angle={-25} textAnchor="end" height={80} /><YAxis fontSize={11} /><Tooltip contentStyle={{fontSize:12}} /><Bar dataKey="count" fill="var(--signal)" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer></div></Card></TabsContent>
+        <TabsContent value="activities" className="mt-4">
+          <Panel texture="dots">
+            <PanelHead title="Recent Activities" sub="Latest lead touches across the pipeline" accent="purple" />
+            <ol className="relative ml-2 space-y-4 border-l border-[rgba(133,164,204,0.14)]">
+              {d.leads.slice(0, 10).map((l) => (
+                <li key={l.id} className="ml-4 relative">
+                  <div className="absolute w-2 h-2 rounded-full bg-signal -left-[21px] mt-1.5" style={{ boxShadow: "0 0 8px rgba(47,131,255,0.6)" }} />
+                  <div className="text-[13px] text-foreground">{l.company} · <span className="text-muted-foreground">{l.stage}</span></div>
+                  <div className="text-[11px] num text-muted-foreground">{fmtDate(l.lastActivity)}</div>
+                </li>
+              ))}
+            </ol>
+          </Panel>
+        </TabsContent>
+        <TabsContent value="targets" className="mt-4">
+          <Panel texture="grid">
+            <PanelHead title="Quarterly Targets" sub="Sales team quota attainment" accent="green" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {d.employees.filter((e) => e.department === "Sales").map((e) => {
+                const val = 320000 + ((e.id.charCodeAt(2) || 1) * 5137) % 400000;
+                const pct = Math.min(100, (val / 1000000) * 100);
+                return (
+                  <div key={e.id} className="panel-flat p-4">
+                    <div className="text-[13px] font-medium text-foreground">{e.name}</div>
+                    <div className="text-[11px] text-muted-foreground">{e.role}</div>
+                    <div className="num mt-3 text-2xl font-semibold text-foreground">{fmtQAR(val, { compact: true })}</div>
+                    <div className="text-[11px] text-muted-foreground mb-2">of {fmtQAR(1000000, { compact: true })} target</div>
+                    <ProgressBar value={pct} accent="green" />
+                  </div>
+                );
+              })}
+            </div>
+          </Panel>
+        </TabsContent>
+        <TabsContent value="analytics" className="mt-4"><StageChart tall /></TabsContent>
       </Tabs>
 
       <NewLeadDialog open={newOpen} onOpenChange={setNewOpen} />
@@ -57,9 +112,151 @@ function SalesPage() {
   );
 }
 
+function StageChart({ tall }: { tall?: boolean }) {
+  const d = useData();
+  const data = LEAD_STAGES.filter((s) => s !== "Won" && s !== "Lost").map((s) => ({ stage: s, count: d.leads.filter((l) => l.stage === s).length }));
+  return (
+    <Panel texture="grid" accent="blue" className="h-full">
+      <PanelHead title="Pipeline by Stage" sub="Active lead count across the funnel" accent="blue" />
+      <div className={tall ? "h-96" : "h-72"}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ left: -20 }}>
+            <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
+            <XAxis dataKey="stage" {...axisProps} angle={-25} textAnchor="end" height={70} />
+            <YAxis {...axisProps} />
+            <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(47,131,255,0.06)" }} />
+            <Bar dataKey="count" fill="#2F83FF" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Panel>
+  );
+}
+
+function MonthlyTarget() {
+  const d = useData();
+  const won = d.leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0);
+  const target = 2500000;
+  const pct = Math.min(100, (won / target) * 100);
+  return (
+    <Panel accent="green" texture="dots" className="h-full flex flex-col">
+      <PanelHead title="Monthly Target" sub="Team quota progress" accent="green" />
+      <div className="flex-1 grid place-items-center">
+        <Ring value={pct} size={132} thickness={9} accent="green" />
+      </div>
+      <div className="mt-3 space-y-1">
+        <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Closed-won</span><span className="num font-medium text-foreground">{fmtQAR(won, { compact: true })}</span></div>
+        <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Target</span><span className="num font-medium text-foreground">{fmtQAR(target, { compact: true })}</span></div>
+      </div>
+    </Panel>
+  );
+}
+
+function PriorityQueue() {
+  const d = useData();
+  const items = useMemo(() => {
+    return d.leads
+      .filter((l) => l.stage !== "Won" && l.stage !== "Lost")
+      .map((l) => ({ l, overdue: l.nextFollowUp ? daysFromToday(l.nextFollowUp) : 999 }))
+      .filter((x) => x.overdue <= 2)
+      .sort((a, b) => a.overdue - b.overdue)
+      .slice(0, 6);
+  }, [d.leads]);
+  return (
+    <Panel>
+      <PanelHead title="Priority Action Queue" sub="Leads needing attention now" accent="amber" />
+      <div className="space-y-2.5">
+        {items.length === 0 && <div className="text-[12.5px] text-muted-foreground">All caught up. No urgent follow-ups.</div>}
+        {items.map(({ l, overdue }) => (
+          <AlertCard key={l.id} severity={overdue < 0 ? "critical" : "warning"} title={`${l.company} — ${l.stage}`}
+            meta={[
+              { k: "Value", v: fmtQAR(l.value, { compact: true }) },
+              { k: "Due", v: overdue < 0 ? `${Math.abs(overdue)}d overdue` : overdue === 0 ? "Today" : `in ${overdue}d` },
+            ]}
+          />
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function Leaderboard() {
+  const d = useData();
+  const rows = useMemo(() => {
+    const sales = d.employees.filter((e) => e.department === "Sales");
+    return sales.map((e) => {
+      const leads = d.leads.filter((l) => l.salespersonId === e.id);
+      const won = leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0);
+      return { e, won, count: leads.length };
+    }).sort((a, b) => b.won - a.won);
+  }, [d.leads, d.employees]);
+  const max = Math.max(1, ...rows.map((r) => r.won));
+  return (
+    <Panel>
+      <PanelHead title="Salesperson Leaderboard" sub="Ranked by closed-won value" accent="purple" />
+      <div className="space-y-3">
+        {rows.map((r, i) => (
+          <div key={r.e.id} className="flex items-center gap-3">
+            <div className="w-6 text-[12px] num text-muted-foreground">#{i + 1}</div>
+            <div className="min-w-0 flex-1">
+              <div className="flex justify-between text-[12.5px] mb-1"><span className="truncate text-foreground">{r.e.name}</span><span className="num font-medium">{fmtQAR(r.won, { compact: true })}</span></div>
+              <ProgressBar value={(r.won / max) * 100} accent={i === 0 ? "amber" : "purple"} height={6} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function QuotationActivity() {
+  const d = useData();
+  const byStatus = ["Draft","Internal Approval","Sent","Approved","Rejected","Expired"].map((s) => ({ name: s, value: d.quotations.filter((q) => q.status === s).length })).filter((x) => x.value > 0);
+  return (
+    <Panel>
+      <PanelHead title="Quotation Activity" sub="Status distribution across active quotes" accent="cyan" />
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={byStatus} layout="vertical" margin={{ left: 10 }}>
+            <CartesianGrid stroke="rgba(133,164,204,0.07)" horizontal={false} />
+            <XAxis type="number" {...axisProps} />
+            <YAxis type="category" dataKey="name" {...axisProps} width={110} />
+            <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(24,213,255,0.06)" }} />
+            <Bar dataKey="value" fill="#18D5FF" radius={[0, 6, 6, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Panel>
+  );
+}
+
+function LeadSourceChart() {
+  const d = useData();
+  const sources = useMemo(() => {
+    const map: Record<string, number> = {};
+    d.leads.forEach((l) => { map[l.source] = (map[l.source] || 0) + 1; });
+    return Object.entries(map).map(([name, value]) => ({ name, value }));
+  }, [d.leads]);
+  const colors = ["#2F83FF", "#18D5FF", "#9654FF", "#E447C4", "#20D39A", "#FFAA2C"];
+  return (
+    <Panel>
+      <PanelHead title="Lead Source Mix" sub="Where opportunities originate" accent="magenta" />
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={sources} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
+              {sources.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
+            </Pie>
+            <Tooltip content={<ChartTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </Panel>
+  );
+}
+
 function PipelineBoard() {
   const d = useData();
-  const nav = useNavigate();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [lostOpen, setLostOpen] = useState<{ id: string; reason: string } | null>(null);
   const [detail, setDetail] = useState<Lead | null>(null);
@@ -72,47 +269,50 @@ function PipelineBoard() {
     setDraggingId(null);
   };
   return (
-    <>
-      <div className="flex gap-3 overflow-x-auto pb-2">
-        {LEAD_STAGES.map((stage) => {
-          const leads = d.leads.filter((l) => l.stage === stage);
-          return (
-            <div key={stage} onDragOver={(e) => e.preventDefault()} onDrop={() => onDrop(stage)} className="shrink-0 w-72 bg-surface-2/60 border hairline rounded-lg p-2">
-              <div className="flex items-center justify-between px-1 py-1 mb-2">
-                <div className="text-xs font-medium uppercase tracking-wider">{stage}</div>
-                <div className="text-[10px] text-muted-foreground num">{leads.length} · {fmtQAR(stageValue(stage), { compact: true })}</div>
-              </div>
-              <div className="space-y-2 min-h-[100px]">
-                {leads.map((l) => {
-                  const sp = d.employees.find((e) => e.id === l.salespersonId);
-                  const dueDays = l.nextFollowUp ? daysFromToday(l.nextFollowUp) : null;
-                  const inactive = daysFromToday(l.lastActivity) < -14;
-                  return (
-                    <div key={l.id} draggable onDragStart={() => setDraggingId(l.id)} onDragEnd={() => setDraggingId(null)} onClick={() => setDetail(l)}
-                      className="bg-card border hairline rounded-md p-2.5 text-xs cursor-grab active:cursor-grabbing hover:border-signal/40">
-                      <div className="flex items-start gap-2">
-                        <GripVertical className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium truncate text-[13px]">{l.company}</div>
-                          <div className="text-muted-foreground truncate">{l.contactName}</div>
+    <Panel pad={false}>
+      <div className="p-4 md:p-5">
+        <PanelHead title="Pipeline Board" sub="Drag leads across stages" accent="blue" />
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {LEAD_STAGES.map((stage) => {
+            const leads = d.leads.filter((l) => l.stage === stage);
+            return (
+              <div key={stage} onDragOver={(e) => e.preventDefault()} onDrop={() => onDrop(stage)} className="shrink-0 w-72 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(13,25,41,0.5)] p-2">
+                <div className="flex items-center justify-between px-1 py-1 mb-2">
+                  <div className="label-xs">{stage}</div>
+                  <div className="text-[10px] text-muted-foreground num">{leads.length} · {fmtQAR(stageValue(stage), { compact: true })}</div>
+                </div>
+                <div className="space-y-2 min-h-[100px]">
+                  {leads.map((l) => {
+                    const sp = d.employees.find((e) => e.id === l.salespersonId);
+                    const dueDays = l.nextFollowUp ? daysFromToday(l.nextFollowUp) : null;
+                    const inactive = daysFromToday(l.lastActivity) < -14;
+                    return (
+                      <div key={l.id} draggable onDragStart={() => setDraggingId(l.id)} onDragEnd={() => setDraggingId(null)} onClick={() => setDetail(l)}
+                        className="panel-flat p-2.5 text-xs cursor-grab active:cursor-grabbing hover:border-[rgba(47,131,255,0.4)] transition-colors">
+                        <div className="flex items-start gap-2">
+                          <GripVertical className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium truncate text-[13px] text-foreground">{l.company}</div>
+                            <div className="text-muted-foreground truncate">{l.contactName}</div>
+                          </div>
                         </div>
+                        <div className="mt-2 flex items-center justify-between">
+                          <div className="num font-semibold text-foreground">{fmtQAR(l.value, { compact: true })}</div>
+                          <div className="text-[10px] text-muted-foreground">{l.probability}%</div>
+                        </div>
+                        <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+                          <span>{sp?.name?.split(" ")[0]}</span>
+                          {dueDays !== null && <span className={`num ${dueDays < 0 ? "text-[#FF4664]" : dueDays <= 2 ? "text-[#FFAA2C]" : ""}`}>{dueDays < 0 ? `${Math.abs(dueDays)}d over` : `${dueDays}d`}</span>}
+                        </div>
+                        {inactive && l.stage !== "Won" && l.stage !== "Lost" && <div className="mt-1 text-[10px] text-[#FFAA2C]">Inactive 14+ days</div>}
                       </div>
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="num font-semibold">{fmtQAR(l.value, { compact: true })}</div>
-                        <div className="text-[10px] text-muted-foreground">{l.probability}%</div>
-                      </div>
-                      <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                        <span>{sp?.name?.split(" ")[0]}</span>
-                        {dueDays !== null && <span className={`num ${dueDays < 0 ? "text-critical" : dueDays <= 2 ? "text-warning" : ""}`}>{dueDays < 0 ? `${Math.abs(dueDays)}d over` : `${dueDays}d`}</span>}
-                      </div>
-                      {inactive && l.stage !== "Won" && l.stage !== "Lost" && <div className="mt-1 text-[10px] text-warning">Inactive 14+ days</div>}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
       <AlertDialog open={!!lostOpen} onOpenChange={(o) => !o && setLostOpen(null)}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Mark lead as Lost</AlertDialogTitle></AlertDialogHeader>
@@ -140,16 +340,16 @@ function PipelineBoard() {
                   <Field label="Next follow-up" v={detail.nextFollowUp ? fmtDate(detail.nextFollowUp) : "-"} />
                 </div>
                 <div><div className="text-xs uppercase text-muted-foreground">Notes</div><div>{detail.notes || "-"}</div></div>
-                {detail.lostReason && <div className="text-critical text-xs">Lost reason: {detail.lostReason}</div>}
+                {detail.lostReason && <div className="text-[#FF4664] text-xs">Lost reason: {detail.lostReason}</div>}
               </TabsContent>
-              <TabsContent value="tl" className="mt-3"><ol className="relative border-l hairline ml-2 space-y-3">{[detail.createdAt, detail.lastActivity].map((dt, i) => <li key={i} className="ml-4"><div className="absolute w-2 h-2 rounded-full bg-signal -left-1 mt-1.5" /><div className="text-sm num">{fmtDate(dt)}</div><div className="text-xs text-muted-foreground">{i === 0 ? "Lead created" : "Last activity"}</div></li>)}</ol></TabsContent>
+              <TabsContent value="tl" className="mt-3"><ol className="relative ml-2 space-y-3 border-l border-[rgba(133,164,204,0.14)]">{[detail.createdAt, detail.lastActivity].map((dt, i) => <li key={i} className="ml-4 relative"><div className="absolute w-2 h-2 rounded-full bg-signal -left-[21px] mt-1.5" /><div className="text-sm num">{fmtDate(dt)}</div><div className="text-xs text-muted-foreground">{i === 0 ? "Lead created" : "Last activity"}</div></li>)}</ol></TabsContent>
               <TabsContent value="notes" className="mt-3"><div className="text-sm">{detail.notes || "No notes."}</div></TabsContent>
             </Tabs>
             <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>Close</Button></DialogFooter>
           </>}
         </DialogContent>
       </Dialog>
-    </>
+    </Panel>
   );
 }
 const stageProb = (s: LeadStage): number => ({ "New Enquiry": 10, "Contacted": 20, "Qualified": 30, "Site Survey Required": 35, "Site Survey Scheduled": 40, "Survey Completed": 55, "Quotation Draft": 55, "Quotation Sent": 65, "Negotiation": 75, "Verbal Approval": 90, "Won": 100, "Lost": 0 }[s]);
@@ -160,34 +360,32 @@ function LeadsTable() {
   const [confirm, setConfirm] = useState<string | null>(null);
   const filtered = d.leads.filter((l) => (l.company + l.contactName + l.systemType).toLowerCase().includes(q.toLowerCase()));
   return (
-    <Card className="p-0">
-      <div className="p-3 flex items-center gap-2"><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search leads." className="h-9 w-64" /></div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["Company","Contact","System","Value","Stage","Prob","Salesperson","Next follow","Last activity",""].map((h) => <th key={h} className="text-left py-2 px-3">{h}</th>)}</tr></thead>
-          <tbody>{filtered.map((l) => {
-            const sp = d.employees.find((e) => e.id === l.salespersonId);
-            return (
-              <tr key={l.id} className="border-t hairline hover:bg-muted/30">
-                <td className="py-2 px-3">{l.company}</td>
-                <td className="py-2 px-3 text-xs">{l.contactName}<div className="text-[10px] num text-muted-foreground">{l.phone}</div></td>
-                <td className="py-2 px-3 text-xs">{l.systemType}</td>
-                <td className="py-2 px-3 num">{fmtQAR(l.value, {compact:true})}</td>
-                <td className="py-2 px-3"><StatusPill status={l.stage} tone={l.stage==="Won"?"success":l.stage==="Lost"?"critical":"info"} /></td>
-                <td className="py-2 px-3 num text-xs">{l.probability}%</td>
-                <td className="py-2 px-3 text-xs">{sp?.name}</td>
-                <td className="py-2 px-3 num text-xs">{l.nextFollowUp ? fmtDate(l.nextFollowUp) : "-"}</td>
-                <td className="py-2 px-3 num text-xs text-muted-foreground">{fmtDate(l.lastActivity)}</td>
-                <td className="py-2 px-3"><Button variant="ghost" size="sm" onClick={() => setConfirm(l.id)} className="text-critical"><Trash2 className="w-3 h-3" /></Button></td>
-              </tr>
-            );
-          })}</tbody>
-        </table>
-      </div>
+    <Panel pad={false}>
+      <div className="p-3 flex items-center gap-2"><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search leads." className="h-9 w-64 bg-[#0D1929]" /></div>
+      <TableShell>
+        <thead><tr>{["Company","Contact","System","Value","Stage","Prob","Salesperson","Next follow","Last activity",""].map((h) => <th key={h}>{h}</th>)}</tr></thead>
+        <tbody>{filtered.map((l) => {
+          const sp = d.employees.find((e) => e.id === l.salespersonId);
+          return (
+            <tr key={l.id}>
+              <td className="font-medium text-foreground">{l.company}</td>
+              <td className="text-xs">{l.contactName}<div className="text-[10px] num text-muted-foreground">{l.phone}</div></td>
+              <td className="text-xs">{l.systemType}</td>
+              <td className="num">{fmtQAR(l.value, {compact:true})}</td>
+              <td><StatusPill status={l.stage} tone={l.stage==="Won"?"success":l.stage==="Lost"?"critical":"info"} /></td>
+              <td className="num text-xs">{l.probability}%</td>
+              <td className="text-xs">{sp?.name}</td>
+              <td className="num text-xs">{l.nextFollowUp ? fmtDate(l.nextFollowUp) : "-"}</td>
+              <td className="num text-xs text-muted-foreground">{fmtDate(l.lastActivity)}</td>
+              <td><Button variant="ghost" size="sm" onClick={() => setConfirm(l.id)} className="text-[#FF4664]"><Trash2 className="w-3 h-3" /></Button></td>
+            </tr>
+          );
+        })}</tbody>
+      </TableShell>
       <AlertDialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete lead?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => { if (confirm) { d.deleteLead(confirm); toast.success("Lead deleted."); } setConfirm(null); }}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </Panel>
   );
 }
 
@@ -210,7 +408,13 @@ function FollowUps() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
       {Object.entries(groups).map(([label, list]) => (
-        <Card key={label} className="p-3"><div className="text-xs uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-between"><span>{label}</span><span className="num">{list.length}</span></div><div className="space-y-2">{list.slice(0, 8).map((l) => (<div key={l.id} className="border hairline rounded-md p-2 text-xs"><div className="font-medium truncate">{l.company}</div><div className="text-muted-foreground">{l.stage}</div>{l.nextFollowUp && <div className="num mt-1">{fmtDate(l.nextFollowUp)}</div>}</div>))}{list.length===0 && <div className="text-xs text-muted-foreground">Nothing here.</div>}</div></Card>
+        <Panel key={label}>
+          <div className="label-xs mb-2 flex items-center justify-between"><span>{label}</span><span className="num">{list.length}</span></div>
+          <div className="space-y-2">
+            {list.slice(0, 8).map((l) => (<div key={l.id} className="panel-flat p-2 text-xs"><div className="font-medium truncate text-foreground">{l.company}</div><div className="text-muted-foreground">{l.stage}</div>{l.nextFollowUp && <div className="num mt-1">{fmtDate(l.nextFollowUp)}</div>}</div>))}
+            {list.length===0 && <div className="text-xs text-muted-foreground">Nothing here.</div>}
+          </div>
+        </Panel>
       ))}
     </div>
   );
@@ -234,12 +438,12 @@ function NewLeadDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o
           <label><span className="text-xs text-muted-foreground">Salesperson</span><Select value={form.salespersonId} onValueChange={(v) => setForm({ ...form, salespersonId: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{d.employees.filter((e)=>e.department==="Sales").map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></label>
           <label><span className="text-xs text-muted-foreground">Stage</span><Select value={form.stage} onValueChange={(v) => setForm({ ...form, stage: v as LeadStage })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{LEAD_STAGES.filter((s) => s !== "Won" && s !== "Lost").map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></label>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button onClick={() => { if (!form.company) { toast.error("Company required"); return; } d.addLead({ ...form, probability: stageProb(form.stage), createdAt: new Date().toISOString().slice(0,10), lastActivity: new Date().toISOString().slice(0,10), notes: "" }); onOpenChange(false); toast.success("Lead created."); }} className="bg-signal text-signal-foreground">Create lead</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button onClick={() => { if (!form.company) { toast.error("Company required"); return; } d.addLead({ ...form, probability: stageProb(form.stage), createdAt: new Date().toISOString().slice(0,10), lastActivity: new Date().toISOString().slice(0,10), notes: "" }); onOpenChange(false); toast.success("Lead created."); }} className="bg-signal text-white">Create lead</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
 function Field({ label, v }: { label: string; v: React.ReactNode }) {
-  return <div className="border hairline rounded p-2"><div className="text-[10px] uppercase text-muted-foreground">{label}</div><div className="text-sm">{v}</div></div>;
+  return <div className="panel-flat p-2"><div className="text-[10px] uppercase text-muted-foreground tracking-wide">{label}</div><div className="text-sm text-foreground">{v}</div></div>;
 }

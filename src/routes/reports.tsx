@@ -1,112 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useData } from "@/lib/data-context";
-import { PageHeader, StatTile, Panel, PanelHead, axisProps, ChartTooltip } from "@/components/app/common";
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/app/common";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { fmtQAR } from "@/lib/format";
-
-export const Route = createFileRoute("/reports")({
-  head: () => ({ meta: [
-    { title: "Reports | AL HARIB CCTV COMPANY" },
-    { name: "description", content: "Executive, project, sales, financial and compliance analytics across the business." },
-  ] }),
-  component: ReportsPage,
-});
-
-const CATS = ["Executive", "Project", "Sales", "Financial", "Service and AMC", "Compliance and Quality"];
-
+export const Route = createFileRoute("/reports")({ head: () => ({ meta: [{ title: "Reports | AL HARIB CCTV COMPANY" }] }), component: ReportsPage });
+const CATS = ["Executive","Project","Sales","Financial","Service and AMC","Compliance and Quality"];
 function ReportsPage() {
   const d = useData();
   const planActual = d.projects.map((p) => ({ name: p.number.split("-").pop(), planned: p.plannedProgress, actual: p.actualProgress }));
-  const cams = [
-    { name: "Planned", v: d.devices.length },
-    { name: "Installed", v: d.devices.filter((x) => x.status !== "Faulty").length },
-    { name: "Tested", v: d.devices.filter((x) => x.testResult === "Pass").length },
-    { name: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length },
-  ];
-  const collected = [{ m: "Feb", v: 120000 }, { m: "Mar", v: 180000 }, { m: "Apr", v: 260000 }, { m: "May", v: 340000 }, { m: "Jun", v: 410000 }, { m: "Jul", v: 305000 }];
-  const totalContract = d.projects.reduce((s, p) => s + p.contractValue, 0);
-
+  const cams = [{name:"Planned", v: d.devices.length},{name:"Installed",v:d.devices.filter((x)=>x.status!=="Faulty").length},{name:"Tested",v:d.devices.filter((x)=>x.testResult==="Pass").length},{name:"Failed",v:d.devices.filter((x)=>x.testResult==="Fail").length}];
+  const collected = [{m:"Feb",v:120000},{m:"Mar",v:180000},{m:"Apr",v:260000},{m:"May",v:340000},{m:"Jun",v:410000},{m:"Jul",v:305000}];
   return (
     <div>
-      <PageHeader
-        eyebrow={<><span className="h-1.5 w-1.5 rounded-full bg-[#2F83FF] shadow-[0_0_8px_#2F83FF]" />Business Intelligence</>}
-        title="Reports"
-        subtitle="Business answers, not decoration"
-        actions={
-          <>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("Saved view")}>Save view</Button>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("CSV exported (demo)")}>Export CSV</Button>
-            <Button size="sm" className="bg-signal text-white hover:bg-signal/90" onClick={() => window.print()}>Print</Button>
-          </>
-        }
-      />
-
-      <div className="rise rise-1 mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="Projects" value={d.projects.length} accent="blue" />
-        <StatTile label="Contract Value" value={fmtQAR(totalContract, { compact: true })} accent="purple" />
-        <StatTile label="Cameras Tested" value={cams[2].v} accent="cyan" />
-        <StatTile label="Test Failures" value={cams[3].v} accent="red" />
-      </div>
-
-      <Tabs defaultValue={CATS[0]} className="rise rise-2">
-        <TabsList>{CATS.map((c) => <TabsTrigger key={c} value={c}>{c}</TabsTrigger>)}</TabsList>
-
-        <TabsContent value="Executive" className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Panel accent="blue" texture="grid">
-            <PanelHead title="Planned vs Actual" sub="By project" accent="blue" />
-            <div className="h-56">
-              <ResponsiveContainer>
-                <BarChart data={planActual}>
-                  <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
-                  <XAxis dataKey="name" {...axisProps} />
-                  <YAxis {...axisProps} />
-                  <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(47,131,255,0.06)" }} />
-                  <Bar dataKey="planned" fill="rgba(133,164,204,0.35)" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="actual" fill="#2F83FF" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-          <Panel accent="purple" texture="grid">
-            <PanelHead title="Camera Funnel" sub="Planned vs installed vs tested" accent="purple" />
-            <div className="h-56">
-              <ResponsiveContainer>
-                <BarChart data={cams}>
-                  <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
-                  <XAxis dataKey="name" {...axisProps} />
-                  <YAxis {...axisProps} />
-                  <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(150,84,255,0.06)" }} />
-                  <Bar dataKey="v" fill="#9654FF" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-          <Panel accent="cyan" texture="grid" className="lg:col-span-2">
-            <PanelHead title="Collections Trend" sub="Monthly cash collected" accent="cyan" />
-            <div className="h-56">
-              <ResponsiveContainer>
-                <LineChart data={collected}>
-                  <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
-                  <XAxis dataKey="m" {...axisProps} />
-                  <YAxis {...axisProps} tickFormatter={(v) => `${v / 1000}K`} />
-                  <Tooltip content={<ChartTooltip formatter={(v: number) => fmtQAR(v)} />} cursor={{ fill: "rgba(24,213,255,0.06)" }} />
-                  <Line type="monotone" dataKey="v" stroke="#18D5FF" strokeWidth={2.5} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
+      <PageHeader title="Reports" subtitle="Business answers, not decoration" actions={<><Button variant="outline" size="sm" onClick={() => toast("Saved view")}>Save view</Button><Button variant="outline" size="sm" onClick={() => toast("CSV exported (demo)")}>Export CSV</Button><Button size="sm" onClick={() => window.print()}>Print</Button></>} />
+      <Tabs defaultValue={CATS[0]}><TabsList>{CATS.map((c) => <TabsTrigger key={c} value={c}>{c}</TabsTrigger>)}</TabsList>
+        <TabsContent value="Executive" className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="p-4"><div className="text-sm font-medium mb-2">Planned vs Actual (by project)</div><div className="h-56"><ResponsiveContainer><BarChart data={planActual}><XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} /><Tooltip contentStyle={{fontSize:12}} /><Bar dataKey="planned" fill="var(--muted-foreground)" /><Bar dataKey="actual" fill="var(--signal)" /></BarChart></ResponsiveContainer></div></Card>
+          <Card className="p-4"><div className="text-sm font-medium mb-2">Cameras planned vs installed vs tested</div><div className="h-56"><ResponsiveContainer><BarChart data={cams}><XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} /><Tooltip contentStyle={{fontSize:12}} /><Bar dataKey="v" fill="var(--signal)" /></BarChart></ResponsiveContainer></div></Card>
+          <Card className="p-4 lg:col-span-2"><div className="text-sm font-medium mb-2">Collections trend</div><div className="h-56"><ResponsiveContainer><LineChart data={collected}><XAxis dataKey="m" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => `${v/1000}K`} /><Tooltip contentStyle={{fontSize:12}} formatter={(v: number) => fmtQAR(v)} /><Line type="monotone" dataKey="v" stroke="var(--signal)" strokeWidth={2} /></LineChart></ResponsiveContainer></div></Card>
         </TabsContent>
-
-        {CATS.slice(1).map((c) => (
-          <TabsContent key={c} value={c} className="mt-3">
-            <Panel accent="blue" texture="dots">
-              <p className="text-sm text-muted-foreground">Reports in this category are available in the demo. Charts and drill-downs match the Executive template above.</p>
-            </Panel>
-          </TabsContent>
-        ))}
+        {CATS.slice(1).map((c) => <TabsContent key={c} value={c} className="mt-3"><Card className="p-6 text-sm text-muted-foreground">Reports in this category are available in the demo. Charts and drill-downs match the Executive template above.</Card></TabsContent>)}
       </Tabs>
     </div>
   );

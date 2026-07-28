@@ -1,18 +1,20 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useData } from "@/lib/data-context";
-import { PageHeader, HealthBadge, MonoChip, ProgressBar, StatusPill, Ring } from "@/components/app/common";
+import { HealthBadge, MonoChip, ProgressBar, StatusPill, Ring } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useState } from "react";
-import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Printer, Circle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Printer, Circle, ChevronRight, MoreHorizontal, LayoutGrid, Wrench, Coins, ShieldCheck, FolderOpen, Flag, Camera, Package as PackageIcon, ClipboardCheck, TrendingDown, Users, MessageSquare, CalendarClock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/projects/$id")({
   head: () => ({ meta: [{ title: "Project | AL HARIB CCTV COMPANY" }] }),
@@ -41,36 +43,139 @@ function ProjectDetail() {
   const projectTests = d.testRecords.filter((t) => t.projectId === p.id);
   const projectHandover = d.handoverItems.filter((h) => h.projectId === p.id);
   const projectCompliance = d.complianceItems.filter((c) => c.projectId === p.id);
+  const SECTIONS = useMemo(() => [
+    { id: "overview",   label: "Overview",   icon: LayoutGrid,     subs: [{ v: "overview", l: "Summary" }] },
+    { id: "execution",  label: "Execution",  icon: Wrench,         subs: [
+      { v: "scope", l: "Scope & BOQ" }, { v: "tasks", l: "Tasks" }, { v: "timeline", l: "Timeline" },
+      { v: "site", l: "Site Activity" }, { v: "team", l: "Team" }, { v: "materials", l: "Materials" },
+      { v: "devices", l: "Device Register" },
+    ] },
+    { id: "commercial", label: "Commercial", icon: Coins,          subs: [{ v: "fin", l: "Financials" }, { v: "vars", l: "Variations" }] },
+    { id: "quality",    label: "Quality",    icon: ShieldCheck,    subs: [{ v: "testing", l: "Testing" }, { v: "comp", l: "Compliance" }] },
+    { id: "documents",  label: "Documents",  icon: FolderOpen,     subs: [{ v: "docs", l: "Project Documents" }, { v: "comm", l: "Client Communication" }, { v: "log", l: "Activity Log" }] },
+    { id: "handover",   label: "Handover",   icon: Flag,           subs: [{ v: "handover", l: "Readiness Checklist" }] },
+  ] as const, []);
+  const [section, setSection] = useState<string>("overview");
   const [tab, setTab] = useState("overview");
+  const activeSection = SECTIONS.find((s) => s.id === section) || SECTIONS[0];
+  const goTo = (sub: string) => {
+    const sec = SECTIONS.find((s) => s.subs.some((x) => x.v === sub));
+    if (sec) setSection(sec.id);
+    setTab(sub);
+  };
+  const collected = p.collected; const invoiced = Math.max(1, p.invoiced);
+  const camsInstalled = projectDevices.filter((x) => x.status !== "Planned").length;
+  const testsPassed = projectDevices.filter((x) => x.testResult === "Pass").length;
+  const testsFailed = projectDevices.filter((x) => x.testResult === "Fail").length;
+  const daysLeft = daysFromToday(p.plannedEnd);
+  const scheduleGap = p.plannedProgress - p.actualProgress;
 
   return (
-    <div>
-      <Card className="p-4 mb-4">
-        <div className="flex flex-wrap items-start gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1"><MonoChip>{p.number}</MonoChip><HealthBadge label={health.label} /><StatusPill status={p.phase} tone="info" /></div>
-            <h1 className="text-2xl font-display font-semibold">{p.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{cust.name} · {site.name} · PM {pm.name}</p>
+    <div className="space-y-4">
+      {/* LAYER 1 — Identity Header */}
+      <div className="rounded-2xl border hairline bg-gradient-to-br from-card via-card to-surface-2/60 p-5 shadow-sm">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-5 items-start">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <MonoChip>{p.number}</MonoChip>
+              <HealthBadge label={health.label} />
+              <StatusPill status={p.phase} tone="info" />
+              {scheduleGap > 10 && <StatusPill status="High Priority" tone="warning" />}
+            </div>
+            <h1 className="text-2xl md:text-[26px] font-display font-semibold tracking-tight truncate">{p.name}</h1>
+            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+              <span><span className="text-foreground/70">Customer:</span> {cust.name}</span>
+              <span><span className="text-foreground/70">Site:</span> {site.name}</span>
+              <span><span className="text-foreground/70">PM:</span> {pm.name}</span>
+              <span><span className="text-foreground/70">Type:</span> CCTV Installation</span>
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-            <Stat label="Value" value={fmtQAR(p.contractValue + p.approvedVariations, { compact: true })} />
-            <Stat label="Completion" value={`${p.actualProgress}%`} sub={`Planned ${p.plannedProgress}%`} />
-            <Stat label="Planned end" value={fmtDate(p.plannedEnd)} sub={`${daysFromToday(p.plannedEnd)} days`} />
-            <Stat label="Material readiness" value={`${p.materialReadiness}%`} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 min-w-0">
+            <MiniStat label="Value" value={fmtQAR(p.contractValue + p.approvedVariations, { compact: true })} />
+            <MiniStat label="Completion" value={`${p.actualProgress}%`} accent="signal" />
+            <MiniStat label="Planned end" value={fmtDate(p.plannedEnd)} sub={`${daysLeft} days left`} />
+            <MiniStat label="Materials" value={`${p.materialReadiness}%`} accent={p.materialReadiness < 80 ? "warning" : "success"} />
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-4">
-          <Button size="sm" variant="outline" onClick={() => toast.success("Progress report generated (demo)")}><Printer className="w-3.5 h-3.5 mr-1" /> Progress report</Button>
-          <Button size="sm" variant="outline" onClick={() => setTab("comm")}>Client update</Button>
-          <Button size="sm" variant="outline" onClick={() => setTab("tasks")}>Add task</Button>
-          <Button size="sm" variant="outline" onClick={() => setTab("handover")}>Handover checklist</Button>
+        <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t hairline">
+          <Button size="sm" className="bg-signal text-signal-foreground hover:bg-signal/90 h-8" onClick={() => toast.success("Project updated (demo)")}>Update Project</Button>
+          <Button size="sm" variant="outline" className="h-8" onClick={() => goTo("tasks")}>Add Task</Button>
+          <Button size="sm" variant="outline" className="h-8" onClick={() => goTo("site")}>Add Site Report</Button>
+          <Button size="sm" variant="outline" className="h-8" onClick={() => goTo("comm")}>Client Update</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="ghost" className="h-8 gap-1"><MoreHorizontal className="w-4 h-4" /> More</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onClick={() => toast.success("Progress report generated (demo)")}><Printer className="w-3.5 h-3.5 mr-2" />Progress Report</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => goTo("docs")}>Upload Document</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast("Issue drafted (demo)")}>Add Issue</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => goTo("vars")}>Add Variation</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast("Site visit scheduled (demo)")}>Schedule Visit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => goTo("handover")}>Handover Checklist</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => toast("Archived (demo)")} className="text-critical focus:text-critical">Archive Project</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </Card>
+      </div>
 
+      {/* LAYER 2 — Command Summary Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        <CommandTile label="Actual Progress" value={`${p.actualProgress}%`} sub={scheduleGap > 0 ? `${scheduleGap}% behind plan` : "On plan"} tone={scheduleGap > 10 ? "critical" : scheduleGap > 0 ? "warning" : "success"} kind="ring" ring={p.actualProgress} onClick={() => goTo("overview")} />
+        <CommandTile label="Planned Progress" value={`${p.plannedProgress}%`} sub="Expected today" tone="info" kind="ring" ring={p.plannedProgress} onClick={() => goTo("timeline")} />
+        <CommandTile label="Material Readiness" value={`${p.materialReadiness}%`} sub={`${projectMats.filter((m) => m.critical && m.delivered < m.required).length} critical items`} tone={p.materialReadiness < 80 ? "warning" : "success"} kind="bar" bar={p.materialReadiness} onClick={() => goTo("materials")} />
+        <CommandTile label="Cameras Installed" value={`${camsInstalled} / ${projectDevices.length}`} sub={`${projectDevices.length - camsInstalled} remaining`} tone="info" kind="bar" bar={projectDevices.length ? (camsInstalled / projectDevices.length) * 100 : 0} icon={Camera} onClick={() => goTo("devices")} />
+        <CommandTile label="Tests Passed" value={`${testsPassed} / ${projectDevices.length}`} sub={testsFailed ? `${testsFailed} failures` : "No failures"} tone={testsFailed ? "critical" : "success"} kind="counter" icon={ClipboardCheck} onClick={() => goTo("testing")} />
+        <CommandTile label="Collected" value={`${fmtQAR(collected, { compact: true })}`} sub={`${Math.round((collected / invoiced) * 100)}% of invoiced`} tone="success" kind="bar" bar={(collected / invoiced) * 100} icon={Coins} onClick={() => goTo("fin")} />
+      </div>
+
+      {/* LAYER 3 — Primary Section Nav */}
+      <div className="rounded-xl border hairline bg-card/60 p-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        {SECTIONS.map((s) => {
+          const Icon = s.icon;
+          const active = section === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => { setSection(s.id); setTab(s.subs[0].v); }}
+              className={cn(
+                "shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all",
+                active ? "bg-signal text-signal-foreground shadow-sm shadow-signal/20" : "text-muted-foreground hover:text-foreground hover:bg-surface-2"
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* LAYER 4 — Contextual Sub-nav */}
+      {activeSection.subs.length > 1 && (
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar text-[12px] px-1 -mt-2">
+          {activeSection.subs.map((s) => {
+            const active = tab === s.v;
+            return (
+              <button
+                key={s.v}
+                onClick={() => setTab(s.v)}
+                className={cn(
+                  "shrink-0 px-3 py-1.5 rounded-md transition-colors border",
+                  active ? "bg-signal-soft text-signal border-signal/30" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-surface-2"
+                )}
+              >
+                {s.l}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* LAYER 5 — Workspace with intelligence rail */}
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4">
+        <div className="min-w-0">
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex flex-wrap h-auto">
-          {[["overview","Overview"],["scope","Scope & BOQ"],["tasks","Tasks"],["timeline","Timeline"],["site","Site Activity"],["team","Team"],["materials","Materials"],["devices","Device Register"],["docs","Documents"],["vars","Variations"],["testing","Testing"],["fin","Financials"],["comm","Communication"],["comp","Compliance"],["handover","Handover"],["log","Activity Log"]].map(([v,l]) => <TabsTrigger key={v} value={v} className="text-xs">{l}</TabsTrigger>)}
-        </TabsList>
 
         <TabsContent value="overview" className="mt-4 space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -218,7 +323,228 @@ function ProjectDetail() {
           <ol className="relative border-l hairline ml-2 space-y-4">{[{t:"Site activity logged",d:"2026-07-20 08:15",w:"Rakesh Nair"},{t:"Test result: FAIL on CP-13",d:"2026-07-19 16:40",w:"Ahmed Sobhi"},{t:"Materials issued",d:"2026-07-19 11:20",w:"Aisha Rahman"},{t:"Progress cert 3 invoiced",d:"2026-07-18 14:00",w:"Hasan Barzani"},{t:"Variation VO-02 submitted",d:"2026-07-14 10:12",w:"Anitha Verghese"}].map((e, i) => (<li key={i} className="ml-4"><div className="absolute w-2 h-2 rounded-full bg-signal -left-1 mt-1.5" /><div className="text-sm">{e.t}</div><div className="text-xs text-muted-foreground num">{e.d} · {e.w}</div></li>))}</ol>
         </Card></TabsContent>
       </Tabs>
+        </div>
+        {/* Intelligence Rail */}
+        <IntelligenceRail
+          section={section}
+          project={p}
+          health={health}
+          milestones={projectMs}
+          materials={projectMats}
+          tasks={projectTasks}
+          approvals={projectApprovals}
+          devices={projectDevices}
+          payments={projectPays}
+          docs={projectDocs}
+          handoverItems={projectHandover}
+          comms={projectComms}
+          onJump={goTo}
+        />
+      </div>
     </div>
+  );
+}
+
+function MiniStat({ label, value, sub, accent }: { label: string; value: React.ReactNode; sub?: string; accent?: "signal"|"warning"|"success"|"critical" }) {
+  const accentCls = accent === "warning" ? "text-warning" : accent === "success" ? "text-success" : accent === "critical" ? "text-critical" : accent === "signal" ? "text-signal" : "text-foreground";
+  return (
+    <div className="rounded-lg bg-surface-2/70 border hairline px-3 py-2 min-w-[110px]">
+      <div className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground font-medium">{label}</div>
+      <div className={cn("num text-[15px] font-semibold mt-0.5 truncate", accentCls)}>{value}</div>
+      {sub && <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{sub}</div>}
+    </div>
+  );
+}
+
+function CommandTile({ label, value, sub, tone = "info", kind, ring, bar, icon: Icon, onClick }: {
+  label: string; value: React.ReactNode; sub?: string;
+  tone?: "success"|"warning"|"critical"|"info";
+  kind: "ring"|"bar"|"counter";
+  ring?: number; bar?: number;
+  icon?: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
+}) {
+  const toneVar = tone === "critical" ? "var(--critical)" : tone === "warning" ? "var(--warning)" : tone === "success" ? "var(--success)" : "var(--signal)";
+  const toneText = tone === "critical" ? "text-critical" : tone === "warning" ? "text-warning" : tone === "success" ? "text-success" : "text-signal";
+  return (
+    <button onClick={onClick} className="group text-left rounded-xl border hairline bg-card p-3.5 hover:border-signal/40 hover:shadow-md hover:shadow-signal/10 transition-all">
+      <div className="flex items-start justify-between gap-2">
+        <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">{label}</div>
+        {Icon && <Icon className={cn("w-3.5 h-3.5", toneText)} />}
+      </div>
+      <div className="mt-2 flex items-end gap-2.5">
+        {kind === "ring" && ring !== undefined && (
+          <svg width="42" height="42" className="-rotate-90 shrink-0">
+            <circle cx="21" cy="21" r="17" strokeWidth="3.5" stroke="var(--muted)" fill="none" />
+            <circle cx="21" cy="21" r="17" strokeWidth="3.5" stroke={toneVar} fill="none" strokeDasharray={2 * Math.PI * 17} strokeDashoffset={2 * Math.PI * 17 - (Math.min(100, Math.max(0, ring)) / 100) * 2 * Math.PI * 17} strokeLinecap="round" />
+          </svg>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="num text-[22px] font-display font-semibold leading-none tabular-nums truncate">{value}</div>
+          {sub && <div className={cn("text-[10.5px] mt-1 truncate", toneText)}>{sub}</div>}
+        </div>
+      </div>
+      {kind === "bar" && bar !== undefined && (
+        <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, Math.max(0, bar))}%`, backgroundColor: toneVar }} />
+        </div>
+      )}
+    </button>
+  );
+}
+
+function IntelligenceRail({ section, project, health, milestones, materials, tasks, devices, payments, docs, handoverItems, comms, onJump }: {
+  section: string;
+  project: import("@/lib/mock-data").Project;
+  health: ReturnType<import("@/lib/data-context").DataContextType["computeHealth"]>;
+  milestones: import("@/lib/mock-data").Milestone[];
+  materials: import("@/lib/mock-data").Material[];
+  tasks: import("@/lib/mock-data").Task[];
+  approvals: import("@/lib/mock-data").Approval[];
+  devices: import("@/lib/mock-data").Device[];
+  payments: import("@/lib/mock-data").PaymentMilestone[];
+  docs: import("@/lib/mock-data").Document[];
+  handoverItems: import("@/lib/mock-data").HandoverItem[];
+  comms: import("@/lib/mock-data").Communication[];
+  onJump: (v: string) => void;
+}) {
+  const nextMs = milestones.find((m) => !m.done);
+  const shortages = materials.filter((m) => m.critical && m.delivered < m.required);
+  const overdue = tasks.filter((t) => new Date(t.due) < new Date() && t.status !== "Completed");
+  const failedTests = devices.filter((d) => d.testResult === "Fail");
+  const overduePay = payments.filter((p) => p.status === "Overdue");
+  const pendingDocs = docs.filter((d) => d.status !== "Approved");
+  const remainingHandover = handoverItems.filter((h) => !h.done);
+  const lastComm = comms[comms.length - 1];
+
+  return (
+    <aside className="hidden xl:block space-y-3 sticky top-16 self-start">
+      <div className="rounded-xl border hairline bg-card p-3.5">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">Health Score</div>
+          <HealthBadge label={health.label} />
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <div className="num text-3xl font-display font-bold">{health.score}</div>
+          <div className="text-xs text-muted-foreground">/ 100</div>
+        </div>
+        <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-gradient-to-r from-signal to-chart-5" style={{ width: `${health.score}%` }} />
+        </div>
+      </div>
+
+      {section === "overview" && (
+        <>
+          {nextMs && (
+            <RailCard title="Next Milestone" icon={CalendarClock} onClick={() => onJump("timeline")}>
+              <div className="text-sm font-medium truncate">{nextMs.title}</div>
+              <div className="text-[11px] text-muted-foreground num mt-0.5">{fmtDate(nextMs.planned)}</div>
+            </RailCard>
+          )}
+          <RailCard title="Current Blockers" icon={AlertTriangle} tone={shortages.length ? "critical" : "success"}>
+            {shortages.length === 0 ? <div className="text-xs text-muted-foreground">No critical blockers.</div> :
+              shortages.slice(0, 3).map((m) => (
+                <div key={m.id} className="text-xs py-1 border-b hairline last:border-0">
+                  <div className="truncate">{m.name}</div>
+                  <div className="text-[10px] text-muted-foreground num">{m.delivered} / {m.required}</div>
+                </div>
+              ))}
+          </RailCard>
+          {lastComm && (
+            <RailCard title="Latest Client Message" icon={MessageSquare} onClick={() => onJump("comm")}>
+              <div className="text-xs truncate">{lastComm.subject}</div>
+              <div className="text-[10px] text-muted-foreground num mt-0.5">{fmtDate(lastComm.date)} · {lastComm.owner}</div>
+            </RailCard>
+          )}
+        </>
+      )}
+
+      {section === "execution" && (
+        <>
+          <RailCard title="Material Shortages" icon={PackageIcon} tone={shortages.length ? "critical" : "success"} onClick={() => onJump("materials")}>
+            <div className="num text-2xl font-display font-bold">{shortages.length}</div>
+            <div className="text-[11px] text-muted-foreground">critical items missing</div>
+          </RailCard>
+          <RailCard title="Overdue Tasks" icon={TrendingDown} tone={overdue.length ? "warning" : "success"} onClick={() => onJump("tasks")}>
+            <div className="num text-2xl font-display font-bold">{overdue.length}</div>
+            <div className="text-[11px] text-muted-foreground">need attention</div>
+          </RailCard>
+          <RailCard title="Team on Site" icon={Users} onClick={() => onJump("team")}>
+            <div className="num text-2xl font-display font-bold">{project.teamIds.length + 1}</div>
+            <div className="text-[11px] text-muted-foreground">active members</div>
+          </RailCard>
+        </>
+      )}
+
+      {section === "commercial" && (
+        <>
+          <RailCard title="Outstanding" icon={Coins} tone="warning" onClick={() => onJump("fin")}>
+            <div className="num text-2xl font-display font-bold">{fmtQAR(project.invoiced - project.collected, { compact: true })}</div>
+            <div className="text-[11px] text-muted-foreground">to be collected</div>
+          </RailCard>
+          <RailCard title="Overdue Invoices" icon={AlertTriangle} tone={overduePay.length ? "critical" : "success"} onClick={() => onJump("fin")}>
+            <div className="num text-2xl font-display font-bold">{overduePay.length}</div>
+          </RailCard>
+          <RailCard title="Forecast Margin" icon={TrendingDown}>
+            <div className="num text-2xl font-display font-bold text-success">28%</div>
+          </RailCard>
+        </>
+      )}
+
+      {section === "quality" && (
+        <>
+          <RailCard title="Failed Tests" icon={XCircle} tone={failedTests.length ? "critical" : "success"} onClick={() => onJump("testing")}>
+            <div className="num text-2xl font-display font-bold">{failedTests.length}</div>
+            <div className="text-[11px] text-muted-foreground">to retest</div>
+          </RailCard>
+          <RailCard title="Compliance" icon={ShieldCheck} onClick={() => onJump("comp")}>
+            <div className="text-xs text-muted-foreground">Track internal approvals and permits.</div>
+          </RailCard>
+        </>
+      )}
+
+      {section === "documents" && (
+        <>
+          <RailCard title="Pending Approvals" icon={FolderOpen} tone={pendingDocs.length ? "warning" : "success"} onClick={() => onJump("docs")}>
+            <div className="num text-2xl font-display font-bold">{pendingDocs.length}</div>
+          </RailCard>
+          <RailCard title="Recently Uploaded" icon={FolderOpen}>
+            {docs.slice(0, 3).map((d) => (
+              <div key={d.id} className="text-xs py-1 border-b hairline last:border-0 truncate">{d.name}</div>
+            ))}
+          </RailCard>
+        </>
+      )}
+
+      {section === "handover" && (
+        <>
+          <RailCard title="Checklist Remaining" icon={ClipboardCheck} tone={remainingHandover.length ? "warning" : "success"}>
+            <div className="num text-2xl font-display font-bold">{remainingHandover.length}</div>
+            <div className="text-[11px] text-muted-foreground">of {handoverItems.length} items</div>
+          </RailCard>
+          <RailCard title="Final Payment" icon={Coins}>
+            <div className="num text-lg font-display font-bold">{fmtQAR(project.retention, { compact: true })}</div>
+            <div className="text-[11px] text-muted-foreground">retention</div>
+          </RailCard>
+        </>
+      )}
+    </aside>
+  );
+}
+
+function RailCard({ title, icon: Icon, tone, onClick, children }: {
+  title: string; icon: React.ComponentType<{ className?: string }>;
+  tone?: "success"|"warning"|"critical"; onClick?: () => void; children: React.ReactNode;
+}) {
+  const toneText = tone === "critical" ? "text-critical" : tone === "warning" ? "text-warning" : tone === "success" ? "text-success" : "text-signal";
+  return (
+    <button onClick={onClick} className={cn("w-full text-left rounded-xl border hairline bg-card p-3.5 hover:border-signal/40 transition-all block", !onClick && "cursor-default")}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-semibold flex items-center gap-1.5"><Icon className={cn("w-3 h-3", toneText)} />{title}</div>
+        {onClick && <ChevronRight className="w-3 h-3 text-muted-foreground" />}
+      </div>
+      {children}
+    </button>
   );
 }
 

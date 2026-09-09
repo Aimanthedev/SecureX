@@ -112,11 +112,11 @@ function CommandCenter() {
   return (
     <div className="space-y-4">
       {/* Top metric row */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rise rise-1"><MetricCard label="Active project value" value={fmtQAR(revenue, { compact: true })} delta="+12.4%" sub="vs last quarter" accent="blue" motif="camera" icon={<Wallet className="h-3.5 w-3.5" />} spark={[8, 9, 9, 10, 11, 12, 13]} onClick={() => nav({ to: "/projects" })} /></div>
-        <div className="rise rise-2"><MetricCard label="Open sales pipeline" value={fmtQAR(pipeline, { compact: true })} delta="+8.1%" sub="weighted forecast" accent="purple" motif="nodes" icon={<TrendingUp className="h-3.5 w-3.5" />} spark={[6, 7, 6, 8, 9, 9, 11]} onClick={() => nav({ to: "/sales" })} /></div>
-        <div className="rise rise-3"><MetricCard label="Outstanding collections" value={fmtQAR(outstanding, { compact: true })} delta="-3.2%" sub="12 invoices aged" accent="amber" motif="channels" icon={<Banknote className="h-3.5 w-3.5" />} spark={[9, 9, 8, 8, 7, 7, 6]} onClick={() => nav({ to: "/reports" })} /></div>
-        <div className="rise rise-4"><MetricCard label="Active projects" value={String(active)} delta="+1" sub={`${atRisk} need attention`} accent="cyan" motif="waves" icon={<HardHat className="h-3.5 w-3.5" />} spark={[4, 4, 5, 5, 6, 6, 6]} onClick={() => nav({ to: "/projects" })} /></div>
+      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rise rise-1 h-full"><MetricCard label="Active project value" value={fmtQAR(revenue, { compact: true })} delta="+12.4%" sub="vs last quarter" accent="blue" motif="camera" icon={<Wallet className="h-3.5 w-3.5" />} spark={[8, 9, 9, 10, 11, 12, 13]} onClick={() => nav({ to: "/projects" })} /></div>
+        <div className="rise rise-2 h-full"><MetricCard label="Open sales pipeline" value={fmtQAR(pipeline, { compact: true })} delta="+8.1%" sub="weighted forecast" accent="purple" motif="nodes" icon={<TrendingUp className="h-3.5 w-3.5" />} spark={[6, 7, 6, 8, 9, 9, 11]} onClick={() => nav({ to: "/sales" })} /></div>
+        <div className="rise rise-3 h-full"><MetricCard label="Outstanding collections" value={fmtQAR(outstanding, { compact: true })} delta="-3.2%" sub="12 invoices aged" accent="amber" motif="channels" icon={<Banknote className="h-3.5 w-3.5" />} spark={[9, 9, 8, 8, 7, 7, 6]} onClick={() => nav({ to: "/reports" })} /></div>
+        <div className="rise rise-4 h-full"><MetricCard label="Active projects" value={String(active)} delta="+1" sub={`${atRisk} need attention`} accent="cyan" motif="waves" icon={<HardHat className="h-3.5 w-3.5" />} spark={[4, 4, 5, 5, 6, 6, 6]} onClick={() => nav({ to: "/projects" })} /></div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">

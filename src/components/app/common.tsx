@@ -103,7 +103,7 @@ export function MetricCard({ label, value, delta, sub, icon, accent = "blue", sp
   return (
     <Comp
       onClick={onClick}
-      className={cn("panel card-lift group relative overflow-hidden p-4 text-left", onClick && "cursor-pointer", className)}
+      className={cn("panel card-lift group relative flex h-full w-full flex-col overflow-hidden p-4 text-left", onClick && "cursor-pointer", className)}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-90"

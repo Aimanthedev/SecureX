@@ -195,7 +195,7 @@ function ProjectDetail() {
               <div className="mt-3 space-y-2 text-xs">
                 <div className="flex justify-between"><span className="text-muted-foreground">Cameras installed</span><span className="num">{projectDevices.filter((x)=>x.status!=="Faulty").length} / {projectDevices.length}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Tests passed</span><span className="num">{projectDevices.filter((x)=>x.testResult==="Pass").length} / {projectDevices.length}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Approvals pending</span><span className="num">{projectApprovals.filter((a)=>a.status==="Submitted").length}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Approvals pending</span><span className="num">{projectApprovals.filter((a)=>a.status==="Pending").length}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Collected</span><span className="num">{fmtQAR(p.collected,{compact:true})} of {fmtQAR(p.invoiced,{compact:true})}</span></div>
               </div>
             </Card>

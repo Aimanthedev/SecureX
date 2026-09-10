@@ -24,7 +24,6 @@ const NAV_GROUPS = [
   ]},
   { group: "Sales", items: [
     { to: "/sales", label: "Sales", icon: Users },
-    { to: "/quotations", label: "Quotations", icon: FileText },
     { to: "/surveys", label: "Site Surveys", icon: Radar },
     { to: "/customers", label: "Customers", icon: UserCircle2 },
   ]},
@@ -48,7 +47,7 @@ const NAV_GROUPS = [
 
 const PAGE_TITLES: Record<string, string> = {
   "": "Command Center", projects: "Projects", field: "Field Operations", calendar: "Calendar",
-  sales: "Sales", quotations: "Quotations", surveys: "Site Surveys", customers: "Customers",
+  sales: "Sales", surveys: "Site Surveys", customers: "Customers",
   equipment: "Equipment", procurement: "Procurement", employees: "Employees", documents: "Documents",
   service: "Service and AMC", reports: "Reports", notifications: "Notifications", settings: "Settings",
 };
@@ -315,7 +314,6 @@ function GlobalSearch() {
     d.projects.filter((p) => (p.name + p.number).toLowerCase().includes(term)).slice(0, 5).forEach((p) => out.push({ group: "Projects", label: p.name, sub: p.number, go: () => nav({ to: "/projects/$id", params: { id: p.id } }) }));
     d.customers.filter((c) => c.name.toLowerCase().includes(term)).slice(0, 5).forEach((c) => out.push({ group: "Customers", label: c.name, sub: c.contact, go: () => nav({ to: "/customers/$id", params: { id: c.id } }) }));
     d.leads.filter((l) => (l.company + l.contactName).toLowerCase().includes(term)).slice(0, 5).forEach((l) => out.push({ group: "Leads", label: l.company, sub: l.stage, go: () => nav({ to: "/sales" }) }));
-    d.quotations.filter((qu) => qu.number.toLowerCase().includes(term) || qu.opportunityName.toLowerCase().includes(term)).slice(0, 5).forEach((qu) => out.push({ group: "Quotations", label: qu.opportunityName, sub: qu.number, go: () => nav({ to: "/quotations" }) }));
     d.devices.filter((dv) => (dv.label + dv.serial + dv.ip + dv.mac).toLowerCase().includes(term)).slice(0, 5).forEach((dv) => out.push({ group: "Devices", label: dv.label + " · " + dv.model, sub: dv.serial, go: () => nav({ to: "/projects/$id", params: { id: dv.projectId } }) }));
     d.employees.filter((e) => e.name.toLowerCase().includes(term)).slice(0, 5).forEach((e) => out.push({ group: "Employees", label: e.name, sub: e.role, go: () => nav({ to: "/employees" }) }));
     d.tickets.filter((t) => (t.title + t.number).toLowerCase().includes(term)).slice(0, 5).forEach((t) => out.push({ group: "Tickets", label: t.title, sub: t.number, go: () => nav({ to: "/service" }) }));
@@ -365,7 +363,7 @@ function QuickCreate() {
   const nav = useNavigate();
   const items = [
     { l: "New lead", go: () => nav({ to: "/sales" }) },
-    { l: "New quotation", go: () => nav({ to: "/quotations" }) },
+    
     { l: "New site survey", go: () => nav({ to: "/surveys" }) },
     { l: "New project", go: () => nav({ to: "/projects" }) },
     { l: "New task", go: () => nav({ to: "/projects" }) },

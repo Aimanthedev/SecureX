@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useData } from "@/lib/data-context";
-import { MonoChip, StatusPill, ProgressBar } from "@/components/app/common";
+import { MonoChip, StatusPill, WorkStatusBadge, projectStatus, countStatus } from "@/components/app/common";
 import { fmtDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Home, ClipboardList, Package, User, HardHat, MapPin, CheckCircle2, AlertTriangle, Camera, PenSquare, LogIn, LogOut } from "lucide-react";
@@ -85,8 +85,7 @@ function FieldOps() {
       {tab === "projects" && <div className="p-4 space-y-2.5">{d.projects.map((p) => (
         <div key={p.id} className="rounded-2xl p-4" style={{ background: "#091321", border: "1px solid rgba(133,164,204,0.12)" }}>
           <div className="text-[14px] font-medium">{p.name}</div>
-          <div className="mt-2.5"><ProgressBar value={p.actualProgress} planned={p.plannedProgress} /></div>
-          <div className="mt-2 text-[11.5px] text-[#66778D] num">{p.actualProgress}% actual · {p.plannedProgress}% planned</div>
+          <div className="mt-2.5 flex items-center gap-2"><WorkStatusBadge status={projectStatus(p)} /><StatusPill status={p.phase} tone="info" /></div>
         </div>
       ))}</div>}
 
@@ -101,7 +100,7 @@ function FieldOps() {
         <div key={m.id} className="rounded-2xl p-3.5 text-[14px]" style={{ background: "#091321", border: "1px solid rgba(133,164,204,0.12)" }}>
           <div className="font-medium">{m.name}</div>
           <div className="text-[11.5px] text-[#66778D] mt-1">Issued <span className="num text-[#F7FAFF]">{m.issued}</span> of <span className="num text-[#F7FAFF]">{m.required}</span></div>
-          <div className="mt-2"><ProgressBar value={(m.issued / (m.required || 1)) * 100} accent="cyan" height={6} /></div>
+          <div className="mt-2"><WorkStatusBadge status={countStatus(m.issued, m.required)} /></div>
         </div>
       ))}</div>}
 

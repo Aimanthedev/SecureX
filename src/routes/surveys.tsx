@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
-import { PageHeader, MonoChip, StatusPill, ProgressBar, MetricCard, Panel, PanelHead, TableShell } from "@/components/app/common";
+import { PageHeader, MonoChip, StatusPill, WorkStatusBadge, MetricCard, Panel, PanelHead, TableShell, type WorkStatus } from "@/components/app/common";
 import { fmtDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,9 +20,11 @@ function SurveysPage() {
   const [detail, setDetail] = useState<string | null>(null);
 
   const upcoming = d.surveys.filter((s) => s.status === "Scheduled" || s.status === "Requested").length;
-  const avgCompleteness = Math.round(d.surveys.reduce((s, x) => s + x.completeness, 0) / (d.surveys.length || 1));
+  const completedSurveys = d.surveys.filter((s) => s.completeness >= 100).length;
   const totalPoints = d.surveys.reduce((s, x) => s + x.points.length, 0);
   const pendingReports = d.surveys.filter((s) => s.reportStatus !== "Approved").length;
+  const surveyStatus = (s: { completeness: number; status: string }): WorkStatus =>
+    s.completeness >= 100 ? "Completed" : s.completeness === 0 ? "Not Started" : s.status === "In Progress" ? "In Progress" : "Pending";
 
   return (
     <div>
@@ -30,7 +32,7 @@ function SurveysPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <MetricCard label="Survey Schedule" value={upcoming} sub="requested or scheduled" icon={<CalendarClock className="w-4 h-4" />} accent="blue" motif="grid" />
-        <MetricCard label="Survey Completeness" value={`${avgCompleteness}%`} sub="avg across active surveys" icon={<ShieldAlert className="w-4 h-4" />} accent="cyan" motif="waves" />
+        <MetricCard label="Surveys Completed" value={`${completedSurveys} / ${d.surveys.length}`} sub="fully captured sites" icon={<ShieldAlert className="w-4 h-4" />} accent="cyan" motif="waves" />
         <MetricCard label="Proposed Cameras" value={totalPoints} sub="camera points captured" icon={<Camera className="w-4 h-4" />} accent="purple" motif="camera" />
         <MetricCard label="Report Status" value={pendingReports} sub="pending review or draft" icon={<FileCheck2 className="w-4 h-4" />} accent="amber" motif="channels" />
       </div>

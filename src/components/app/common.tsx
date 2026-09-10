@@ -266,50 +266,70 @@ export function StatusPill({ status, tone = "neutral" }: {
   );
 }
 
-/* ── Progress ────────────────────────────────────────────────── */
-export function ProgressBar({ value, planned, accent = "blue", height = 8 }: {
-  value: number; planned?: number; accent?: Accent; height?: number;
-}) {
-  const a = ACCENT[accent];
-  const v = Math.min(100, Math.max(0, value));
-  return (
-    <div className="w-full">
-      <div className="relative w-full overflow-hidden rounded-full bg-[rgba(133,164,204,0.10)]" style={{ height }}>
-        <div
-          className="grow-bar absolute inset-y-0 left-0 rounded-full"
-          style={{ width: `${v}%`, background: `linear-gradient(90deg, ${a.hex}, ${a.hex}99)`, boxShadow: `0 0 14px ${a.ring}` }}
-        />
-        {planned !== undefined && (
-          <div className="absolute top-0 h-full w-[2px] rounded bg-[rgba(247,250,255,0.55)]" style={{ left: `${Math.min(100, Math.max(0, planned))}%` }} />
-        )}
-      </div>
-    </div>
-  );
+/* ── Work status language (replaces percentage progress) ─────── */
+export type WorkStatus =
+  | "Not Started" | "Pending" | "In Progress" | "On Hold" | "Awaiting Material"
+  | "Awaiting Client" | "Ready for Testing" | "Testing" | "Completed" | "Delayed" | "Blocked";
+
+const WORK_STATUS_TONE: Record<WorkStatus, "neutral" | "success" | "warning" | "critical" | "info" | "purple" | "cyan"> = {
+  "Not Started": "neutral",
+  "Pending": "neutral",
+  "In Progress": "info",
+  "On Hold": "warning",
+  "Awaiting Material": "warning",
+  "Awaiting Client": "warning",
+  "Ready for Testing": "cyan",
+  "Testing": "purple",
+  "Completed": "success",
+  "Delayed": "critical",
+  "Blocked": "critical",
+};
+
+export function WorkStatusBadge({ status }: { status: WorkStatus }) {
+  return <StatusPill status={status} tone={WORK_STATUS_TONE[status]} />;
 }
 
-export function Ring({ value, size = 56, label, accent = "blue", thickness = 5 }: {
-  value: number; size?: number; label?: string; accent?: Accent; thickness?: number;
-}) {
-  const a = ACCENT[accent];
-  const r = (size - thickness - 2) / 2;
-  const c = 2 * Math.PI * r;
-  const off = c - (Math.max(0, Math.min(100, value)) / 100) * c;
-  return (
-    <div className="inline-flex flex-col items-center">
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={thickness} stroke="rgba(133,164,204,0.12)" fill="none" />
-          <circle
-            cx={size / 2} cy={size / 2} r={r} strokeWidth={thickness} stroke={a.hex} fill="none"
-            strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
-            style={{ filter: `drop-shadow(0 0 6px ${a.ring})`, transition: "stroke-dashoffset 900ms cubic-bezier(.2,.7,.3,1)" }}
-          />
-        </svg>
-        <div className="num absolute inset-0 grid place-items-center text-[12px] font-semibold">{Math.round(value)}%</div>
-      </div>
-      {label && <div className="label-xs mt-2">{label}</div>}
-    </div>
-  );
+/** Operational status of a project, derived from phase and health — never a percentage. */
+export function projectStatus(
+  p: { phase: string; actualProgress?: number; plannedProgress?: number },
+  healthLabel?: ProjectHealth,
+): WorkStatus {
+  switch (p.phase) {
+    case "On Hold": return "On Hold";
+    case "Delayed": return "Delayed";
+    case "Awaiting Client":
+    case "Client Approval": return "Awaiting Client";
+    case "Awaiting Materials":
+    case "Procurement":
+    case "Material Delivery": return "Awaiting Material";
+    case "Testing": return "Testing";
+    case "Handover":
+    case "Warranty":
+    case "AMC": return "Completed";
+    case "Project Setup": return "Not Started";
+    default: break;
+  }
+  if (healthLabel === "Delayed") return "Delayed";
+  if (healthLabel === "Awaiting Materials") return "Awaiting Material";
+  if (healthLabel === "At Risk") return "Blocked";
+  return "In Progress";
+}
+
+/** Material status from factual delivered / required counts. */
+export function materialStatus(mats: { required: number; ordered: number; delivered: number; critical: boolean }[]): WorkStatus {
+  if (mats.length === 0) return "Pending";
+  if (mats.some((m) => m.critical && m.delivered < m.required)) return "Blocked";
+  if (mats.every((m) => m.delivered >= m.required)) return "Completed";
+  if (mats.some((m) => m.delivered < m.required)) return "Awaiting Material";
+  return "In Progress";
+}
+
+/** Status from a factual done / total count pair. */
+export function countStatus(done: number, total: number): WorkStatus {
+  if (total === 0) return "Not Started";
+  if (done === 0) return "Not Started";
+  if (done >= total) return "Completed";
+  return "In Progress";
 }
 
 /* ── Segmented control ───────────────────────────────────────── */

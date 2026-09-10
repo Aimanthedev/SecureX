@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useData } from "@/lib/data-context";
-import { PageHeader, StatusPill, ProgressBar, StatTile, TableShell } from "@/components/app/common";
+import { PageHeader, StatusPill, StatTile, TableShell } from "@/components/app/common";
 
 export const Route = createFileRoute("/employees")({
   head: () => ({ meta: [
@@ -14,7 +14,7 @@ function EmployeesPage() {
   const d = useData();
   const available = d.employees.filter((e) => e.availability === "Available").length;
   const busy = d.employees.filter((e) => e.availability === "Busy").length;
-  const avgWorkload = Math.round(d.employees.reduce((s, e) => s + e.workload, 0) / (d.employees.length || 1));
+  const onLeave = d.employees.filter((e) => e.availability === "On Leave").length;
 
   return (
     <div>
@@ -28,14 +28,14 @@ function EmployeesPage() {
         <StatTile label="Team Size" value={d.employees.length} accent="blue" />
         <StatTile label="Available" value={available} accent="green" />
         <StatTile label="Busy" value={busy} accent="amber" />
-        <StatTile label="Avg Workload" value={`${avgWorkload}%`} accent="cyan" />
+        <StatTile label="On Leave" value={onLeave} accent="cyan" />
       </div>
 
       <div className="rise rise-2">
         <TableShell>
           <thead>
             <tr>
-              {["Name", "Role", "Department", "Phone", "Workload", "Availability", "Tasks due"].map((h) => (
+              {["Name", "Role", "Department", "Phone", "Load", "Availability", "Tasks due"].map((h) => (
                 <th key={h} className={h === "Tasks due" ? "text-right" : "text-left"}>{h}</th>
               ))}
             </tr>
@@ -49,7 +49,7 @@ function EmployeesPage() {
                   <td className="text-xs text-muted-foreground">{e.role}</td>
                   <td className="text-xs text-muted-foreground">{e.department}</td>
                   <td className="num text-xs">{e.phone}</td>
-                  <td className="w-40"><ProgressBar value={e.workload} accent={e.workload > 80 ? "amber" : "blue"} /></td>
+                  <td><StatusPill status={e.workload > 80 ? "Heavy" : e.workload > 55 ? "Steady" : "Light"} tone={e.workload > 80 ? "warning" : e.workload > 55 ? "info" : "neutral"} /></td>
                   <td><StatusPill status={e.availability} tone={e.availability === "Available" ? "success" : e.availability === "Busy" ? "warning" : "neutral"} /></td>
                   <td className="num text-right">{td}</td>
                 </tr>

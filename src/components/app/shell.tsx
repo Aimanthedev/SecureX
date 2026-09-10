@@ -363,7 +363,7 @@ function QuickCreate() {
   const nav = useNavigate();
   const items = [
     { l: "New lead", go: () => nav({ to: "/sales" }) },
-    { l: "New quotation", go: () => nav({ to: "/quotations" }) },
+    
     { l: "New site survey", go: () => nav({ to: "/surveys" }) },
     { l: "New project", go: () => nav({ to: "/projects" }) },
     { l: "New task", go: () => nav({ to: "/projects" }) },

@@ -14,7 +14,6 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ServiceRouteImport } from './routes/service'
 import { Route as SalesRouteImport } from './routes/sales'
 import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as QuotationsRouteImport } from './routes/quotations'
 import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as FieldRouteImport } from './routes/field'
@@ -51,11 +50,6 @@ const SalesRoute = SalesRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QuotationsRoute = QuotationsRouteImport.update({
-  id: '/quotations',
-  path: '/quotations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProcurementRoute = ProcurementRouteImport.update({
@@ -128,7 +122,6 @@ export interface FileRoutesByFullPath {
   '/field': typeof FieldRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
-  '/quotations': typeof QuotationsRoute
   '/reports': typeof ReportsRoute
   '/sales': typeof SalesRoute
   '/service': typeof ServiceRoute
@@ -148,7 +141,6 @@ export interface FileRoutesByTo {
   '/field': typeof FieldRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
-  '/quotations': typeof QuotationsRoute
   '/reports': typeof ReportsRoute
   '/sales': typeof SalesRoute
   '/service': typeof ServiceRoute
@@ -169,7 +161,6 @@ export interface FileRoutesById {
   '/field': typeof FieldRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
-  '/quotations': typeof QuotationsRoute
   '/reports': typeof ReportsRoute
   '/sales': typeof SalesRoute
   '/service': typeof ServiceRoute
@@ -191,7 +182,6 @@ export interface FileRouteTypes {
     | '/field'
     | '/notifications'
     | '/procurement'
-    | '/quotations'
     | '/reports'
     | '/sales'
     | '/service'
@@ -211,7 +201,6 @@ export interface FileRouteTypes {
     | '/field'
     | '/notifications'
     | '/procurement'
-    | '/quotations'
     | '/reports'
     | '/sales'
     | '/service'
@@ -231,7 +220,6 @@ export interface FileRouteTypes {
     | '/field'
     | '/notifications'
     | '/procurement'
-    | '/quotations'
     | '/reports'
     | '/sales'
     | '/service'
@@ -252,7 +240,6 @@ export interface RootRouteChildren {
   FieldRoute: typeof FieldRoute
   NotificationsRoute: typeof NotificationsRoute
   ProcurementRoute: typeof ProcurementRoute
-  QuotationsRoute: typeof QuotationsRoute
   ReportsRoute: typeof ReportsRoute
   SalesRoute: typeof SalesRoute
   ServiceRoute: typeof ServiceRoute
@@ -299,13 +286,6 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/quotations': {
-      id: '/quotations'
-      path: '/quotations'
-      fullPath: '/quotations'
-      preLoaderRoute: typeof QuotationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/procurement': {
@@ -404,7 +384,6 @@ const rootRouteChildren: RootRouteChildren = {
   FieldRoute: FieldRoute,
   NotificationsRoute: NotificationsRoute,
   ProcurementRoute: ProcurementRoute,
-  QuotationsRoute: QuotationsRoute,
   ReportsRoute: ReportsRoute,
   SalesRoute: SalesRoute,
   ServiceRoute: ServiceRoute,

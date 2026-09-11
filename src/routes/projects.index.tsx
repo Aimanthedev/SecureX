@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
-  PageHeader, MonoChip, ProgressBar, StatusPill, HealthBadge, StatTile, Segmented,
+  PageHeader, MonoChip, WorkStatusBadge, projectStatus, materialStatus, StatusPill, HealthBadge, StatTile, Segmented,
   TableShell, EmptyState, ACCENT, Motif, type Accent,
 } from "@/components/app/common";
 import { fmtQAR, fmtDate } from "@/lib/format";
@@ -164,15 +164,15 @@ function ProjectsList() {
                     <HealthBadge label={h.label} />
                   </div>
 
-                  <div className="mt-4">
-                    <div className="mb-1.5 flex items-center justify-between text-[11px]"><span className="label-xs">Completion</span><span className="num text-foreground">{p.actualProgress}% / {p.plannedProgress}% planned</span></div>
-                    <ProgressBar value={p.actualProgress} planned={p.plannedProgress} accent={accent} height={9} />
+                  <div className="mt-4 flex items-center justify-between rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-2.5 py-2">
+                    <span className="label-xs">Status</span>
+                    <WorkStatusBadge status={projectStatus(p, h.label)} />
                   </div>
 
                   <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
                     <div className="rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] p-2">
                       <div className="label-xs">Material</div>
-                      <div className="num mt-1 font-semibold text-foreground">{p.materialReadiness}%</div>
+                      <div className="mt-1"><WorkStatusBadge status={materialStatus(d.materials.filter((m) => m.projectId === p.id))} /></div>
                     </div>
                     <div className="rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] p-2">
                       <div className="label-xs">Cameras</div>
@@ -212,8 +212,8 @@ function ProjectsList() {
           <TableShell>
             <thead>
               <tr>
-                {["Project", "Client", "Site", "PM", "Phase", "Planned/Actual", "Value", "Health", "Start", "End"].map((h) => (
-                  <th key={h} className={h === "Value" || h.includes("Planned") || h === "Start" || h === "End" ? "text-right" : "text-left"}>{h}</th>
+                {["Project", "Client", "Site", "PM", "Phase", "Status", "Value", "Health", "Start", "End"].map((h) => (
+                  <th key={h} className={h === "Value" || h === "Start" || h === "End" ? "text-right" : "text-left"}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -229,7 +229,7 @@ function ProjectsList() {
                     <td className="text-xs text-muted-foreground">{site?.name}</td>
                     <td className="text-xs text-muted-foreground">{pm?.name}</td>
                     <td><StatusPill status={p.phase} tone="info" /></td>
-                    <td className="w-52"><div className="flex items-center gap-2"><ProgressBar value={p.actualProgress} planned={p.plannedProgress} accent={healthAccent[h.label]} /><span className="num w-16 shrink-0 text-right text-xs">{p.actualProgress}/{p.plannedProgress}%</span></div></td>
+                    <td className="w-40"><WorkStatusBadge status={projectStatus(p, h.label)} /></td>
                     <td className="num text-right">{fmtQAR(p.contractValue, { compact: true })}</td>
                     <td><HealthBadge label={h.label} /></td>
                     <td className="num text-right text-xs">{fmtDate(p.plannedStart)}</td>
@@ -261,8 +261,8 @@ function ProjectsList() {
                     >
                       <div className="flex items-center justify-between gap-2"><MonoChip>{p.number}</MonoChip><HealthBadge label={h.label} /></div>
                       <div className="mt-1.5 truncate text-[13px] font-medium text-foreground">{p.name}</div>
-                      <div className="mt-2"><ProgressBar value={p.actualProgress} planned={p.plannedProgress} accent={healthAccent[h.label]} height={6} /></div>
-                      <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground"><span className="num">{p.actualProgress}%</span><span className="num">{fmtQAR(p.contractValue, { compact: true })}</span></div>
+                      <div className="mt-2"><WorkStatusBadge status={projectStatus(p, h.label)} /></div>
+                      <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground"><span>{fmtDate(p.plannedEnd)}</span><span className="num">{fmtQAR(p.contractValue, { compact: true })}</span></div>
                     </button>
                   ))}
                   {items.length === 0 && <div className="rounded-lg border border-dashed border-[rgba(133,164,204,0.14)] py-6 text-center text-[11px] text-muted-foreground">Empty</div>}
@@ -276,31 +276,26 @@ function ProjectsList() {
       {filtered.length > 0 && view === "timeline" && (
         <div className="rise rise-2 panel overflow-x-auto p-4">
           <div className="min-w-[720px] space-y-3">
-            {filtered.map(({ p, h }) => {
-              const accent = healthAccent[h.label];
-              const a = ACCENT[accent];
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => nav({ to: "/projects/$id", params: { id: p.id } })}
-                  className="grid w-full grid-cols-[180px_1fr_90px] items-center gap-3 rounded-xl border border-[rgba(133,164,204,0.08)] p-2 text-left transition-colors hover:border-[rgba(133,164,204,0.22)]"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5"><MonoChip>{p.number}</MonoChip></div>
-                    <div className="mt-0.5 truncate text-[12.5px] font-medium text-foreground">{p.name}</div>
-                  </div>
-                  <div className="relative h-6 w-full overflow-hidden rounded-full bg-[rgba(133,164,204,0.08)]">
-                    <div className="absolute inset-y-0 left-0 rounded-full opacity-40" style={{ width: `${p.plannedProgress}%`, background: a.hex }} />
-                    <div className="grow-bar absolute inset-y-1 left-0 rounded-full" style={{ width: `${p.actualProgress}%`, background: `linear-gradient(90deg, ${a.hex}, ${a.hex}99)`, boxShadow: `0 0 12px ${a.ring}` }} />
-                  </div>
-                  <div className="text-right"><HealthBadge label={h.label} /></div>
-                </button>
-              );
-            })}
+            {filtered.map(({ p, h }) => (
+              <button
+                key={p.id}
+                onClick={() => nav({ to: "/projects/$id", params: { id: p.id } })}
+                className="grid w-full grid-cols-[180px_1fr_90px] items-center gap-3 rounded-xl border border-[rgba(133,164,204,0.08)] p-2 text-left transition-colors hover:border-[rgba(133,164,204,0.22)]"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5"><MonoChip>{p.number}</MonoChip></div>
+                  <div className="mt-0.5 truncate text-[12.5px] font-medium text-foreground">{p.name}</div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-muted-foreground">
+                  <WorkStatusBadge status={projectStatus(p, h.label)} />
+                  <span className="num">{fmtDate(p.plannedStart)} → {fmtDate(p.plannedEnd)}</span>
+                </div>
+                <div className="text-right"><HealthBadge label={h.label} /></div>
+              </button>
+            ))}
           </div>
-          <div className="mt-3 flex items-center gap-4 text-[11px] text-muted-foreground">
-            <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-[rgba(133,164,204,0.3)]" />Planned</span>
-            <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-signal" />Actual</span>
+          <div className="mt-3 text-[11px] text-muted-foreground">
+            Planned start and planned end dates for each project.
           </div>
         </div>
       )}

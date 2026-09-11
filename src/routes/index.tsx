@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
-  MetricCard, Panel, PanelHead, Donut, ProgressBar, StatusPill, HealthBadge, MonoChip,
+  MetricCard, Panel, PanelHead, Donut, StatusPill, HealthBadge, MonoChip, WorkStatusBadge, projectStatus,
   Segmented, QuickAction, AlertCard, TableShell, axisProps, ChartTooltip, ACCENT,
 } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
@@ -41,13 +41,14 @@ function CommandCenter() {
   const invoiced = d.projects.reduce((s, p) => s + p.invoiced, 0);
   const collected = d.projects.reduce((s, p) => s + p.collected, 0);
   const outstanding = invoiced - collected;
-  const avgCompletion = Math.round(d.projects.reduce((s, p) => s + p.actualProgress, 0) / Math.max(1, d.projects.length));
+  const inProgressCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "In Progress").length;
+  const completedCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "Completed").length;
 
   const execData = useMemo(
     () => MONTHS.map((m, i) => ({
       m,
-      planned: 46 + i * 7 + ((i * 13) % 9),
-      actual: 38 + i * 6 + ((i * 7) % 11),
+      planned: 12 + i * 2 + ((i * 13) % 4),
+      actual: 9 + i * 2 + ((i * 7) % 5),
       completed: 120 + i * 26,
       delayed: 60 - i * 5 + ((i * 11) % 14),
     })),

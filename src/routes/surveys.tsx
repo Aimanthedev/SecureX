@@ -42,7 +42,7 @@ function SurveysPage() {
         <TabsContent value="list" className="mt-3">
           <Panel pad={false}>
             <TableShell>
-              <thead><tr>{["Number","Client","Site","Type","Engineer","Scheduled","Status","Completeness","Report",""].map((h) => <th key={h}>{h}</th>)}</tr></thead>
+              <thead><tr>{["Number","Client","Site","Type","Engineer","Scheduled","Status","Capture","Report",""].map((h) => <th key={h}>{h}</th>)}</tr></thead>
               <tbody>{d.surveys.map((s) => {
                 const cust = d.customers.find((c) => c.id === s.customerId);
                 const site = d.sites.find((x) => x.id === s.siteId);

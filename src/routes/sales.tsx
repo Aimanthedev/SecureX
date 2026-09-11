@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
-  PageHeader, MonoChip, StatusPill, MetricCard, Panel, PanelHead, ProgressBar, TableShell, AlertCard,
-  Ring, axisProps, ChartTooltip,
+  PageHeader, StatusPill, MetricCard, Panel, PanelHead, TableShell, AlertCard,
+  axisProps, ChartTooltip,
 } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
 import { LEAD_STAGES, type Lead, type LeadStage } from "@/lib/mock-data";
@@ -62,10 +62,7 @@ function SalesPage() {
             <PriorityQueue />
             <Leaderboard />
           </div>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <QuotationActivity />
-            <LeadSourceChart />
-          </div>
+          <LeadSourceChart />
         </TabsContent>
 
         <TabsContent value="leads" className="mt-4"><LeadsTable /></TabsContent>
@@ -90,14 +87,13 @@ function SalesPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {d.employees.filter((e) => e.department === "Sales").map((e) => {
                 const val = 320000 + ((e.id.charCodeAt(2) || 1) * 5137) % 400000;
-                const pct = Math.min(100, (val / 1000000) * 100);
                 return (
                   <div key={e.id} className="panel-flat p-4">
                     <div className="text-[13px] font-medium text-foreground">{e.name}</div>
                     <div className="text-[11px] text-muted-foreground">{e.role}</div>
                     <div className="num mt-3 text-2xl font-semibold text-foreground">{fmtQAR(val, { compact: true })}</div>
                     <div className="text-[11px] text-muted-foreground mb-2">of {fmtQAR(1000000, { compact: true })} target</div>
-                    <ProgressBar value={pct} accent="green" />
+                    <StatusPill status={val >= 1000000 ? "Target met" : "In Progress"} tone={val >= 1000000 ? "success" : "info"} />
                   </div>
                 );
               })}
@@ -137,16 +133,19 @@ function MonthlyTarget() {
   const d = useData();
   const won = d.leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0);
   const target = 2500000;
-  const pct = Math.min(100, (won / target) * 100);
   return (
     <Panel accent="green" texture="dots" className="h-full flex flex-col">
-      <PanelHead title="Monthly Target" sub="Team quota progress" accent="green" />
-      <div className="flex-1 grid place-items-center">
-        <Ring value={pct} size={132} thickness={9} accent="green" />
+      <PanelHead title="Monthly Target" sub="Team quota position" accent="green" />
+      <div className="flex-1 grid place-items-center py-4">
+        <div className="text-center">
+          <div className="num text-4xl font-semibold text-foreground">{fmtQAR(won, { compact: true })}</div>
+          <div className="mt-2"><StatusPill status={won >= target ? "Completed" : "In Progress"} tone={won >= target ? "success" : "info"} /></div>
+        </div>
       </div>
       <div className="mt-3 space-y-1">
         <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Closed-won</span><span className="num font-medium text-foreground">{fmtQAR(won, { compact: true })}</span></div>
         <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Target</span><span className="num font-medium text-foreground">{fmtQAR(target, { compact: true })}</span></div>
+        <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Remaining</span><span className="num font-medium text-foreground">{fmtQAR(Math.max(0, target - won), { compact: true })}</span></div>
       </div>
     </Panel>
   );
@@ -190,18 +189,16 @@ function Leaderboard() {
       return { e, won, count: leads.length };
     }).sort((a, b) => b.won - a.won);
   }, [d.leads, d.employees]);
-  const max = Math.max(1, ...rows.map((r) => r.won));
   return (
     <Panel>
       <PanelHead title="Salesperson Leaderboard" sub="Ranked by closed-won value" accent="purple" />
-      <div className="space-y-3">
+      <div className="space-y-2">
         {rows.map((r, i) => (
-          <div key={r.e.id} className="flex items-center gap-3">
+          <div key={r.e.id} className="flex items-center gap-3 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2">
             <div className="w-6 text-[12px] num text-muted-foreground">#{i + 1}</div>
-            <div className="min-w-0 flex-1">
-              <div className="flex justify-between text-[12.5px] mb-1"><span className="truncate text-foreground">{r.e.name}</span><span className="num font-medium">{fmtQAR(r.won, { compact: true })}</span></div>
-              <ProgressBar value={(r.won / max) * 100} accent={i === 0 ? "amber" : "purple"} height={6} />
-            </div>
+            <div className="min-w-0 flex-1 truncate text-[12.5px] text-foreground">{r.e.name}</div>
+            <div className="num text-[11.5px] text-muted-foreground">{r.count} leads</div>
+            <div className="num text-[12.5px] font-medium text-foreground">{fmtQAR(r.won, { compact: true })}</div>
           </div>
         ))}
       </div>

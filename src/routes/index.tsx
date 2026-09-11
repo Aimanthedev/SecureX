@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
-  MetricCard, Panel, PanelHead, Donut, ProgressBar, StatusPill, HealthBadge, MonoChip,
+  MetricCard, Panel, PanelHead, Donut, StatusPill, HealthBadge, MonoChip, WorkStatusBadge, projectStatus,
   Segmented, QuickAction, AlertCard, TableShell, axisProps, ChartTooltip, ACCENT,
 } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
@@ -41,13 +41,14 @@ function CommandCenter() {
   const invoiced = d.projects.reduce((s, p) => s + p.invoiced, 0);
   const collected = d.projects.reduce((s, p) => s + p.collected, 0);
   const outstanding = invoiced - collected;
-  const avgCompletion = Math.round(d.projects.reduce((s, p) => s + p.actualProgress, 0) / Math.max(1, d.projects.length));
+  const inProgressCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "In Progress").length;
+  const completedCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "Completed").length;
 
   const execData = useMemo(
     () => MONTHS.map((m, i) => ({
       m,
-      planned: 46 + i * 7 + ((i * 13) % 9),
-      actual: 38 + i * 6 + ((i * 7) % 11),
+      planned: 12 + i * 2 + ((i * 13) % 4),
+      actual: 9 + i * 2 + ((i * 7) % 5),
       completed: 120 + i * 26,
       delayed: 60 - i * 5 + ((i * 11) % 14),
     })),
@@ -125,13 +126,13 @@ function CommandCenter() {
           <Panel className="rise rise-2" texture="grid">
             <PanelHead
               title="Project Execution Performance"
-              sub="Planned versus actual monthly progress across the delivery portfolio"
+              sub="Planned versus completed delivery milestones each month"
               icon={<BarChart3Icon />}
               right={<Segmented size="sm" value={range} onChange={setRange} options={[{ value: "m", label: "Month" }, { value: "q", label: "Quarter" }, { value: "y", label: "Year" }]} />}
             />
             <div className="mb-4 flex flex-wrap gap-6">
-              <Legend color="#2F83FF" label="Actual progress" value={`${avgCompletion}%`} />
-              <Legend color="rgba(133,164,204,0.35)" label="Planned progress" value={`${Math.min(100, avgCompletion + 12)}%`} />
+              <Legend color="#2F83FF" label="Projects in progress" value={String(inProgressCount)} />
+              <Legend color="rgba(133,164,204,0.35)" label="Projects completed" value={String(completedCount)} />
               <Legend color="#20D39A" label="Completed value" value={fmtQAR(collected, { compact: true })} />
               <Legend color="#FF4664" label="Delayed value" value={fmtQAR(outstanding * 0.4, { compact: true })} />
             </div>
@@ -141,7 +142,7 @@ function CommandCenter() {
                   <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
                   <XAxis dataKey="m" {...axisProps} />
                   <YAxis {...axisProps} width={34} />
-                  <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v}%`} />} />
+                  <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v} milestones`} />} />
                   <Bar dataKey="planned" name="Planned" radius={[6, 6, 0, 0]} maxBarSize={16}>
                     {execData.map((r) => <Cell key={r.m} fill="rgba(133,164,204,0.16)" />)}
                   </Bar>
@@ -194,7 +195,7 @@ function CommandCenter() {
             <TableShell className="rounded-none border-0">
               <thead>
                 <tr>
-                  <th>Project</th><th>Customer</th><th>Phase</th><th className="w-52">Progress</th>
+                  <th>Project</th><th>Customer</th><th>Phase</th><th className="w-40">Status</th>
                   <th className="ta-right">Value</th><th>Health</th><th>Next milestone</th><th />
                 </tr>
               </thead>
@@ -207,12 +208,7 @@ function CommandCenter() {
                       <td><div className="flex items-center gap-2"><MonoChip>{p.number}</MonoChip><span className="font-medium">{p.name}</span></div></td>
                       <td className="text-muted-foreground">{cust?.name}</td>
                       <td><StatusPill status={p.phase} tone="info" /></td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <ProgressBar value={p.actualProgress} planned={p.plannedProgress} height={6} />
-                          <span className="num w-14 shrink-0 text-right text-[11px] text-muted-foreground">{p.actualProgress}/{p.plannedProgress}%</span>
-                        </div>
-                      </td>
+                      <td><WorkStatusBadge status={projectStatus(p, h.label)} /></td>
                       <td className="num ta-right font-semibold">{fmtQAR(p.contractValue, { compact: true })}</td>
                       <td><HealthBadge label={h.label} /></td>
                       <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>
@@ -247,13 +243,9 @@ function CommandCenter() {
                   {atRisk > 2 ? "Watch" : "Healthy"}
                 </span>
               </div>
-              <div className="mt-4">
-                <div className="mb-1.5 flex items-center justify-between text-[11px] text-white/80">
-                  <span>Portfolio completion</span><span className="num font-semibold text-white">{avgCompletion}%</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
-                  <div className="grow-bar h-full rounded-full bg-white" style={{ width: `${avgCompletion}%` }} />
-                </div>
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-[11px] text-white/80">
+                <span>Portfolio status</span>
+                <span className="num font-semibold text-white">{inProgressCount} in progress · {completedCount} completed</span>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {[{ l: "Active sites", v: String(active) }, { l: "At risk", v: String(atRisk) }, { l: "Deadlines", v: String(d.milestones.filter((m) => !m.done).length) }].map((x) => (
@@ -303,8 +295,8 @@ function CommandCenter() {
           </Panel>
 
           <Panel className="rise rise-6" accent="cyan" texture="dots">
-            <PanelHead title="Installation Lifecycle" sub="Devices across the portfolio" icon={<Camera className="h-4 w-4" />} accent="cyan" />
-            <div className="space-y-3">
+            <PanelHead title="Installation Lifecycle" sub="Device counts across the portfolio" icon={<Camera className="h-4 w-4" />} accent="cyan" />
+            <div className="space-y-2">
               {[
                 { l: "Planned", v: totalCameras, a: "blue" as const },
                 { l: "Mounted", v: d.devices.filter((x) => x.status !== "Faulty").length, a: "cyan" as const },
@@ -312,12 +304,12 @@ function CommandCenter() {
                 { l: "Tested", v: tested, a: "magenta" as const },
                 { l: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length, a: "red" as const },
               ].map((s) => (
-                <div key={s.l}>
-                  <div className="mb-1 flex items-center justify-between text-[11.5px]">
-                    <span className="text-muted-foreground">{s.l}</span>
-                    <span className="num font-semibold">{s.v}</span>
-                  </div>
-                  <ProgressBar value={(s.v / Math.max(1, totalCameras)) * 100} accent={s.a} height={6} />
+                <div key={s.l} className="flex items-center justify-between rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2 text-[11.5px]">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: ACCENT[s.a].hex, boxShadow: `0 0 8px ${ACCENT[s.a].hex}` }} />
+                    {s.l}
+                  </span>
+                  <span className="num font-semibold text-foreground">{s.v} of {totalCameras}</span>
                 </div>
               ))}
             </div>

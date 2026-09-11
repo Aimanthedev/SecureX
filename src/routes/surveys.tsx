@@ -42,7 +42,7 @@ function SurveysPage() {
         <TabsContent value="list" className="mt-3">
           <Panel pad={false}>
             <TableShell>
-              <thead><tr>{["Number","Client","Site","Type","Engineer","Scheduled","Status","Completeness","Report",""].map((h) => <th key={h}>{h}</th>)}</tr></thead>
+              <thead><tr>{["Number","Client","Site","Type","Engineer","Scheduled","Status","Capture","Report",""].map((h) => <th key={h}>{h}</th>)}</tr></thead>
               <tbody>{d.surveys.map((s) => {
                 const cust = d.customers.find((c) => c.id === s.customerId);
                 const site = d.sites.find((x) => x.id === s.siteId);
@@ -56,7 +56,7 @@ function SurveysPage() {
                     <td className="text-xs">{eng?.name}</td>
                     <td className="num text-xs">{fmtDate(s.scheduled)}</td>
                     <td><StatusPill status={s.status} tone={s.status.includes("Approved") ? "success" : s.status === "In Progress" ? "info" : "warning"} /></td>
-                    <td className="w-32"><ProgressBar value={s.completeness} accent="cyan" /></td>
+                    <td className="w-32"><WorkStatusBadge status={surveyStatus(s)} /></td>
                     <td><StatusPill status={s.reportStatus} tone={s.reportStatus==="Approved"?"success":"info"} /></td>
                     <td><Button size="sm" variant="ghost">Open</Button></td>
                   </tr>
@@ -101,7 +101,7 @@ function SurveysPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-3">
                   <div className="panel-flat p-3"><div className="label-xs mb-1">Existing system</div><div className="text-foreground">{s.existingSystem}</div></div>
                   <div className="panel-flat p-3"><div className="label-xs mb-1">Proposed system</div><div className="text-foreground">{s.proposedSummary}</div></div>
-                  <div className="panel-flat p-3"><div className="label-xs mb-1">Completeness</div><ProgressBar value={s.completeness} accent="cyan" /></div>
+                  <div className="panel-flat p-3"><div className="label-xs mb-1">Capture status</div><WorkStatusBadge status={surveyStatus(s)} /></div>
                 </div>
                 <div className="text-sm font-medium mb-2 text-foreground">Proposed Camera Points ({s.points.length})</div>
                 <TableShell maxHeight={384}>

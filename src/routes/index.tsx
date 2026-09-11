@@ -126,13 +126,13 @@ function CommandCenter() {
           <Panel className="rise rise-2" texture="grid">
             <PanelHead
               title="Project Execution Performance"
-              sub="Planned versus actual monthly progress across the delivery portfolio"
+              sub="Planned versus completed delivery milestones each month"
               icon={<BarChart3Icon />}
               right={<Segmented size="sm" value={range} onChange={setRange} options={[{ value: "m", label: "Month" }, { value: "q", label: "Quarter" }, { value: "y", label: "Year" }]} />}
             />
             <div className="mb-4 flex flex-wrap gap-6">
-              <Legend color="#2F83FF" label="Actual progress" value={`${avgCompletion}%`} />
-              <Legend color="rgba(133,164,204,0.35)" label="Planned progress" value={`${Math.min(100, avgCompletion + 12)}%`} />
+              <Legend color="#2F83FF" label="Projects in progress" value={String(inProgressCount)} />
+              <Legend color="rgba(133,164,204,0.35)" label="Projects completed" value={String(completedCount)} />
               <Legend color="#20D39A" label="Completed value" value={fmtQAR(collected, { compact: true })} />
               <Legend color="#FF4664" label="Delayed value" value={fmtQAR(outstanding * 0.4, { compact: true })} />
             </div>
@@ -142,7 +142,7 @@ function CommandCenter() {
                   <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
                   <XAxis dataKey="m" {...axisProps} />
                   <YAxis {...axisProps} width={34} />
-                  <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v}%`} />} />
+                  <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v} milestones`} />} />
                   <Bar dataKey="planned" name="Planned" radius={[6, 6, 0, 0]} maxBarSize={16}>
                     {execData.map((r) => <Cell key={r.m} fill="rgba(133,164,204,0.16)" />)}
                   </Bar>
@@ -195,7 +195,7 @@ function CommandCenter() {
             <TableShell className="rounded-none border-0">
               <thead>
                 <tr>
-                  <th>Project</th><th>Customer</th><th>Phase</th><th className="w-52">Progress</th>
+                  <th>Project</th><th>Customer</th><th>Phase</th><th className="w-40">Status</th>
                   <th className="ta-right">Value</th><th>Health</th><th>Next milestone</th><th />
                 </tr>
               </thead>
@@ -208,12 +208,7 @@ function CommandCenter() {
                       <td><div className="flex items-center gap-2"><MonoChip>{p.number}</MonoChip><span className="font-medium">{p.name}</span></div></td>
                       <td className="text-muted-foreground">{cust?.name}</td>
                       <td><StatusPill status={p.phase} tone="info" /></td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <ProgressBar value={p.actualProgress} planned={p.plannedProgress} height={6} />
-                          <span className="num w-14 shrink-0 text-right text-[11px] text-muted-foreground">{p.actualProgress}/{p.plannedProgress}%</span>
-                        </div>
-                      </td>
+                      <td><WorkStatusBadge status={projectStatus(p, h.label)} /></td>
                       <td className="num ta-right font-semibold">{fmtQAR(p.contractValue, { compact: true })}</td>
                       <td><HealthBadge label={h.label} /></td>
                       <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>

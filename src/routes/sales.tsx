@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
-  PageHeader, MonoChip, StatusPill, MetricCard, Panel, PanelHead, ProgressBar, TableShell, AlertCard,
-  Ring, axisProps, ChartTooltip,
+  PageHeader, StatusPill, MetricCard, Panel, PanelHead, TableShell, AlertCard,
+  axisProps, ChartTooltip,
 } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
 import { LEAD_STAGES, type Lead, type LeadStage } from "@/lib/mock-data";
@@ -62,10 +62,7 @@ function SalesPage() {
             <PriorityQueue />
             <Leaderboard />
           </div>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <QuotationActivity />
-            <LeadSourceChart />
-          </div>
+          <LeadSourceChart />
         </TabsContent>
 
         <TabsContent value="leads" className="mt-4"><LeadsTable /></TabsContent>
@@ -90,14 +87,13 @@ function SalesPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {d.employees.filter((e) => e.department === "Sales").map((e) => {
                 const val = 320000 + ((e.id.charCodeAt(2) || 1) * 5137) % 400000;
-                const pct = Math.min(100, (val / 1000000) * 100);
                 return (
                   <div key={e.id} className="panel-flat p-4">
                     <div className="text-[13px] font-medium text-foreground">{e.name}</div>
                     <div className="text-[11px] text-muted-foreground">{e.role}</div>
                     <div className="num mt-3 text-2xl font-semibold text-foreground">{fmtQAR(val, { compact: true })}</div>
                     <div className="text-[11px] text-muted-foreground mb-2">of {fmtQAR(1000000, { compact: true })} target</div>
-                    <ProgressBar value={pct} accent="green" />
+                    <StatusPill status={val >= 1000000 ? "Target met" : "In Progress"} tone={val >= 1000000 ? "success" : "info"} />
                   </div>
                 );
               })}

@@ -243,13 +243,9 @@ function CommandCenter() {
                   {atRisk > 2 ? "Watch" : "Healthy"}
                 </span>
               </div>
-              <div className="mt-4">
-                <div className="mb-1.5 flex items-center justify-between text-[11px] text-white/80">
-                  <span>Portfolio completion</span><span className="num font-semibold text-white">{avgCompletion}%</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
-                  <div className="grow-bar h-full rounded-full bg-white" style={{ width: `${avgCompletion}%` }} />
-                </div>
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-[11px] text-white/80">
+                <span>Portfolio status</span>
+                <span className="num font-semibold text-white">{inProgressCount} in progress · {completedCount} completed</span>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {[{ l: "Active sites", v: String(active) }, { l: "At risk", v: String(atRisk) }, { l: "Deadlines", v: String(d.milestones.filter((m) => !m.done).length) }].map((x) => (
@@ -299,8 +295,8 @@ function CommandCenter() {
           </Panel>
 
           <Panel className="rise rise-6" accent="cyan" texture="dots">
-            <PanelHead title="Installation Lifecycle" sub="Devices across the portfolio" icon={<Camera className="h-4 w-4" />} accent="cyan" />
-            <div className="space-y-3">
+            <PanelHead title="Installation Lifecycle" sub="Device counts across the portfolio" icon={<Camera className="h-4 w-4" />} accent="cyan" />
+            <div className="space-y-2">
               {[
                 { l: "Planned", v: totalCameras, a: "blue" as const },
                 { l: "Mounted", v: d.devices.filter((x) => x.status !== "Faulty").length, a: "cyan" as const },
@@ -308,12 +304,12 @@ function CommandCenter() {
                 { l: "Tested", v: tested, a: "magenta" as const },
                 { l: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length, a: "red" as const },
               ].map((s) => (
-                <div key={s.l}>
-                  <div className="mb-1 flex items-center justify-between text-[11.5px]">
-                    <span className="text-muted-foreground">{s.l}</span>
-                    <span className="num font-semibold">{s.v}</span>
-                  </div>
-                  <ProgressBar value={(s.v / Math.max(1, totalCameras)) * 100} accent={s.a} height={6} />
+                <div key={s.l} className="flex items-center justify-between rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2 text-[11.5px]">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: ACCENT[s.a].hex, boxShadow: `0 0 8px ${ACCENT[s.a].hex}` }} />
+                    {s.l}
+                  </span>
+                  <span className="num font-semibold text-foreground">{s.v} of {totalCameras}</span>
                 </div>
               ))}
             </div>

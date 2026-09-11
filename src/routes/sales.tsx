@@ -133,16 +133,19 @@ function MonthlyTarget() {
   const d = useData();
   const won = d.leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0);
   const target = 2500000;
-  const pct = Math.min(100, (won / target) * 100);
   return (
     <Panel accent="green" texture="dots" className="h-full flex flex-col">
-      <PanelHead title="Monthly Target" sub="Team quota progress" accent="green" />
-      <div className="flex-1 grid place-items-center">
-        <Ring value={pct} size={132} thickness={9} accent="green" />
+      <PanelHead title="Monthly Target" sub="Team quota position" accent="green" />
+      <div className="flex-1 grid place-items-center py-4">
+        <div className="text-center">
+          <div className="num text-4xl font-semibold text-foreground">{fmtQAR(won, { compact: true })}</div>
+          <div className="mt-2"><StatusPill status={won >= target ? "Completed" : "In Progress"} tone={won >= target ? "success" : "info"} /></div>
+        </div>
       </div>
       <div className="mt-3 space-y-1">
         <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Closed-won</span><span className="num font-medium text-foreground">{fmtQAR(won, { compact: true })}</span></div>
         <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Target</span><span className="num font-medium text-foreground">{fmtQAR(target, { compact: true })}</span></div>
+        <div className="flex justify-between text-[12px]"><span className="text-muted-foreground">Remaining</span><span className="num font-medium text-foreground">{fmtQAR(Math.max(0, target - won), { compact: true })}</span></div>
       </div>
     </Panel>
   );
@@ -186,18 +189,16 @@ function Leaderboard() {
       return { e, won, count: leads.length };
     }).sort((a, b) => b.won - a.won);
   }, [d.leads, d.employees]);
-  const max = Math.max(1, ...rows.map((r) => r.won));
   return (
     <Panel>
       <PanelHead title="Salesperson Leaderboard" sub="Ranked by closed-won value" accent="purple" />
-      <div className="space-y-3">
+      <div className="space-y-2">
         {rows.map((r, i) => (
-          <div key={r.e.id} className="flex items-center gap-3">
+          <div key={r.e.id} className="flex items-center gap-3 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2">
             <div className="w-6 text-[12px] num text-muted-foreground">#{i + 1}</div>
-            <div className="min-w-0 flex-1">
-              <div className="flex justify-between text-[12.5px] mb-1"><span className="truncate text-foreground">{r.e.name}</span><span className="num font-medium">{fmtQAR(r.won, { compact: true })}</span></div>
-              <ProgressBar value={(r.won / max) * 100} accent={i === 0 ? "amber" : "purple"} height={6} />
-            </div>
+            <div className="min-w-0 flex-1 truncate text-[12.5px] text-foreground">{r.e.name}</div>
+            <div className="num text-[11.5px] text-muted-foreground">{r.count} leads</div>
+            <div className="num text-[12.5px] font-medium text-foreground">{fmtQAR(r.won, { compact: true })}</div>
           </div>
         ))}
       </div>

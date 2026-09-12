@@ -218,9 +218,8 @@ function ProjectDetail() {
 
         <TabsContent value="scope" className="mt-4">
           <Card className="p-0 overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["CP","SKU","Description","Category","Qty","Ord","Del","Iss","Inst","Test","Progress"].map((h) => <th key={h} className="text-left py-2 px-2">{h}</th>)}</tr></thead>
+            <thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["CP","SKU","Description","Category","Qty","Ord","Del","Iss","Inst","Test","Status"].map((h) => <th key={h} className="text-left py-2 px-2">{h}</th>)}</tr></thead>
             <tbody>{(d.quotations.find((q) => q.id === p.quotationId)?.items || []).map((it) => {
-              const pct = Math.round((it.tested / (it.qty || 1)) * 100);
               return (<tr key={it.id} className="border-t hairline">
                 <td className="py-2 px-2">{it.cameraPointId ? <MonoChip>{it.cameraPointId}</MonoChip> : ""}</td>
                 <td className="py-2 px-2 num text-xs">{it.sku}</td>
@@ -232,7 +231,7 @@ function ProjectDetail() {
                 <td className="py-2 px-2 num text-xs">{it.issued}</td>
                 <td className="py-2 px-2 num text-xs">{it.installed}</td>
                 <td className="py-2 px-2 num text-xs">{it.tested}</td>
-                <td className="py-2 px-2 w-32"><ProgressBar value={pct} /></td>
+                <td className="py-2 px-2 w-40"><WorkStatusBadge status={countStatus(it.tested, it.qty)} /></td>
               </tr>);
             })}</tbody>
           </table></div></Card>
@@ -265,7 +264,7 @@ function ProjectDetail() {
         </Card></TabsContent>
 
         <TabsContent value="materials" className="mt-4"><Card className="p-0">
-          <div className="p-3 flex items-center justify-between"><h3 className="font-display font-semibold text-lg">Materials</h3><div className="text-xs">Readiness <span className="num text-lg font-semibold">{p.materialReadiness}%</span></div></div>
+          <div className="p-3 flex items-center justify-between"><h3 className="font-display font-semibold text-lg">Materials</h3><WorkStatusBadge status={materialStatus(projectMats)} /></div>
           <table className="w-full text-sm"><thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["SKU","Item","Req","Ord","Del","Iss","Inst","Ret","Status"].map((h) => <th key={h} className="text-left py-2 px-2">{h}</th>)}</tr></thead>
             <tbody>{projectMats.map((m) => (<tr key={m.id} className="border-t hairline"><td className="py-2 px-2 num text-xs">{m.sku}</td><td className="py-2 px-2 text-xs">{m.name}</td><td className="py-2 px-2 num text-xs">{m.required}</td><td className="py-2 px-2 num text-xs">{m.ordered}</td><td className="py-2 px-2 num text-xs">{m.delivered}</td><td className="py-2 px-2 num text-xs">{m.issued}</td><td className="py-2 px-2 num text-xs">{m.installed}</td><td className="py-2 px-2 num text-xs">{m.returned}</td><td className="py-2 px-2">{m.critical && m.delivered < m.required ? <StatusPill status="Critical shortage" tone="critical" /> : m.installed === m.required ? <StatusPill status="Complete" tone="success" /> : <StatusPill status="In flight" tone="info" />}</td></tr>))}</tbody>
           </table>
@@ -564,7 +563,7 @@ function TasksTab({ projectId, tasks }: { projectId: string; tasks: import("@/li
   return (
     <Card className="p-0">
       <div className="p-3 flex items-center justify-between"><h3 className="font-display font-semibold text-lg">Tasks</h3><Button size="sm" onClick={() => setAddOpen(true)}>Add task</Button></div>
-      <table className="w-full text-sm"><thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["Task","Assignee","Phase","Priority","Due","Status","Progress",""].map((h) => <th key={h} className="text-left py-2 px-3">{h}</th>)}</tr></thead>
+      <table className="w-full text-sm"><thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["Task","Assignee","Phase","Priority","Due","Status",""].map((h) => <th key={h} className="text-left py-2 px-3">{h}</th>)}</tr></thead>
         <tbody>{tasks.map((t) => {
           const emp = d.employees.find((e) => e.id === t.assigneeId);
           return (<tr key={t.id} className="border-t hairline">
@@ -572,7 +571,7 @@ function TasksTab({ projectId, tasks }: { projectId: string; tasks: import("@/li
             <td className="py-2 px-3"><StatusPill status={t.priority} tone={t.priority==="Critical"?"critical":t.priority==="High"?"warning":"neutral"} /></td>
             <td className="py-2 px-3 num text-xs">{fmtDate(t.due)}</td>
             <td className="py-2 px-3"><Select value={t.status} onValueChange={(v) => { d.updateTask(t.id, { status: v as never }); toast(`Task status: ${v}`); }}><SelectTrigger className="h-7 text-xs w-40"><SelectValue /></SelectTrigger><SelectContent>{["Not Started","Ready","In Progress","Blocked","Awaiting Client","Awaiting Material","Under Review","Completed"].map((s) => <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>)}</SelectContent></Select></td>
-            <td className="py-2 px-3 w-32"><ProgressBar value={t.progress} /></td>
+            
             <td className="py-2 px-3"><Button size="sm" variant="ghost" onClick={() => setConfirmDel(t.id)} className="text-critical">Delete</Button></td>
           </tr>);
         })}</tbody>
@@ -659,12 +658,11 @@ function TestingTab({ devices, tests }: { devices: import("@/lib/mock-data").Dev
 
 function HandoverTab({ items }: { items: import("@/lib/mock-data").HandoverItem[] }) {
   const d = useData();
-  const readiness = items.length ? Math.round((items.filter((i) => i.done).length / items.length) * 100) : 0;
+  const doneCount = items.filter((i) => i.done).length;
   const sections: import("@/lib/mock-data").HandoverItem["section"][] = ["Technical","Documentation","Commercial","Client"];
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-4"><div><h3 className="font-display font-semibold text-lg">Handover Readiness</h3><p className="text-xs text-muted-foreground">All items must be completed before handover.</p></div><div className="text-right"><div className="num text-3xl font-display font-bold">{readiness}%</div><StatusPill status={readiness === 100 ? "Ready" : readiness > 70 ? "Nearly ready" : "In progress"} tone={readiness === 100 ? "success" : readiness > 70 ? "info" : "warning"} /></div></div>
-      <ProgressBar value={readiness} />
+      <div className="flex items-center justify-between mb-4"><div><h3 className="font-display font-semibold text-lg">Handover Readiness</h3><p className="text-xs text-muted-foreground">All items must be completed before handover.</p></div><div className="text-right"><div className="num text-3xl font-display font-bold">{doneCount} / {items.length}</div><WorkStatusBadge status={countStatus(doneCount, items.length)} /></div></div>
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">{sections.map((sec) => (
         <div key={sec} className="border hairline rounded-lg p-3">
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{sec}</div>

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useData } from "@/lib/data-context";
-import { HealthBadge, MonoChip, ProgressBar, StatusPill, Ring } from "@/components/app/common";
+import { HealthBadge, MonoChip, StatusPill, WorkStatusBadge, projectStatus, materialStatus, countStatus } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,9 +92,9 @@ function ProjectDetail() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 min-w-0">
             <MiniStat label="Value" value={fmtQAR(p.contractValue + p.approvedVariations, { compact: true })} />
-            <MiniStat label="Completion" value={`${p.actualProgress}%`} accent="signal" />
+            <MiniStat label="Project status" value={projectStatus(p, health.label)} accent="signal" />
             <MiniStat label="Planned end" value={fmtDate(p.plannedEnd)} sub={`${daysLeft} days left`} />
-            <MiniStat label="Materials" value={`${p.materialReadiness}%`} accent={p.materialReadiness < 80 ? "warning" : "success"} />
+            <MiniStat label="Materials" value={materialStatus(projectMats)} accent={materialStatus(projectMats) === "Completed" ? "success" : "warning"} />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t hairline">
@@ -122,12 +122,12 @@ function ProjectDetail() {
 
       {/* LAYER 2 — Command Summary Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
-        <CommandTile label="Actual Progress" value={`${p.actualProgress}%`} sub={scheduleGap > 0 ? `${scheduleGap}% behind plan` : "On plan"} tone={scheduleGap > 10 ? "critical" : scheduleGap > 0 ? "warning" : "success"} kind="ring" ring={p.actualProgress} onClick={() => goTo("overview")} />
-        <CommandTile label="Planned Progress" value={`${p.plannedProgress}%`} sub="Expected today" tone="info" kind="ring" ring={p.plannedProgress} onClick={() => goTo("timeline")} />
-        <CommandTile label="Material Readiness" value={`${p.materialReadiness}%`} sub={`${projectMats.filter((m) => m.critical && m.delivered < m.required).length} critical items`} tone={p.materialReadiness < 80 ? "warning" : "success"} kind="bar" bar={p.materialReadiness} onClick={() => goTo("materials")} />
-        <CommandTile label="Cameras Installed" value={`${camsInstalled} / ${projectDevices.length}`} sub={`${projectDevices.length - camsInstalled} remaining`} tone="info" kind="bar" bar={projectDevices.length ? (camsInstalled / projectDevices.length) * 100 : 0} icon={Camera} onClick={() => goTo("devices")} />
+        <CommandTile label="Project Status" value={projectStatus(p, health.label)} sub={scheduleGap > 0 ? "Behind plan" : "On plan"} tone={scheduleGap > 10 ? "critical" : scheduleGap > 0 ? "warning" : "success"} kind="counter" onClick={() => goTo("overview")} />
+        <CommandTile label="Schedule" value={daysLeft >= 0 ? `${daysLeft} days left` : `${Math.abs(daysLeft)} days over`} sub={`Planned end ${fmtDate(p.plannedEnd)}`} tone={daysLeft < 0 ? "critical" : "info"} kind="counter" onClick={() => goTo("timeline")} />
+        <CommandTile label="Material Status" value={materialStatus(projectMats)} sub={`${projectMats.filter((m) => m.critical && m.delivered < m.required).length} critical items`} tone={materialStatus(projectMats) === "Completed" ? "success" : "warning"} kind="counter" onClick={() => goTo("materials")} />
+        <CommandTile label="Cameras Installed" value={`${camsInstalled} / ${projectDevices.length}`} sub={`${projectDevices.length - camsInstalled} remaining`} tone="info" kind="counter" icon={Camera} onClick={() => goTo("devices")} />
         <CommandTile label="Tests Passed" value={`${testsPassed} / ${projectDevices.length}`} sub={testsFailed ? `${testsFailed} failures` : "No failures"} tone={testsFailed ? "critical" : "success"} kind="counter" icon={ClipboardCheck} onClick={() => goTo("testing")} />
-        <CommandTile label="Collected" value={`${fmtQAR(collected, { compact: true })}`} sub={`${Math.round((collected / invoiced) * 100)}% of invoiced`} tone="success" kind="bar" bar={(collected / invoiced) * 100} icon={Coins} onClick={() => goTo("fin")} />
+        <CommandTile label="Collected" value={`${fmtQAR(collected, { compact: true })}`} sub={`of ${fmtQAR(invoiced, { compact: true })} invoiced`} tone="success" kind="counter" icon={Coins} onClick={() => goTo("fin")} />
       </div>
 
       {/* LAYER 3 — Primary Section Nav */}
@@ -190,8 +190,12 @@ function ProjectDetail() {
               ))}</div>
             </Card>
             <Card className="p-4">
-              <h3 className="font-display font-semibold text-lg mb-3">Progress</h3>
-              <div className="grid grid-cols-3 gap-3"><Ring value={p.actualProgress} label="Actual" /><Ring value={p.plannedProgress} label="Planned" /><Ring value={p.materialReadiness} label="Materials" /></div>
+              <h3 className="font-display font-semibold text-lg mb-3">Status</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="border hairline rounded-lg p-3"><div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">Project</div><WorkStatusBadge status={projectStatus(p, health.label)} /></div>
+                <div className="border hairline rounded-lg p-3"><div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">Materials</div><WorkStatusBadge status={materialStatus(projectMats)} /></div>
+                <div className="border hairline rounded-lg p-3"><div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">Testing</div><WorkStatusBadge status={countStatus(projectDevices.filter((x)=>x.testResult==="Pass").length, projectDevices.length)} /></div>
+              </div>
               <div className="mt-3 space-y-2 text-xs">
                 <div className="flex justify-between"><span className="text-muted-foreground">Cameras installed</span><span className="num">{projectDevices.filter((x)=>x.status!=="Faulty").length} / {projectDevices.length}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Tests passed</span><span className="num">{projectDevices.filter((x)=>x.testResult==="Pass").length} / {projectDevices.length}</span></div>

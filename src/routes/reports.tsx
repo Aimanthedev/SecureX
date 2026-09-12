@@ -19,7 +19,14 @@ const CATS = ["Executive", "Project", "Sales", "Financial", "Service and AMC", "
 
 function ReportsPage() {
   const d = useData();
-  const planActual = d.projects.map((p) => ({ name: p.number.split("-").pop(), planned: p.plannedProgress, actual: p.actualProgress }));
+  const planActual = d.projects.map((p) => {
+    const devs = d.devices.filter((x) => x.projectId === p.id);
+    return {
+      name: p.number.split("-").pop(),
+      planned: devs.length,
+      actual: devs.filter((x) => x.status === "Installed" || x.status === "Configured" || x.status === "Tested" || x.status === "Handed Over").length,
+    };
+  });
   const cams = [
     { name: "Planned", v: d.devices.length },
     { name: "Installed", v: d.devices.filter((x) => x.status !== "Faulty").length },
@@ -56,7 +63,7 @@ function ReportsPage() {
 
         <TabsContent value="Executive" className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Panel accent="blue" texture="grid">
-            <PanelHead title="Planned vs Actual" sub="By project" accent="blue" />
+            <PanelHead title="Planned vs Installed Devices" sub="By project" accent="blue" />
             <div className="h-56">
               <ResponsiveContainer>
                 <BarChart data={planActual}>

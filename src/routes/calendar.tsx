@@ -5,7 +5,7 @@ import { PageHeader, StatTile, Panel, PanelHead, Segmented, MonoChip } from "@/c
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({ meta: [
-    { title: "Calendar | AL HARIB CCTV COMPANY" },
+    { title: "Calendar | SecureX CCTV COMPANY" },
     { name: "description", content: "Unified schedule of surveys, milestones, installs and service visits." },
   ] }),
   component: CalPage,

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/service")({
   head: () => ({ meta: [
-    { title: "Service and AMC | AL HARIB CCTV COMPANY" },
+    { title: "Service and AMC | SecureX CCTV COMPANY" },
     { name: "description", content: "AMC contracts, service tickets, SLA tracking and preventive maintenance checklists." },
   ] }),
   component: ServicePage,

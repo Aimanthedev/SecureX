@@ -17,7 +17,7 @@ import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Printer, Circle, Chevr
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/projects/$id")({
-  head: () => ({ meta: [{ title: "Project | AL HARIB CCTV COMPANY" }] }),
+  head: () => ({ meta: [{ title: "Project | SecureX CCTV COMPANY" }] }),
   component: ProjectDetail,
 });
 

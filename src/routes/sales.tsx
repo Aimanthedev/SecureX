@@ -18,7 +18,7 @@ import { GripVertical, Trash2, TrendingUp, Target, Clock, Trophy } from "lucide-
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 
 export const Route = createFileRoute("/sales")({
-  head: () => ({ meta: [{ title: "Sales | AL HARIB CCTV COMPANY" }, { name: "description", content: "Lead pipeline, forecasts, and follow-ups." }] }),
+  head: () => ({ meta: [{ title: "Sales | SecureX CCTV COMPANY" }, { name: "description", content: "Lead pipeline, forecasts, and follow-ups." }] }),
   component: SalesPage,
 });
 
@@ -35,7 +35,7 @@ function SalesPage() {
 
   return (
     <div>
-      <PageHeader title="Sales" subtitle="Pipeline, leads, and forecast for AL HARIB CCTV COMPANY"
+      <PageHeader title="Sales" subtitle="Pipeline, leads, and forecast for SecureX CCTV COMPANY"
         actions={<><Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)]">Import leads</Button><Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-white hover:bg-signal/90">New lead</Button></>} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">

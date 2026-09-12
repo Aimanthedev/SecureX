@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/equipment")({
   head: () => ({ meta: [
-    { title: "Equipment | AL HARIB CCTV COMPANY" },
+    { title: "Equipment | SecureX CCTV COMPANY" },
     { name: "description", content: "Catalogue and serialized register of every camera, recorder and network device." },
   ] }),
   component: EquipmentPage,

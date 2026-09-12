@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/customers/")({
   head: () => ({ meta: [
-    { title: "Customers | AL HARIB CCTV COMPANY" },
+    { title: "Customers | SecureX CCTV COMPANY" },
     { name: "description", content: "Accounts, sites, contracted value and outstanding balances across the customer base." },
   ] }),
   component: CustomersPage,

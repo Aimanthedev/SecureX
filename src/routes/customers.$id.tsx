@@ -5,7 +5,7 @@ import { fmtQAR, fmtDate } from "@/lib/format";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/customers/$id")({
-  head: () => ({ meta: [{ title: "Customer | AL HARIB CCTV COMPANY" }] }),
+  head: () => ({ meta: [{ title: "Customer | SecureX CCTV COMPANY" }] }),
   component: CustomerDetail,
 });
 

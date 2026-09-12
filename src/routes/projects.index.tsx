@@ -16,7 +16,7 @@ import type { ProjectHealth } from "@/lib/mock-data";
 export const Route = createFileRoute("/projects/")({
   head: () => ({
     meta: [
-      { title: "Projects | AL HARIB CCTV COMPANY" },
+      { title: "Projects | SecureX CCTV COMPANY" },
       { name: "description", content: "Live portfolio view of every CCTV project — health, progress, materials and cameras across sites." },
     ],
   }),

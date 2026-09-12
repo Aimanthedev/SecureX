@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({ meta: [
-    { title: "Notifications | AL HARIB CCTV COMPANY" },
+    { title: "Notifications | SecureX CCTV COMPANY" },
     { name: "description", content: "Critical, warning and informational signals across the platform." },
   ] }),
   component: NotifPage,

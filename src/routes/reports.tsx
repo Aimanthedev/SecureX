@@ -9,7 +9,7 @@ import { fmtQAR } from "@/lib/format";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [
-    { title: "Reports | AL HARIB CCTV COMPANY" },
+    { title: "Reports | SecureX CCTV COMPANY" },
     { name: "description", content: "Executive, project, sales, financial and compliance analytics across the business." },
   ] }),
   component: ReportsPage,

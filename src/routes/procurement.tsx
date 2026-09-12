@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/procurement")({
   head: () => ({ meta: [
-    { title: "Procurement | AL HARIB CCTV COMPANY" },
+    { title: "Procurement | SecureX CCTV COMPANY" },
     { name: "description", content: "Purchase requests, purchase orders and sourcing pipeline across every project." },
   ] }),
   component: ProcurementPage,

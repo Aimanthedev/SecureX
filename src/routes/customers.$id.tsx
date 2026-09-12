@@ -43,7 +43,7 @@ function CustomerDetail() {
 
       <Tabs defaultValue="overview" className="rise rise-2">
         <TabsList>
-          {["Overview", "Contacts", "Sites", "Projects", "Quotations", "AMC", "Tickets", "Documents"].map((t) => (
+          {["Overview", "Contacts", "Sites", "Projects", "AMC", "Tickets", "Documents"].map((t) => (
             <TabsTrigger key={t} value={t.toLowerCase()}>{t}</TabsTrigger>
           ))}
         </TabsList>
@@ -84,7 +84,7 @@ function CustomerDetail() {
         <TabsContent value="projects" className="mt-4">
           <TableShell>
             <thead>
-              <tr>{["Number", "Name", "Phase", "Value", "Status"].map((h) => <th key={h} className="text-left">{h}</th>)}</tr>
+              <tr>{["Number", "Name", "Phase", "Value", "Planned end"].map((h) => <th key={h} className="text-left">{h}</th>)}</tr>
             </thead>
             <tbody>
               {projs.map((p) => (
@@ -93,14 +93,14 @@ function CustomerDetail() {
                   <td><Link to="/projects/$id" params={{ id: p.id }} className="text-signal">{p.name}</Link></td>
                   <td><StatusPill status={p.phase} tone="info" /></td>
                   <td className="num">{fmtQAR(p.contractValue, { compact: true })}</td>
-                  <td className="num text-xs">{p.actualProgress}%</td>
+                  <td className="num text-xs">{fmtDate(p.plannedEnd)}</td>
                 </tr>
               ))}
             </tbody>
           </TableShell>
         </TabsContent>
 
-        {["contacts", "quotations", "amc", "tickets", "documents"].map((t) => (
+        {["contacts", "amc", "tickets", "documents"].map((t) => (
           <TabsContent key={t} value={t} className="mt-4">
             <EmptyState title={`No ${t} records to display`} />
           </TabsContent>

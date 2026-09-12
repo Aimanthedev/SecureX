@@ -58,7 +58,7 @@ function SettingsPage() {
             <PanelHead title="Numbering Formats" sub="Document series conventions" accent="cyan" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field label="Project number format"><Input defaultValue="AHC-PRO-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Quotation format"><Input defaultValue="AHC-QTN-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
+              <Field label="Work order format"><Input defaultValue="AHC-WO-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
               <Field label="Purchase order format"><Input defaultValue="AHC-PO-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
               <Field label="AMC format"><Input defaultValue="AHC-AMC-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
             </div>

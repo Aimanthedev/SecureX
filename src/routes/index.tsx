@@ -101,7 +101,7 @@ function CommandCenter() {
         { icon: Camera, accent: "blue" as const, activity: "Cameras installed", value: `${8 + i * 2} units`, status: "Completed", tone: "success", time: `${i + 1}h ago` },
         { icon: ClipboardCheck, accent: "cyan" as const, activity: "Site survey completed", value: "24 points", status: "Reviewed", tone: "info", time: `${i + 3}h ago` },
         { icon: Package, accent: "purple" as const, activity: "Material request approved", value: fmtQAR(18400 + i * 3100, { compact: true }), status: "Approved", tone: "purple", time: `${i + 5}h ago` },
-        { icon: FileSignature, accent: "magenta" as const, activity: "Quotation submitted", value: fmtQAR(126000 + i * 8400, { compact: true }), status: "Sent", tone: "info", time: "Yesterday" },
+        { icon: FileSignature, accent: "magenta" as const, activity: "Work order issued", value: fmtQAR(126000 + i * 8400, { compact: true }), status: "In Progress", tone: "info", time: "Yesterday" },
         { icon: CircleDollarSign, accent: "green" as const, activity: "Client payment received", value: fmtQAR(74000 + i * 5200, { compact: true }), status: "Cleared", tone: "success", time: "Yesterday" },
         { icon: AlertTriangle, accent: "red" as const, activity: "Testing failure reported", value: "2 devices", status: "Open", tone: "critical", time: "2 days ago" },
       ][i % 6];

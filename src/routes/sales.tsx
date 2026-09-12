@@ -206,27 +206,6 @@ function Leaderboard() {
   );
 }
 
-function QuotationActivity() {
-  const d = useData();
-  const byStatus = ["Draft","Internal Approval","Sent","Approved","Rejected","Expired"].map((s) => ({ name: s, value: d.quotations.filter((q) => q.status === s).length })).filter((x) => x.value > 0);
-  return (
-    <Panel>
-      <PanelHead title="Quotation Activity" sub="Status distribution across active quotes" accent="cyan" />
-      <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={byStatus} layout="vertical" margin={{ left: 10 }}>
-            <CartesianGrid stroke="rgba(133,164,204,0.07)" horizontal={false} />
-            <XAxis type="number" {...axisProps} />
-            <YAxis type="category" dataKey="name" {...axisProps} width={110} />
-            <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(24,213,255,0.06)" }} />
-            <Bar dataKey="value" fill="#18D5FF" radius={[0, 6, 6, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </Panel>
-  );
-}
-
 function LeadSourceChart() {
   const d = useData();
   const sources = useMemo(() => {
@@ -295,7 +274,7 @@ function PipelineBoard() {
                         </div>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="num font-semibold text-foreground">{fmtQAR(l.value, { compact: true })}</div>
-                          <div className="text-[10px] text-muted-foreground">{l.probability}%</div>
+                          <div className="text-[10px] text-muted-foreground">{l.stage}</div>
                         </div>
                         <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
                           <span>{sp?.name?.split(" ")[0]}</span>
@@ -330,7 +309,7 @@ function PipelineBoard() {
                   <Field label="Email" v={detail.email} />
                   <Field label="System type" v={detail.systemType} />
                   <Field label="Value" v={fmtQAR(detail.value)} />
-                  <Field label="Probability" v={`${detail.probability}%`} />
+                  <Field label="Next follow-up" v={detail.nextFollowUp ? fmtDate(detail.nextFollowUp) : "-"} />
                   <Field label="Stage" v={detail.stage} />
                   <Field label="Salesperson" v={d.employees.find((e) => e.id === detail.salespersonId)?.name || ""} />
                   <Field label="Source" v={detail.source} />
@@ -370,7 +349,7 @@ function LeadsTable() {
               <td className="text-xs">{l.systemType}</td>
               <td className="num">{fmtQAR(l.value, {compact:true})}</td>
               <td><StatusPill status={l.stage} tone={l.stage==="Won"?"success":l.stage==="Lost"?"critical":"info"} /></td>
-              <td className="num text-xs">{l.probability}%</td>
+              
               <td className="text-xs">{sp?.name}</td>
               <td className="num text-xs">{l.nextFollowUp ? fmtDate(l.nextFollowUp) : "-"}</td>
               <td className="num text-xs text-muted-foreground">{fmtDate(l.lastActivity)}</td>

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [
-    { title: "Settings | AL HARIB CCTV COMPANY" },
+    { title: "Settings | SecureX CCTV COMPANY" },
     { name: "description", content: "Company profile, numbering formats, appearance, language and data preferences." },
   ] }),
   component: SettingsPage,
@@ -45,7 +45,7 @@ function SettingsPage() {
           <Panel accent="blue" texture="grid">
             <PanelHead title="Company Profile" sub="Legal identity and formatting defaults" accent="blue" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label="Company name"><Input defaultValue="AL HARIB CCTV COMPANY" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
+              <Field label="Company name"><Input defaultValue="SecureX CCTV COMPANY" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
               <Field label="Currency"><Input defaultValue="QAR" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
               <Field label="Tax rate"><Input defaultValue="0%" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
               <Field label="Date format"><Input defaultValue="dd MMM yyyy" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>

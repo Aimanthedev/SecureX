@@ -111,7 +111,7 @@ function Logo({ compact }: { compact?: boolean }) {
       </div>
       {!compact && (
         <div className="min-w-0 flex-1">
-          <div className="text-[13.5px] font-bold leading-tight tracking-[0.06em] text-white">AL HARIB</div>
+          <div className="text-[13.5px] font-bold leading-tight tracking-[0.06em] text-white">SecureX</div>
           <div className="text-[8.5px] font-semibold uppercase tracking-[0.22em] text-[#66778D]">CCTV Company</div>
         </div>
       )}
@@ -220,7 +220,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         <div className="min-w-0">
           <div className="truncate text-[15px] font-semibold tracking-[-0.02em] text-foreground">{title}</div>
           <div className="hidden items-center gap-1.5 text-[10.5px] text-[#66778D] md:flex">
-            <Link to="/" className="hover:text-foreground">AL Harib</Link>
+            <Link to="/" className="hover:text-foreground">SecureX</Link>
             <ChevronRight className="h-3 w-3" />
             <span className="capitalize text-[#A8B7CA]">{title}</span>
             {parts[1] && <><ChevronRight className="h-3 w-3" /><MonoChip>{parts[1]}</MonoChip></>}

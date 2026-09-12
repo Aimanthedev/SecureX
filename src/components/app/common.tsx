@@ -4,7 +4,7 @@ import type { ProjectHealth } from "@/lib/mock-data";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 /* ────────────────────────────────────────────────────────────────
-   AL HARIB command design system — dark navy operations language
+   SecureX command design system — dark navy operations language
    ──────────────────────────────────────────────────────────────── */
 
 export type Accent = "blue" | "cyan" | "purple" | "magenta" | "green" | "amber" | "red";

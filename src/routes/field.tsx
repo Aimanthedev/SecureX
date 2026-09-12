@@ -8,7 +8,7 @@ import { Home, ClipboardList, Package, User, HardHat, MapPin, CheckCircle2, Aler
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/field")({
-  head: () => ({ meta: [{ title: "Field Operations | AL HARIB CCTV COMPANY" }] }),
+  head: () => ({ meta: [{ title: "Field Operations | SecureX CCTV COMPANY" }] }),
   component: FieldOps,
 });
 

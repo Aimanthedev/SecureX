@@ -14,10 +14,10 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, Cartes
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Command Center | AL HARIB CCTV COMPANY" },
-    { name: "description", content: "Live operations command center for AL HARIB CCTV COMPANY — projects, pipeline, collections and field execution." },
-    { property: "og:title", content: "Command Center | AL HARIB CCTV COMPANY" },
-    { property: "og:description", content: "Live operations command center for AL HARIB CCTV COMPANY." },
+    { title: "Command Center | SecureX CCTV COMPANY" },
+    { name: "description", content: "Live operations command center for SecureX CCTV COMPANY — projects, pipeline, collections and field execution." },
+    { property: "og:title", content: "Command Center | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Live operations command center for SecureX CCTV COMPANY." },
   ] }),
   component: CommandCenter,
 });

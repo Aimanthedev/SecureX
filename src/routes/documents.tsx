@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/documents")({
   head: () => ({ meta: [
-    { title: "Documents | AL HARIB CCTV COMPANY" },
+    { title: "Documents | SecureX CCTV COMPANY" },
     { name: "description", content: "Contracts, drawings, reports and compliance documents across the company." },
   ] }),
   component: DocsPage,

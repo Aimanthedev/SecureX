@@ -1,4 +1,4 @@
-// Shared connected mock dataset for AL HARIB CCTV COMPANY
+// Shared connected mock dataset for SecureX CCTV COMPANY
 // All entities linked by id. Camera Point ids (CP-*) thread through survey -> BOQ -> device -> test -> handover.
 
 export type ID = string;
@@ -103,21 +103,21 @@ export type Project = {
 // ---------- SEED ----------
 
 export const employees: Employee[] = [
-  { id: "E-001", name: "Yousef Al-Emadi", role: "Managing Director", department: "Management", phone: "+974 3311 0001", email: "yousef@alharib.qa", availability: "Busy", workload: 92 },
-  { id: "E-002", name: "Rashid Al-Kubaisi", role: "Operations Manager", department: "Projects", phone: "+974 3311 0002", email: "rashid@alharib.qa", availability: "Busy", workload: 88 },
-  { id: "E-003", name: "Karim Haddad", role: "Senior Project Manager", department: "Projects", phone: "+974 3311 0003", email: "karim@alharib.qa", availability: "Busy", workload: 84 },
-  { id: "E-004", name: "Anitha Verghese", role: "Project Manager", department: "Projects", phone: "+974 3311 0004", email: "anitha@alharib.qa", availability: "Busy", workload: 76 },
-  { id: "E-005", name: "Mohammed Farouk", role: "Sales Manager", department: "Sales", phone: "+974 3311 0005", email: "farouk@alharib.qa", availability: "Available", workload: 55 },
-  { id: "E-006", name: "Layla Al-Thani", role: "Senior Sales Executive", department: "Sales", phone: "+974 3311 0006", email: "layla@alharib.qa", availability: "Busy", workload: 71 },
-  { id: "E-007", name: "Nassar Iqbal", role: "Sales Executive", department: "Sales", phone: "+974 3311 0007", email: "nassar@alharib.qa", availability: "Available", workload: 48 },
-  { id: "E-008", name: "Ahmed Sobhi", role: "Senior Site Engineer", department: "Engineering", phone: "+974 3311 0008", email: "sobhi@alharib.qa", availability: "Busy", workload: 90 },
-  { id: "E-009", name: "Vinod Menon", role: "Site Engineer", department: "Engineering", phone: "+974 3311 0009", email: "vinod@alharib.qa", availability: "Busy", workload: 82 },
-  { id: "E-010", name: "Suresh Kumar", role: "Lead Technician", department: "Installation", phone: "+974 3311 0010", email: "suresh@alharib.qa", availability: "Busy", workload: 78 },
-  { id: "E-011", name: "Rakesh Nair", role: "Installation Technician", department: "Installation", phone: "+974 3311 0011", email: "rakesh@alharib.qa", availability: "Busy", workload: 72 },
-  { id: "E-012", name: "Prakash Iyer", role: "Installation Technician", department: "Installation", phone: "+974 3311 0012", email: "prakash@alharib.qa", availability: "Available", workload: 40 },
-  { id: "E-013", name: "Bilal Farooq", role: "Service Engineer", department: "Service", phone: "+974 3311 0013", email: "bilal@alharib.qa", availability: "Busy", workload: 68 },
-  { id: "E-014", name: "Aisha Rahman", role: "Procurement Officer", department: "Procurement", phone: "+974 3311 0014", email: "aisha@alharib.qa", availability: "Available", workload: 58 },
-  { id: "E-015", name: "Hasan Barzani", role: "Accounts Manager", department: "Accounts", phone: "+974 3311 0015", email: "hasan@alharib.qa", availability: "Available", workload: 52 },
+  { id: "E-001", name: "Yousef Al-Emadi", role: "Managing Director", department: "Management", phone: "+974 3311 0001", email: "yousef@securex.qa", availability: "Busy", workload: 92 },
+  { id: "E-002", name: "Rashid Al-Kubaisi", role: "Operations Manager", department: "Projects", phone: "+974 3311 0002", email: "rashid@securex.qa", availability: "Busy", workload: 88 },
+  { id: "E-003", name: "Karim Haddad", role: "Senior Project Manager", department: "Projects", phone: "+974 3311 0003", email: "karim@securex.qa", availability: "Busy", workload: 84 },
+  { id: "E-004", name: "Anitha Verghese", role: "Project Manager", department: "Projects", phone: "+974 3311 0004", email: "anitha@securex.qa", availability: "Busy", workload: 76 },
+  { id: "E-005", name: "Mohammed Farouk", role: "Sales Manager", department: "Sales", phone: "+974 3311 0005", email: "farouk@securex.qa", availability: "Available", workload: 55 },
+  { id: "E-006", name: "Layla Al-Thani", role: "Senior Sales Executive", department: "Sales", phone: "+974 3311 0006", email: "layla@securex.qa", availability: "Busy", workload: 71 },
+  { id: "E-007", name: "Nassar Iqbal", role: "Sales Executive", department: "Sales", phone: "+974 3311 0007", email: "nassar@securex.qa", availability: "Available", workload: 48 },
+  { id: "E-008", name: "Ahmed Sobhi", role: "Senior Site Engineer", department: "Engineering", phone: "+974 3311 0008", email: "sobhi@securex.qa", availability: "Busy", workload: 90 },
+  { id: "E-009", name: "Vinod Menon", role: "Site Engineer", department: "Engineering", phone: "+974 3311 0009", email: "vinod@securex.qa", availability: "Busy", workload: 82 },
+  { id: "E-010", name: "Suresh Kumar", role: "Lead Technician", department: "Installation", phone: "+974 3311 0010", email: "suresh@securex.qa", availability: "Busy", workload: 78 },
+  { id: "E-011", name: "Rakesh Nair", role: "Installation Technician", department: "Installation", phone: "+974 3311 0011", email: "rakesh@securex.qa", availability: "Busy", workload: 72 },
+  { id: "E-012", name: "Prakash Iyer", role: "Installation Technician", department: "Installation", phone: "+974 3311 0012", email: "prakash@securex.qa", availability: "Available", workload: 40 },
+  { id: "E-013", name: "Bilal Farooq", role: "Service Engineer", department: "Service", phone: "+974 3311 0013", email: "bilal@securex.qa", availability: "Busy", workload: 68 },
+  { id: "E-014", name: "Aisha Rahman", role: "Procurement Officer", department: "Procurement", phone: "+974 3311 0014", email: "aisha@securex.qa", availability: "Available", workload: 58 },
+  { id: "E-015", name: "Hasan Barzani", role: "Accounts Manager", department: "Accounts", phone: "+974 3311 0015", email: "hasan@securex.qa", availability: "Available", workload: 52 },
 ];
 
 export const customers: Customer[] = [

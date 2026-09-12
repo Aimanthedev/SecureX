@@ -4,7 +4,7 @@ import { PageHeader, StatusPill, StatTile, TableShell } from "@/components/app/c
 
 export const Route = createFileRoute("/employees")({
   head: () => ({ meta: [
-    { title: "Employees | AL HARIB CCTV COMPANY" },
+    { title: "Employees | SecureX CCTV COMPANY" },
     { name: "description", content: "Workload, availability and open task assignments for the field and office team." },
   ] }),
   component: EmployeesPage,

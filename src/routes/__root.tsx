@@ -42,9 +42,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AL HARIB CCTV COMPANY | Operations Command Center" },
-      { name: "description", content: "Operations platform for AL HARIB CCTV COMPANY, Qatar. Sales pipeline, site surveys, projects, field operations, service and AMC." },
-      { property: "og:title", content: "AL HARIB CCTV COMPANY | Operations Command Center" },
+      { title: "SecureX CCTV COMPANY | Operations Command Center" },
+      { name: "description", content: "Operations platform for SecureX CCTV COMPANY, Qatar. Sales pipeline, site surveys, projects, field operations, service and AMC." },
+      { property: "og:title", content: "SecureX CCTV COMPANY | Operations Command Center" },
       { property: "og:description", content: "End-to-end operations for a Qatar CCTV and security systems contractor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

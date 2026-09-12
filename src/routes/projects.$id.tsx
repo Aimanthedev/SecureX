@@ -431,9 +431,6 @@ function IntelligenceRail({ section, project, health, milestones, materials, tas
           <div className="num text-3xl font-display font-bold">{health.score}</div>
           <div className="text-xs text-muted-foreground">/ 100</div>
         </div>
-        <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-signal to-chart-5" style={{ width: `${health.score}%` }} />
-        </div>
       </div>
 
       {section === "overview" && (

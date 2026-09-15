@@ -219,10 +219,10 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
 
         <div className="min-w-0">
           <div className="truncate text-[15px] font-semibold tracking-[-0.02em] text-foreground">{title}</div>
-          <div className="hidden items-center gap-1.5 text-[10.5px] text-[#66778D] md:flex">
+          <div className="hidden items-center gap-1.5 text-[10.5px] text-muted-foreground md:flex">
             <Link to="/" className="hover:text-foreground">SecureX</Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="capitalize text-[#A8B7CA]">{title}</span>
+            <span className="capitalize text-muted-foreground">{title}</span>
             {parts[1] && <><ChevronRight className="h-3 w-3" /><MonoChip>{parts[1]}</MonoChip></>}
           </div>
         </div>
@@ -338,20 +338,20 @@ function GlobalSearch() {
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl overflow-hidden rounded-2xl border-border bg-popover p-0">
-        <div className="flex items-center gap-2 border-b border-[rgba(133,164,204,0.10)] px-4 py-3">
-          <Search className="h-4 w-4 text-[#66778D]" />
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+          <Search className="h-4 w-4 text-muted-foreground" />
           <Input autoFocus placeholder="Search projects, customers, cameras, documents…" value={q} onChange={(e) => setQ(e.target.value)} className="border-0 bg-transparent text-sm shadow-none focus-visible:ring-0" />
         </div>
         <div className="max-h-[60vh] overflow-y-auto p-2">
-          {q.trim() === "" && <div className="p-4 text-[11.5px] text-[#66778D]">Try: camera CP-01, project AHC-PRO-2026-041, customer Msheireb, IP 10.20.30.101.</div>}
-          {q.trim() !== "" && Object.keys(grouped).length === 0 && <div className="p-4 text-[11.5px] text-[#66778D]">No results.</div>}
+          {q.trim() === "" && <div className="p-4 text-[11.5px] text-muted-foreground">Try: camera CP-01, project AHC-PRO-2026-041, customer Msheireb, IP 10.20.30.101.</div>}
+          {q.trim() !== "" && Object.keys(grouped).length === 0 && <div className="p-4 text-[11.5px] text-muted-foreground">No results.</div>}
           {Object.entries(grouped).map(([group, items]) => (
             <div key={group} className="mb-2">
               <div className="label-xs px-2 py-1">{group}</div>
               {items.map((r, i) => (
-                <button key={i} onClick={() => { r.go(); setOpen(false); setQ(""); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-[rgba(47,131,255,0.10)]">
-                  <div className="min-w-0"><div className="truncate text-[13px]">{r.label}</div><div className="truncate text-[11px] text-[#66778D]">{r.sub}</div></div>
-                  <ChevronRight className="h-3.5 w-3.5 text-[#66778D]" />
+                <button key={i} onClick={() => { r.go(); setOpen(false); setQ(""); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-muted">
+                  <div className="min-w-0"><div className="truncate text-[13px]">{r.label}</div><div className="truncate text-[11px] text-muted-foreground">{r.sub}</div></div>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               ))}
             </div>

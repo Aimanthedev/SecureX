@@ -139,12 +139,12 @@ function CommandCenter() {
             <div className="h-[248px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={execData} barGap={4} onClick={(e: any) => e?.activeLabel && setMonth(e.activeLabel)}>
-                  <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
+                  <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="m" {...axisProps} />
                   <YAxis {...axisProps} width={34} />
                   <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v} milestones`} />} />
                   <Bar dataKey="planned" name="Planned" radius={[6, 6, 0, 0]} maxBarSize={16}>
-                    {execData.map((r) => <Cell key={r.m} fill="rgba(133,164,204,0.16)" />)}
+                    {execData.map((r) => <Cell key={r.m} fill="var(--chart-track)" />)}
                   </Bar>
                   <Bar dataKey="actual" name="Actual" radius={[6, 6, 0, 0]} maxBarSize={16}>
                     {execData.map((r) => <Cell key={r.m} fill={r.m === month ? "#2F83FF" : "rgba(47,131,255,0.35)"} />)}
@@ -165,12 +165,12 @@ function CommandCenter() {
                 right={<button onClick={() => nav({ to: "/projects" })} className="text-[11.5px] font-medium text-signal hover:underline">View all</button>}
               />
             </div>
-            <div className="divide-y divide-[rgba(133,164,204,0.07)]">
+            <div className="divide-y divide-border">
               {recent.map((r, i) => {
                 const a = ACCENT[r.accent];
                 const Icon = r.icon;
                 return (
-                  <div key={i} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[rgba(47,131,255,0.05)] md:px-5">
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/60 md:px-5">
                     <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border" style={{ background: a.soft, borderColor: a.ring, color: a.hex }}>
                       <Icon className="h-4 w-4" />
                     </div>

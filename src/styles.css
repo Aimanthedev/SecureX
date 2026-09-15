@@ -140,6 +140,7 @@
   --chart-grid: rgba(51, 65, 85, 0.10);
   --chart-track: rgba(51, 65, 85, 0.12);
   --topbar-bg: rgba(244, 246, 249, 0.88);
+  color-scheme: light;
 }
 
 .dark {
@@ -210,6 +211,7 @@
   --chart-grid: rgba(133, 164, 204, 0.07);
   --chart-track: rgba(133, 164, 204, 0.08);
   --topbar-bg: rgba(6, 16, 29, 0.85);
+  color-scheme: dark;
 }
 
 @layer base {

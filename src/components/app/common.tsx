@@ -372,7 +372,7 @@ export function AlertCard({ severity, title, meta, action, onAction }: {
   const accent: Accent = severity === "critical" ? "red" : severity === "warning" ? "amber" : severity === "success" ? "green" : "blue";
   const a = ACCENT[accent];
   return (
-    <div className="panel-flat relative overflow-hidden p-3.5 pl-4 transition-colors hover:border-[rgba(133,164,204,0.24)]">
+    <div className="panel-flat relative overflow-hidden p-3.5 pl-4 transition-colors hover:border-input">
       <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: a.hex, boxShadow: `0 0 14px ${a.ring}` }} />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -511,7 +511,7 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
 
 /* ── Chart helpers ───────────────────────────────────────────── */
 export const axisProps = {
-  tick: { fill: "#66778D", fontSize: 11 },
+  tick: { fill: "var(--muted-foreground)", fontSize: 11 },
   axisLine: false as const,
   tickLine: false as const,
 };
@@ -519,7 +519,7 @@ export const axisProps = {
 export function ChartTooltip({ active, payload, label, formatter }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-[rgba(133,164,204,0.18)] bg-[#0D1929]/95 px-3 py-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.9)] backdrop-blur">
+    <div className="rounded-xl border border-input bg-popover/95 px-3 py-2 shadow-xl backdrop-blur">
       {label !== undefined && <div className="label-xs mb-1.5">{label}</div>}
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-[12px]">

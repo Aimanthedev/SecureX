@@ -45,10 +45,10 @@ function SettingsPage() {
           <Panel accent="blue" texture="grid">
             <PanelHead title="Company Profile" sub="Legal identity and formatting defaults" accent="blue" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label="Company name"><Input defaultValue="SecureX CCTV COMPANY" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Currency"><Input defaultValue="QAR" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Tax rate"><Input defaultValue="0%" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Date format"><Input defaultValue="dd MMM yyyy" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
+              <Field label="Company name"><Input defaultValue="SecureX CCTV COMPANY" className="border-input bg-card" /></Field>
+              <Field label="Currency"><Input defaultValue="QAR" className="border-input bg-card" /></Field>
+              <Field label="Tax rate"><Input defaultValue="0%" className="border-input bg-card" /></Field>
+              <Field label="Date format"><Input defaultValue="dd MMM yyyy" className="border-input bg-card" /></Field>
             </div>
           </Panel>
         </TabsContent>
@@ -57,10 +57,10 @@ function SettingsPage() {
           <Panel accent="cyan" texture="grid">
             <PanelHead title="Numbering Formats" sub="Document series conventions" accent="cyan" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label="Project number format"><Input defaultValue="AHC-PRO-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Work order format"><Input defaultValue="AHC-WO-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Purchase order format"><Input defaultValue="AHC-PO-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="AMC format"><Input defaultValue="AHC-AMC-2026-000" className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
+              <Field label="Project number format"><Input defaultValue="AHC-PRO-2026-000" className="border-input bg-card" /></Field>
+              <Field label="Work order format"><Input defaultValue="AHC-WO-2026-000" className="border-input bg-card" /></Field>
+              <Field label="Purchase order format"><Input defaultValue="AHC-PO-2026-000" className="border-input bg-card" /></Field>
+              <Field label="AMC format"><Input defaultValue="AHC-AMC-2026-000" className="border-input bg-card" /></Field>
             </div>
           </Panel>
         </TabsContent>
@@ -71,7 +71,7 @@ function SettingsPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field label="Theme">
                 <Select value={theme} onValueChange={(v) => setTheme(v as never)}>
-                  <SelectTrigger className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="border-input bg-card"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -88,7 +88,7 @@ function SettingsPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field label="Language">
                 <Select value={lang} onValueChange={(v) => { setLang(v as never); toast("Language preference saved."); }}>
-                  <SelectTrigger className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="border-input bg-card"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="ar">العربية (RTL stub)</SelectItem>
@@ -104,7 +104,7 @@ function SettingsPage() {
             <PanelHead title="Notification Preferences" sub="Alert triggers" accent="amber" />
             <ul className="space-y-2 text-sm">
               {["Failed test alerts", "Overdue PO alerts", "AMC expiring alerts", "Client approval reminders", "Payment collection reminders"].map((n) => (
-                <li key={n} className="flex items-center justify-between rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.03)] px-3 py-2">
+                <li key={n} className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
                   <span className="text-foreground/90">{n}</span>
                   <input type="checkbox" defaultChecked className="accent-signal" />
                 </li>
@@ -116,7 +116,7 @@ function SettingsPage() {
         <TabsContent value="da" className="mt-3">
           <Panel accent="green" texture="dots">
             <PanelHead title="Data Management" sub="Export and portability" accent="green" />
-            <Button variant="outline" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("Export prepared (demo).")}>Export all data</Button>
+            <Button variant="outline" className="border-input bg-transparent" onClick={() => toast("Export prepared (demo).")}>Export all data</Button>
           </Panel>
         </TabsContent>
       </Tabs>

@@ -53,7 +53,7 @@ function EquipmentPage() {
         </TabsList>
 
         <TabsContent value="cat" className="mt-3">
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search SKU, brand, model…" className="h-9 w-72 mb-3 border-[rgba(133,164,204,0.16)] bg-[#0D1929]" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search SKU, brand, model…" className="h-9 w-72 mb-3 border-input bg-card" />
           <TableShell>
             <thead>
               <tr>

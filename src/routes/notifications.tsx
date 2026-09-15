@@ -37,7 +37,7 @@ function NotifPage() {
         title="Notifications"
         subtitle="Signals across the platform"
         actions={
-          <Button size="sm" variant="outline" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => { setList(list.map((n) => ({ ...n, read: true }))); toast("All marked read."); }}>
+          <Button size="sm" variant="outline" className="border-input bg-transparent" onClick={() => { setList(list.map((n) => ({ ...n, read: true }))); toast("All marked read."); }}>
             Mark all read
           </Button>
         }

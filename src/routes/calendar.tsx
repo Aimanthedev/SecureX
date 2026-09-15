@@ -75,7 +75,7 @@ function CalPage() {
             <div key={dw} className="label-xs p-1 text-center">{dw}</div>
           ))}
           {days.map((day) => (
-            <div key={day.iso} className="aspect-square rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.03)] p-1.5 overflow-hidden">
+            <div key={day.iso} className="aspect-square rounded-xl border border-border bg-muted/40 p-1.5 overflow-hidden">
               <div className="num text-[10px] text-muted-foreground">{day.day}</div>
               <div className="mt-1 space-y-0.5">
                 {day.events.map((e, i) => {

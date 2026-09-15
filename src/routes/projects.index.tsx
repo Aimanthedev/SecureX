@@ -77,7 +77,7 @@ function ProjectsList() {
         subtitle={`${withHealth.length} active engagements · ${fmtQAR(totalValue, { compact: true })} contract value under management across Qatar.`}
         actions={
           <>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent hover:bg-[rgba(133,164,204,0.08)]" onClick={() => toast("CSV export prepared (demo)")}>
+            <Button variant="outline" size="sm" className="border-input bg-transparent hover:bg-[rgba(133,164,204,0.08)]" onClick={() => toast("CSV export prepared (demo)")}>
               Export
             </Button>
             <Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-white hover:bg-signal/90 shadow-[0_10px_28px_-12px_var(--glow)]">
@@ -101,17 +101,17 @@ function ProjectsList() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search project or number…"
-          className="h-9 w-full border-[rgba(133,164,204,0.16)] bg-[#091321] sm:w-64"
+          className="h-9 w-full border-input bg-surface sm:w-64"
         />
         <Select value={phaseFilter} onValueChange={setPhaseFilter}>
-          <SelectTrigger className="h-9 w-40 border-[rgba(133,164,204,0.16)] bg-[#091321]"><SelectValue placeholder="Phase" /></SelectTrigger>
+          <SelectTrigger className="h-9 w-40 border-input bg-surface"><SelectValue placeholder="Phase" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All phases</SelectItem>
             {phases.map((ph) => <SelectItem key={ph} value={ph}>{ph}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={healthFilter} onValueChange={setHealthFilter}>
-          <SelectTrigger className="h-9 w-44 border-[rgba(133,164,204,0.16)] bg-[#091321]"><SelectValue placeholder="Health" /></SelectTrigger>
+          <SelectTrigger className="h-9 w-44 border-input bg-surface"><SelectValue placeholder="Health" /></SelectTrigger>
           <SelectContent>
             {["all", "On Track", "Watch", "At Risk", "Awaiting Materials", "Delayed"].map((h) => (
               <SelectItem key={h} value={h}>{h === "all" ? "All health" : h}</SelectItem>
@@ -164,27 +164,27 @@ function ProjectsList() {
                     <HealthBadge label={h.label} />
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-2.5 py-2">
+                  <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-muted/50 px-2.5 py-2">
                     <span className="label-xs">Status</span>
                     <WorkStatusBadge status={projectStatus(p, h.label)} />
                   </div>
 
                   <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-                    <div className="rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] p-2">
+                    <div className="rounded-lg border border-border bg-muted/50 p-2">
                       <div className="label-xs">Material</div>
                       <div className="mt-1"><WorkStatusBadge status={materialStatus(d.materials.filter((m) => m.projectId === p.id))} /></div>
                     </div>
-                    <div className="rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] p-2">
+                    <div className="rounded-lg border border-border bg-muted/50 p-2">
                       <div className="label-xs">Cameras</div>
                       <div className="num mt-1 font-semibold text-foreground">{installed}/{cams.length || "—"}</div>
                     </div>
-                    <div className="rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] p-2">
+                    <div className="rounded-lg border border-border bg-muted/50 p-2">
                       <div className="label-xs">Value</div>
                       <div className="num mt-1 font-semibold text-foreground">{fmtQAR(p.contractValue, { compact: true })}</div>
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between border-t border-[rgba(133,164,204,0.10)] pt-3 text-[11.5px]">
+                  <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-[11.5px]">
                     <div className="min-w-0">
                       <div className="label-xs">Project manager</div>
                       <div className="truncate text-foreground/90">{pm?.name ?? "—"}</div>
@@ -196,7 +196,7 @@ function ProjectsList() {
                   </div>
 
                   {nextTask && (
-                    <div className="mt-2.5 truncate rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(47,131,255,0.06)] px-2.5 py-1.5 text-[11px] text-muted-foreground">
+                    <div className="mt-2.5 truncate rounded-lg border border-border bg-[rgba(47,131,255,0.06)] px-2.5 py-1.5 text-[11px] text-muted-foreground">
                       <span className="label-xs mr-1.5 inline text-[10px]">Next</span>{nextTask.title}
                     </div>
                   )}
@@ -265,7 +265,7 @@ function ProjectsList() {
                       <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground"><span>{fmtDate(p.plannedEnd)}</span><span className="num">{fmtQAR(p.contractValue, { compact: true })}</span></div>
                     </button>
                   ))}
-                  {items.length === 0 && <div className="rounded-lg border border-dashed border-[rgba(133,164,204,0.14)] py-6 text-center text-[11px] text-muted-foreground">Empty</div>}
+                  {items.length === 0 && <div className="rounded-lg border border-dashed border-border py-6 text-center text-[11px] text-muted-foreground">Empty</div>}
                 </div>
               </div>
             );
@@ -301,7 +301,7 @@ function ProjectsList() {
       )}
 
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
-        <DialogContent className="max-w-2xl border-[rgba(133,164,204,0.14)] bg-[#091321]">
+        <DialogContent className="max-w-2xl border-border bg-surface">
           <DialogHeader><DialogTitle>New Project</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <label className="col-span-2"><span className="label-xs">Project name</span><Input placeholder="e.g., West Bay Tower CCTV Upgrade" /></label>

@@ -36,7 +36,7 @@ function SalesPage() {
   return (
     <div>
       <PageHeader title="Sales" subtitle="Pipeline, leads, and forecast for SecureX CCTV COMPANY"
-        actions={<><Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)]">Import leads</Button><Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-white hover:bg-signal/90">New lead</Button></>} />
+        actions={<><Button variant="outline" size="sm" className="border-input">Import leads</Button><Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-white hover:bg-signal/90">New lead</Button></>} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <MetricCard label="Open Pipeline" value={active.length} sub="active opportunities" icon={<TrendingUp className="w-4 h-4" />} accent="blue" motif="nodes" />
@@ -46,7 +46,7 @@ function SalesPage() {
       </div>
 
       <Tabs value={view} onValueChange={(v) => setView(v as never)}>
-        <TabsList className="bg-[#091321] border border-[rgba(133,164,204,0.12)] rounded-xl p-1">
+        <TabsList className="bg-surface border border-border rounded-xl p-1">
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger><TabsTrigger value="leads">Leads</TabsTrigger><TabsTrigger value="followups">Follow-Ups</TabsTrigger><TabsTrigger value="activities">Activities</TabsTrigger><TabsTrigger value="targets">Targets</TabsTrigger><TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -70,7 +70,7 @@ function SalesPage() {
         <TabsContent value="activities" className="mt-4">
           <Panel texture="dots">
             <PanelHead title="Recent Activities" sub="Latest lead touches across the pipeline" accent="purple" />
-            <ol className="relative ml-2 space-y-4 border-l border-[rgba(133,164,204,0.14)]">
+            <ol className="relative ml-2 space-y-4 border-l border-border">
               {d.leads.slice(0, 10).map((l) => (
                 <li key={l.id} className="ml-4 relative">
                   <div className="absolute w-2 h-2 rounded-full bg-signal -left-[21px] mt-1.5" style={{ boxShadow: "0 0 8px rgba(47,131,255,0.6)" }} />
@@ -194,7 +194,7 @@ function Leaderboard() {
       <PanelHead title="Salesperson Leaderboard" sub="Ranked by closed-won value" accent="purple" />
       <div className="space-y-2">
         {rows.map((r, i) => (
-          <div key={r.e.id} className="flex items-center gap-3 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2">
+          <div key={r.e.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-3 py-2">
             <div className="w-6 text-[12px] num text-muted-foreground">#{i + 1}</div>
             <div className="min-w-0 flex-1 truncate text-[12.5px] text-foreground">{r.e.name}</div>
             <div className="num text-[11.5px] text-muted-foreground">{r.count} leads</div>
@@ -252,7 +252,7 @@ function PipelineBoard() {
           {LEAD_STAGES.map((stage) => {
             const leads = d.leads.filter((l) => l.stage === stage);
             return (
-              <div key={stage} onDragOver={(e) => e.preventDefault()} onDrop={() => onDrop(stage)} className="shrink-0 w-72 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(13,25,41,0.5)] p-2">
+              <div key={stage} onDragOver={(e) => e.preventDefault()} onDrop={() => onDrop(stage)} className="shrink-0 w-72 rounded-xl border border-border bg-[rgba(13,25,41,0.5)] p-2">
                 <div className="flex items-center justify-between px-1 py-1 mb-2">
                   <div className="label-xs">{stage}</div>
                   <div className="text-[10px] text-muted-foreground num">{leads.length} · {fmtQAR(stageValue(stage), { compact: true })}</div>
@@ -318,7 +318,7 @@ function PipelineBoard() {
                 <div><div className="text-xs uppercase text-muted-foreground">Notes</div><div>{detail.notes || "-"}</div></div>
                 {detail.lostReason && <div className="text-[#FF4664] text-xs">Lost reason: {detail.lostReason}</div>}
               </TabsContent>
-              <TabsContent value="tl" className="mt-3"><ol className="relative ml-2 space-y-3 border-l border-[rgba(133,164,204,0.14)]">{[detail.createdAt, detail.lastActivity].map((dt, i) => <li key={i} className="ml-4 relative"><div className="absolute w-2 h-2 rounded-full bg-signal -left-[21px] mt-1.5" /><div className="text-sm num">{fmtDate(dt)}</div><div className="text-xs text-muted-foreground">{i === 0 ? "Lead created" : "Last activity"}</div></li>)}</ol></TabsContent>
+              <TabsContent value="tl" className="mt-3"><ol className="relative ml-2 space-y-3 border-l border-border">{[detail.createdAt, detail.lastActivity].map((dt, i) => <li key={i} className="ml-4 relative"><div className="absolute w-2 h-2 rounded-full bg-signal -left-[21px] mt-1.5" /><div className="text-sm num">{fmtDate(dt)}</div><div className="text-xs text-muted-foreground">{i === 0 ? "Lead created" : "Last activity"}</div></li>)}</ol></TabsContent>
               <TabsContent value="notes" className="mt-3"><div className="text-sm">{detail.notes || "No notes."}</div></TabsContent>
             </Tabs>
             <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>Close</Button></DialogFooter>
@@ -337,7 +337,7 @@ function LeadsTable() {
   const filtered = d.leads.filter((l) => (l.company + l.contactName + l.systemType).toLowerCase().includes(q.toLowerCase()));
   return (
     <Panel pad={false}>
-      <div className="p-3 flex items-center gap-2"><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search leads." className="h-9 w-64 bg-[#0D1929]" /></div>
+      <div className="p-3 flex items-center gap-2"><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search leads." className="h-9 w-64 bg-card" /></div>
       <TableShell>
         <thead><tr>{["Company","Contact","System","Value","Stage","Prob","Salesperson","Next follow","Last activity",""].map((h) => <th key={h}>{h}</th>)}</tr></thead>
         <tbody>{filtered.map((l) => {

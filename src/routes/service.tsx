@@ -100,7 +100,7 @@ function ServicePage() {
             <PanelHead title="Preventive Maintenance Checklist" sub="Standard visit checklist" accent="green" />
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-sm">
               {PM_CHECKLIST.map((c, i) => (
-                <li key={c} className="flex items-center gap-2 rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.03)] px-3 py-2">
+                <li key={c} className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
                   <input type="checkbox" defaultChecked={i < 5} className="accent-signal" /> <span className="text-foreground/90">{c}</span>
                 </li>
               ))}

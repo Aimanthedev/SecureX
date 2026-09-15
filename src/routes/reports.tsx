@@ -44,8 +44,8 @@ function ReportsPage() {
         subtitle="Business answers, not decoration"
         actions={
           <>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("Saved view")}>Save view</Button>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("CSV exported (demo)")}>Export CSV</Button>
+            <Button variant="outline" size="sm" className="border-input bg-transparent" onClick={() => toast("Saved view")}>Save view</Button>
+            <Button variant="outline" size="sm" className="border-input bg-transparent" onClick={() => toast("CSV exported (demo)")}>Export CSV</Button>
             <Button size="sm" className="bg-signal text-white hover:bg-signal/90" onClick={() => window.print()}>Print</Button>
           </>
         }

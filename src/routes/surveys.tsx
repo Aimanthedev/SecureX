@@ -38,7 +38,7 @@ function SurveysPage() {
       </div>
 
       <Tabs value={view} onValueChange={setView}>
-        <TabsList className="bg-[#091321] border border-[rgba(133,164,204,0.12)] rounded-xl p-1"><TabsTrigger value="list">List</TabsTrigger><TabsTrigger value="cal">Calendar</TabsTrigger><TabsTrigger value="tpl">Templates</TabsTrigger></TabsList>
+        <TabsList className="bg-surface border border-border rounded-xl p-1"><TabsTrigger value="list">List</TabsTrigger><TabsTrigger value="cal">Calendar</TabsTrigger><TabsTrigger value="tpl">Templates</TabsTrigger></TabsList>
         <TabsContent value="list" className="mt-3">
           <Panel pad={false}>
             <TableShell>
@@ -84,7 +84,7 @@ function SurveysPage() {
               <Panel key={t} texture="dots" accent="purple">
                 <div className="text-sm font-medium text-foreground">{t} template</div>
                 <div className="text-xs text-muted-foreground mt-1">Prefilled sections and typical camera point layouts.</div>
-                <Button size="sm" variant="outline" className="mt-3 border-[rgba(133,164,204,0.18)]" onClick={() => toast.success(`Applied ${t} template.`)}>Use template</Button>
+                <Button size="sm" variant="outline" className="mt-3 border-input" onClick={() => toast.success(`Applied ${t} template.`)}>Use template</Button>
               </Panel>
             ))}
           </div>
@@ -92,7 +92,7 @@ function SurveysPage() {
       </Tabs>
 
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-4xl bg-[#0B1524] border-[rgba(133,164,204,0.14)]">
+        <DialogContent className="max-w-4xl bg-card border-border">
           {detail && (() => {
             const s = d.surveys.find((x) => x.id === detail)!;
             return (

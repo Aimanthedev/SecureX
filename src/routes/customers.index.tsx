@@ -39,7 +39,7 @@ function CustomersPage() {
 
       <Panel className="rise rise-2 mb-4" pad={false}>
         <div className="p-3">
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search customer…" className="h-9 w-72 border-[rgba(133,164,204,0.16)] bg-[#0D1929]" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search customer…" className="h-9 w-72 border-input bg-card" />
         </div>
       </Panel>
 

@@ -176,11 +176,11 @@ function CommandCenter() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-medium">{r.activity}</div>
-                      <div className="truncate text-[11px] text-[#66778D]">{r.title} · {r.owner}</div>
+                      <div className="truncate text-[11px] text-muted-foreground">{r.title} · {r.owner}</div>
                     </div>
                     <div className="num hidden w-28 shrink-0 text-right text-[12.5px] font-semibold sm:block">{r.value}</div>
                     <div className="hidden shrink-0 sm:block"><StatusPill status={r.status} tone={r.tone} /></div>
-                    <div className="w-16 shrink-0 text-right text-[10.5px] text-[#66778D]">{r.time}</div>
+                    <div className="w-16 shrink-0 text-right text-[10.5px] text-muted-foreground">{r.time}</div>
                   </div>
                 );
               })}
@@ -212,7 +212,7 @@ function CommandCenter() {
                       <td className="num ta-right font-semibold">{fmtQAR(p.contractValue, { compact: true })}</td>
                       <td><HealthBadge label={h.label} /></td>
                       <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>
-                      <td><ArrowRight className="h-3.5 w-3.5 text-[#66778D]" /></td>
+                      <td><ArrowRight className="h-3.5 w-3.5 text-muted-foreground" /></td>
                     </tr>
                   );
                 })}
@@ -304,7 +304,7 @@ function CommandCenter() {
                 { l: "Tested", v: tested, a: "magenta" as const },
                 { l: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length, a: "red" as const },
               ].map((s) => (
-                <div key={s.l} className="flex items-center justify-between rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2 text-[11.5px]">
+                <div key={s.l} className="flex items-center justify-between rounded-xl border border-border bg-muted/50 px-3 py-2 text-[11.5px]">
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: ACCENT[s.a].hex, boxShadow: `0 0 8px ${ACCENT[s.a].hex}` }} />
                     {s.l}
@@ -323,7 +323,7 @@ function CommandCenter() {
 function Legend({ color, label, value }: { color: string; label: string; value: string }) {
   return (
     <div>
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#66778D]">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <span className="h-2 w-2 rounded-full" style={{ background: color }} />{label}
       </div>
       <div className="num mt-1 text-[15px] font-semibold">{value}</div>

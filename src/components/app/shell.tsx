@@ -3,7 +3,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, FileText, HardHat, Wrench, Calendar, UserCircle2, Package, ShoppingCart,
   ShieldCheck, FolderOpen, UsersRound, BarChart3, Bell, Settings, Search, Plus, LogOut,
-  PanelLeftClose, PanelLeftOpen, HelpCircle, ChevronRight, Menu, X, Radar, User, Sparkles,
+  PanelLeftClose, PanelLeftOpen, HelpCircle, ChevronRight, Menu, X, Radar, User, Sparkles, Sun, Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -206,14 +206,14 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
 }
 
 function TopBar({ onMenu }: { onMenu: () => void }) {
-  const { role, setRole, density, setDensity } = useUI();
+  const { role, setRole, density, setDensity, theme, setTheme } = useUI();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const nav = useNavigate();
   const parts = useMemo(() => path.split("/").filter(Boolean), [path]);
   const title = PAGE_TITLES[parts[0] ?? ""] ?? (parts[0] ?? "Command Center");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[rgba(133,164,204,0.10)] bg-[#06101D]/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border bg-[var(--topbar-bg)] backdrop-blur-xl">
       <div className="flex h-[58px] items-center gap-2 px-3 md:px-6">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenu}><Menu className="h-5 w-5" /></Button>
 
@@ -232,12 +232,15 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         <QuickCreate />
 
         <Select value={role} onValueChange={(v) => { setRole(v as never); toast(`Role preview: ${v}`); }}>
-          <SelectTrigger className="hidden h-9 w-[172px] rounded-xl border-[rgba(133,164,204,0.14)] bg-[#0B1524] text-[11.5px] lg:flex"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="hidden h-9 w-[172px] rounded-xl border-border bg-card text-[11.5px] lg:flex"><SelectValue /></SelectTrigger>
           <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>)}</SelectContent>
         </Select>
 
         <IconBtn onClick={() => setDensity(density === "compact" ? "comfortable" : "compact")} title={`Density: ${density}`}>
           <span className="font-mono text-[9px] uppercase">{density === "compact" ? "Cmp" : "Cmf"}</span>
+        </IconBtn>
+        <IconBtn onClick={() => setTheme(theme === "dark" ? "light" : "dark")} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </IconBtn>
         <IconBtn onClick={() => nav({ to: "/notifications" })} title="Notifications">
           <span className="relative"><Bell className="h-4 w-4" /><span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#FF4664]" /></span>
@@ -254,7 +257,7 @@ function IconBtn({ children, onClick, title }: { children: React.ReactNode; onCl
     <button
       onClick={onClick}
       title={title}
-      className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(133,164,204,0.12)] bg-[#0B1524] text-[#A8B7CA] transition-colors hover:border-[rgba(47,131,255,0.35)] hover:text-white sm:inline-flex"
+      className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:border-signal/40 hover:bg-accent hover:text-foreground sm:inline-flex"
     >
       {children}
     </button>
@@ -282,17 +285,17 @@ function MobileTabBar() {
       >
         <Plus className="h-5 w-5" />
       </button>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[rgba(133,164,204,0.12)] bg-[#050C17]/95 backdrop-blur-xl md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-[var(--topbar-bg)] backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5 px-1 pb-[env(safe-area-inset-bottom)]">
           {MOBILE_TABS.map((t) => {
             const active = t.to === "/" ? path === "/" : path.startsWith(t.to);
             const Icon = t.icon;
             return (
               <Link key={t.to} to={t.to} className="flex flex-col items-center gap-1 py-2.5">
-                <span className={cn("grid h-8 w-12 place-items-center rounded-xl transition-all", active ? "bg-signal text-white shadow-[0_10px_22px_-12px_rgba(47,131,255,0.95)]" : "text-[#66778D]")}>
+                <span className={cn("grid h-8 w-12 place-items-center rounded-xl transition-all", active ? "bg-signal text-signal-foreground shadow-[0_10px_22px_-12px_var(--glow)]" : "text-muted-foreground")}>
                   <Icon className="h-[17px] w-[17px]" />
                 </span>
-                <span className={cn("text-[9.5px] font-medium", active ? "text-white" : "text-[#66778D]")}>{t.label}</span>
+                <span className={cn("text-[9.5px] font-medium", active ? "text-foreground" : "text-muted-foreground")}>{t.label}</span>
               </Link>
             );
           })}
@@ -328,13 +331,13 @@ function GlobalSearch() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="hidden h-9 w-[190px] items-center gap-2 rounded-full border border-[rgba(133,164,204,0.12)] bg-[#0B1524] px-3.5 text-[11.5px] text-[#66778D] transition-colors hover:border-[rgba(47,131,255,0.35)] md:flex lg:w-[300px] xl:w-[380px]">
+        <button className="hidden h-9 w-[190px] items-center gap-2 rounded-full border border-border bg-card px-3.5 text-[11.5px] text-muted-foreground transition-colors hover:border-signal/40 md:flex lg:w-[300px] xl:w-[380px]">
           <Search className="h-3.5 w-3.5" />
           <span className="truncate">Search projects, customers, cameras, documents…</span>
-          <kbd className="ml-auto hidden rounded-md border border-[rgba(133,164,204,0.14)] bg-[#12233A] px-1.5 py-0.5 font-mono text-[9px] lg:inline">⌘K</kbd>
+          <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[9px] lg:inline">⌘K</kbd>
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl overflow-hidden rounded-2xl border-[rgba(133,164,204,0.14)] bg-[#0D1929] p-0">
+      <DialogContent className="max-w-2xl overflow-hidden rounded-2xl border-border bg-popover p-0">
         <div className="flex items-center gap-2 border-b border-[rgba(133,164,204,0.10)] px-4 py-3">
           <Search className="h-4 w-4 text-[#66778D]" />
           <Input autoFocus placeholder="Search projects, customers, cameras, documents…" value={q} onChange={(e) => setQ(e.target.value)} className="border-0 bg-transparent text-sm shadow-none focus-visible:ring-0" />

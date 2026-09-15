@@ -250,7 +250,7 @@ export function StatusPill({ status, tone = "neutral" }: {
   const key = map[tone];
   if (!key) {
     return (
-      <span className="inline-flex whitespace-nowrap rounded-full border border-[rgba(133,164,204,0.16)] bg-[rgba(133,164,204,0.07)] px-2.5 py-[3px] text-[11px] font-medium text-muted-foreground">
+      <span className="inline-flex whitespace-nowrap rounded-full border border-border bg-muted px-2.5 py-[3px] text-[11px] font-medium text-muted-foreground">
         {status}
       </span>
     );
@@ -337,7 +337,7 @@ export function Segmented<T extends string>({ value, onChange, options, size = "
   value: T; onChange: (v: T) => void; options: { value: T; label: string; icon?: React.ReactNode }[]; size?: "sm" | "md";
 }) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-xl border border-[rgba(133,164,204,0.12)] bg-[#091321] p-1">
+    <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface p-1">
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -349,7 +349,7 @@ export function Segmented<T extends string>({ value, onChange, options, size = "
               size === "sm" ? "px-2.5 py-1 text-[11.5px]" : "px-3.5 py-1.5 text-[12.5px]",
               active
                 ? "bg-signal text-white shadow-[0_8px_22px_-10px_var(--glow)]"
-                : "text-muted-foreground hover:bg-[rgba(133,164,204,0.07)] hover:text-foreground",
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
             {o.icon}
@@ -405,7 +405,7 @@ export function AlertCard({ severity, title, meta, action, onAction }: {
 /* ── Table shell ─────────────────────────────────────────────── */
 export function TableShell({ children, className, maxHeight }: { children: React.ReactNode; className?: string; maxHeight?: number }) {
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-[rgba(133,164,204,0.12)] bg-[#091321]", className)}>
+    <div className={cn("overflow-hidden rounded-2xl border border-border bg-surface", className)}>
       <div className="overflow-auto" style={maxHeight ? { maxHeight } : undefined}>
         <table className="data-table">{children}</table>
       </div>
@@ -426,7 +426,7 @@ export function Donut({ data, size = 180, thickness = 18, centerLabel, centerVal
     <div className="flex flex-wrap items-center gap-5">
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={thickness} stroke="rgba(133,164,204,0.08)" fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={thickness} stroke="var(--chart-track)" fill="none" />
           {data.map((d, i) => {
             const len = (d.value / total) * c;
             const el = (

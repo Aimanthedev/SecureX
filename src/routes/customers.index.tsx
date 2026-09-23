@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useData } from "@/lib/data-context";
 import { PageHeader, StatTile, StatusPill, TableShell, Panel } from "@/components/app/common";
 import { fmtQAR } from "@/lib/format";
+import { getProjectOutstanding } from "@/lib/project-selectors";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,7 +25,7 @@ function CustomersPage() {
   const list = d.customers.filter((c) => c.name.toLowerCase().includes(q.toLowerCase()));
   const active = d.customers.filter((c) => c.status === "Active").length;
   const prospects = d.customers.filter((c) => c.status === "Prospect").length;
-  const totalOutstanding = d.projects.reduce((s, p) => s + (p.invoiced - p.collected), 0);
+  const totalOutstanding = d.projects.reduce((s, p) => s + getProjectOutstanding(d.selectorCtx, p.id), 0);
 
   useEffect(() => {
     if (d.pendingCreate?.type === "customer") { setNewOpen(true); d.clearPendingCreate(); }
@@ -64,7 +65,7 @@ function CustomersPage() {
           <tbody>
             {list.map((c) => {
               const projs = d.projects.filter((p) => p.customerId === c.id);
-              const outstanding = projs.reduce((s, p) => s + (p.invoiced - p.collected), 0);
+              const outstanding = projs.reduce((s, p) => s + getProjectOutstanding(d.selectorCtx, p.id), 0);
               const amc = d.amc.filter((a) => a.customerId === c.id).length;
               return (
                 <tr key={c.id}>

@@ -5,8 +5,9 @@ import {
   MetricCard, Panel, PanelHead, Donut, StatusPill, HealthBadge, MonoChip, WorkStatusBadge, projectStatus,
   Segmented, QuickAction, AlertCard, TableShell, axisProps, ChartTooltip, ACCENT,
 } from "@/components/app/common";
-import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
+import { fmtQAR, fmtDate } from "@/lib/format";
 import { buildAlerts } from "@/lib/alerts";
+import { getProjectHealth, getProjectCurrentValue, getProjectInvoiced, getProjectCollected } from "@/lib/project-selectors";
 import {
   ArrowRight, Wallet, TrendingUp, Banknote, HardHat, Camera, ClipboardCheck, Package,
   FileSignature, CircleDollarSign, AlertTriangle, Plus, FileBarChart, Radio, Building2,
@@ -33,15 +34,15 @@ function CommandCenter() {
   const [range, setRange] = useState<"m" | "q" | "y">("q");
 
   const projectsWithHealth = useMemo(
-    () => d.projects.map((p) => ({ p, h: d.computeHealth(p, d.approvals, d.devices, d.materials) })),
+    () => d.projects.map((p) => ({ p, h: getProjectHealth(d.selectorCtx, p.id) })),
     [d],
   );
   const active = projectsWithHealth.length;
   const atRisk = projectsWithHealth.filter((x) => x.h.label !== "On Track").length;
   const pipeline = d.leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").reduce((s, l) => s + l.value * (l.probability / 100), 0);
-  const revenue = d.projects.reduce((s, p) => s + p.contractValue, 0);
-  const invoiced = d.projects.reduce((s, p) => s + p.invoiced, 0);
-  const collected = d.projects.reduce((s, p) => s + p.collected, 0);
+  const revenue = d.projects.reduce((s, p) => s + getProjectCurrentValue(d.selectorCtx, p.id), 0);
+  const invoiced = d.projects.reduce((s, p) => s + getProjectInvoiced(d.selectorCtx, p.id), 0);
+  const collected = d.projects.reduce((s, p) => s + getProjectCollected(d.selectorCtx, p.id), 0);
   const outstanding = invoiced - collected;
   const inProgressCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "In Progress").length;
   const completedCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "Completed").length;
@@ -60,7 +61,7 @@ function CommandCenter() {
   const distribution = useMemo(() => {
     const byPhase: Record<string, number> = {};
     d.projects.forEach((p) => { byPhase[p.phase] = (byPhase[p.phase] || 0) + 1; });
-    const order = ["Installation", "Testing", "Procurement", "Handover", "Maintenance"];
+    const order = ["Planning", "Procurement", "Installation", "Testing & Commissioning", "Handover"];
     const colors = ["#2F83FF", "#18D5FF", "#9654FF", "#E447C4", "#20D39A"];
     const known = order.map((name, i) => ({ name, value: byPhase[name] || 0, color: colors[i] }));
     Object.entries(byPhase).filter(([k]) => !order.includes(k)).forEach(([name, value], i) => {
@@ -69,7 +70,7 @@ function CommandCenter() {
     return known.filter((x) => x.value > 0);
   }, [d.projects]);
 
-  const alerts = useMemo(() => buildAlerts(d).slice(0, 6).map((a) => ({
+  const alerts = useMemo(() => buildAlerts({ ...d.selectorCtx, purchaseOrders: d.purchaseOrders, amc: d.amc, tickets: d.tickets, customers: d.customers }).slice(0, 6).map((a) => ({
     severity: a.severity === "info" ? "warning" as const : a.severity,
     title: a.title, sub: a.sub, owner: a.owner, action: "Open",
     go: () => { if (a.path) nav({ to: a.path as never }); },
@@ -194,7 +195,7 @@ function CommandCenter() {
                       <td className="text-muted-foreground">{cust?.name}</td>
                       <td><StatusPill status={p.phase} tone="info" /></td>
                       <td><WorkStatusBadge status={projectStatus(p, h.label)} /></td>
-                      <td className="num ta-right font-semibold">{fmtQAR(p.contractValue, { compact: true })}</td>
+                      <td className="num ta-right font-semibold">{fmtQAR(getProjectCurrentValue(d.selectorCtx, p.id), { compact: true })}</td>
                       <td><HealthBadge label={h.label} /></td>
                       <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>
                       <td><ArrowRight className="h-3.5 w-3.5 text-[#66778D]" /></td>

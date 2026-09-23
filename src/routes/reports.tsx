@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { fmtQAR } from "@/lib/format";
 import { TableShell, MonoChip, StatusPill } from "@/components/app/common";
+import { getProjectCurrentValue, getProjectCollected, getProjectOutstanding, getProjectPlannedProgress, getProjectActualProgress } from "@/lib/project-selectors";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [
@@ -35,7 +36,7 @@ function ReportsPage() {
     { name: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length },
   ];
   const collected = [{ m: "Feb", v: 120000 }, { m: "Mar", v: 180000 }, { m: "Apr", v: 260000 }, { m: "May", v: 340000 }, { m: "Jun", v: 410000 }, { m: "Jul", v: 305000 }];
-  const totalContract = d.projects.reduce((s, p) => s + p.contractValue, 0);
+  const totalContract = d.projects.reduce((s, p) => s + getProjectCurrentValue(d.selectorCtx, p.id), 0);
 
   return (
     <div>
@@ -48,7 +49,7 @@ function ReportsPage() {
             <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("Saved view")}>Save view</Button>
             <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => {
               const header = ["Project", "Customer", "Phase", "Contract Value", "Collected", "Outstanding"];
-              const rows = d.projects.map((p) => [p.number, d.customers.find((c) => c.id === p.customerId)?.name ?? "", p.phase, p.contractValue, p.collected, p.invoiced - p.collected]);
+              const rows = d.projects.map((p) => [p.number, d.customers.find((c) => c.id === p.customerId)?.name ?? "", p.phase, getProjectCurrentValue(d.selectorCtx, p.id), getProjectCollected(d.selectorCtx, p.id), getProjectOutstanding(d.selectorCtx, p.id)]);
               const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
               const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
               const url = URL.createObjectURL(blob);
@@ -123,14 +124,16 @@ function ReportsPage() {
               const cust = d.customers.find((c) => c.id === p.customerId);
               const devs = d.devices.filter((x) => x.projectId === p.id);
               const passed = devs.filter((x) => x.testResult === "Pass").length;
-              const variance = p.actualProgress - p.plannedProgress;
+              const planned = getProjectPlannedProgress(d.selectorCtx, p.id);
+              const actual = getProjectActualProgress(d.selectorCtx, p.id);
+              const variance = actual - planned;
               return (
                 <tr key={p.id}>
                   <td><MonoChip>{p.number}</MonoChip> <span className="ml-1 text-foreground">{p.name}</span></td>
                   <td className="text-xs text-muted-foreground">{cust?.name}</td>
                   <td><StatusPill status={p.phase} tone="info" /></td>
-                  <td className="num text-xs">{p.plannedProgress}%</td>
-                  <td className="num text-xs">{p.actualProgress}%</td>
+                  <td className="num text-xs">{planned}%</td>
+                  <td className="num text-xs">{actual}%</td>
                   <td className="num text-xs" style={{ color: variance < 0 ? "#FF4664" : "#20D39A" }}>{variance > 0 ? "+" : ""}{variance}%</td>
                   <td className="num text-xs">{devs.length}</td>
                   <td className="num text-xs">{passed}/{devs.length}</td>
@@ -145,7 +148,7 @@ function ReportsPage() {
             <PanelHead title="Contract Value vs Collected" sub="By project" accent="green" />
             <div className="h-64">
               <ResponsiveContainer>
-                <BarChart data={d.projects.map((p) => ({ name: p.number.split("-").pop(), contract: p.contractValue, collected: p.collected }))}>
+                <BarChart data={d.projects.map((p) => ({ name: p.number.split("-").pop(), contract: getProjectCurrentValue(d.selectorCtx, p.id), collected: getProjectCollected(d.selectorCtx, p.id) }))}>
                   <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
                   <XAxis dataKey="name" {...axisProps} />
                   <YAxis {...axisProps} tickFormatter={(v) => fmtQAR(v, { compact: true })} />
@@ -161,7 +164,7 @@ function ReportsPage() {
             <div className="h-64">
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie data={d.projects.map((p) => ({ name: p.number.split("-").pop(), value: Math.max(0, p.invoiced - p.collected) }))} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
+                  <Pie data={d.projects.map((p) => ({ name: p.number.split("-").pop(), value: Math.max(0, getProjectOutstanding(d.selectorCtx, p.id)) }))} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
                     {d.projects.map((_, i) => <Cell key={i} fill={["#FFAA2C", "#FF4664", "#2F83FF", "#9654FF"][i % 4]} />)}
                   </Pie>
                   <Tooltip content={<ChartTooltip formatter={(v: number) => fmtQAR(v)} />} />

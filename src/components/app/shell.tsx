@@ -222,7 +222,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
   const nav = useNavigate();
   const parts = useMemo(() => path.split("/").filter(Boolean), [path]);
   const title = PAGE_TITLES[parts[0] ?? ""] ?? (parts[0] ?? "Command Center");
-  const unread = useMemo(() => buildAlerts(d).filter((n) => !d.readNotificationIds.includes(n.id)).length, [d]);
+  const unread = useMemo(() => buildAlerts({ ...d.selectorCtx, purchaseOrders: d.purchaseOrders, amc: d.amc, tickets: d.tickets, customers: d.customers }).filter((n) => !d.readNotificationIds.includes(n.id)).length, [d]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[rgba(133,164,204,0.10)] bg-[#06101D]/85 backdrop-blur-xl">

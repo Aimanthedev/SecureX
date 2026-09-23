@@ -2,7 +2,9 @@
 // Command Center's "Requires Attention" rail and the Notifications page both
 // read from this so the two views never disagree.
 import { daysFromToday } from "./format";
-import type { Approval, Device, Material, Project, PurchaseOrder, AMCContract, Customer, Employee, ServiceTicket } from "./mock-data";
+import type { PurchaseOrder, AMCContract, Customer, ServiceTicket } from "./mock-data";
+import type { SelectorCtx } from "./project-selectors";
+import { getProjectHealth } from "./project-selectors";
 
 export type AppAlert = {
   id: string;
@@ -15,24 +17,18 @@ export type AppAlert = {
   projectId?: string;
 };
 
-type AlertInputs = {
-  projects: Project[];
-  approvals: Approval[];
-  devices: Device[];
-  materials: Material[];
+type AlertInputs = SelectorCtx & {
   purchaseOrders: PurchaseOrder[];
   amc: AMCContract[];
   tickets: ServiceTicket[];
   customers: Customer[];
-  employees: Employee[];
-  computeHealth: (p: Project, a: Approval[], d: Device[], m: Material[]) => { label: string; drivers: { severity: string; text: string }[] };
 };
 
 export function buildAlerts(d: AlertInputs): AppAlert[] {
   const out: AppAlert[] = [];
 
   d.projects.forEach((p) => {
-    const h = d.computeHealth(p, d.approvals, d.devices, d.materials);
+    const h = getProjectHealth(d, p.id);
     const pm = d.employees.find((e) => e.id === p.pmId)?.name || "—";
     h.drivers.filter((x) => x.severity !== "info").forEach((dr, i) => {
       out.push({

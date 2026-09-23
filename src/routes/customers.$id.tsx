@@ -4,6 +4,7 @@ import { PageHeader, MonoChip, StatusPill, Panel, PanelHead, StatTile, TableShel
 import { fmtQAR, fmtDate } from "@/lib/format";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Phone, Mail } from "lucide-react";
+import { getProjectOutstanding } from "@/lib/project-selectors";
 
 export const Route = createFileRoute("/customers/$id")({
   head: () => ({ meta: [{ title: "Customer | SecureX CCTV COMPANY" }] }),
@@ -25,7 +26,7 @@ function CustomerDetail() {
   }
   const projs = d.projects.filter((p) => p.customerId === c.id);
   const sites = d.sites.filter((s) => s.customerId === c.id);
-  const outstanding = projs.reduce((s, p) => s + (p.invoiced - p.collected), 0);
+  const outstanding = projs.reduce((s, p) => s + getProjectOutstanding(d.selectorCtx, p.id), 0);
   const custAmc = d.amc.filter((a) => a.customerId === c.id);
   const custTickets = d.tickets.filter((t) => t.customerId === c.id);
   const custDocs = d.documents.filter((doc) => doc.customerId === c.id || projs.some((p) => p.id === doc.projectId));

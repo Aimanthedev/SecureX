@@ -21,7 +21,7 @@ function NotifPage() {
   const nav = useNavigate();
   const d = useData();
   const [group, setGroup] = useState("All");
-  const all = useMemo(() => buildAlerts(d), [d]);
+  const all = useMemo(() => buildAlerts({ ...d.selectorCtx, purchaseOrders: d.purchaseOrders, amc: d.amc, tickets: d.tickets, customers: d.customers }), [d]);
   const unreadCount = all.filter((n) => !d.readNotificationIds.includes(n.id)).length;
   const critical = all.filter((n) => n.severity === "critical").length;
   const warning = all.filter((n) => n.severity === "warning").length;

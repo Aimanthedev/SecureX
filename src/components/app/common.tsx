@@ -224,7 +224,6 @@ const healthMap: Record<ProjectHealth, Accent> = {
   "On Track": "green",
   "Watch": "amber",
   "At Risk": "red",
-  "Awaiting Materials": "amber",
   "Delayed": "red",
 };
 
@@ -296,21 +295,17 @@ export function projectStatus(
 ): WorkStatus {
   switch (p.phase) {
     case "On Hold": return "On Hold";
-    case "Delayed": return "Delayed";
-    case "Awaiting Client":
-    case "Client Approval": return "Awaiting Client";
-    case "Awaiting Materials":
-    case "Procurement":
-    case "Material Delivery": return "Awaiting Material";
-    case "Testing": return "Testing";
+    case "Cancelled": return "Blocked";
+    case "Procurement": return "Awaiting Material";
+    case "Testing & Commissioning": return "Testing";
     case "Handover":
     case "Warranty":
-    case "AMC": return "Completed";
-    case "Project Setup": return "Not Started";
+    case "AMC":
+    case "Completed": return "Completed";
+    case "Planning": return "Not Started";
     default: break;
   }
   if (healthLabel === "Delayed") return "Delayed";
-  if (healthLabel === "Awaiting Materials") return "Awaiting Material";
   if (healthLabel === "At Risk") return "Blocked";
   return "In Progress";
 }

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
   PageHeader, MonoChip, WorkStatusBadge, projectStatus, materialStatus, StatusPill, HealthBadge, StatTile, Segmented,
@@ -37,6 +37,23 @@ const phaseMotif: Record<string, "grid" | "camera" | "nodes" | "channels" | "wav
   "Installation": "camera",
 };
 
+function toCsv(rows: (string | number)[][]) {
+  return rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+}
+function downloadCsv(filename: string, csv: string) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+function exportProjectsCsv(projects: import("@/lib/mock-data").Project[], d: ReturnType<typeof useData>) {
+  const header = ["Number", "Name", "Customer", "Phase", "Contract Value", "Planned Start", "Planned End"];
+  const rows = projects.map((p) => [p.number, p.name, d.customers.find((c) => c.id === p.customerId)?.name ?? "", p.phase, p.contractValue, p.plannedStart, p.plannedEnd]);
+  downloadCsv("projects.csv", toCsv([header, ...rows]));
+  toast.success(`Exported ${projects.length} projects.`);
+}
+
 function ProjectsList() {
   const d = useData();
   const nav = useNavigate();
@@ -45,6 +62,10 @@ function ProjectsList() {
   const [healthFilter, setHealthFilter] = useState<string>("all");
   const [view, setView] = useState<"grid" | "table" | "kanban" | "timeline">("grid");
   const [newOpen, setNewOpen] = useState(false);
+
+  useEffect(() => {
+    if (d.pendingCreate?.type === "project") { setNewOpen(true); d.clearPendingCreate(); }
+  }, [d.pendingCreate]);
 
   const withHealth = useMemo(
     () => d.projects.map((p) => ({ p, h: d.computeHealth(p, d.approvals, d.devices, d.materials) })),
@@ -77,7 +98,7 @@ function ProjectsList() {
         subtitle={`${withHealth.length} active engagements · ${fmtQAR(totalValue, { compact: true })} contract value under management across Qatar.`}
         actions={
           <>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent hover:bg-[rgba(133,164,204,0.08)]" onClick={() => toast("CSV export prepared (demo)")}>
+            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent hover:bg-[rgba(133,164,204,0.08)]" onClick={() => exportProjectsCsv(filtered.map((x) => x.p), d)}>
               Export
             </Button>
             <Button size="sm" onClick={() => setNewOpen(true)} className="bg-signal text-white hover:bg-signal/90 shadow-[0_10px_28px_-12px_var(--glow)]">
@@ -300,24 +321,77 @@ function ProjectsList() {
         </div>
       )}
 
-      <Dialog open={newOpen} onOpenChange={setNewOpen}>
-        <DialogContent className="max-w-2xl border-[rgba(133,164,204,0.14)] bg-[#091321]">
-          <DialogHeader><DialogTitle>New Project</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <label className="col-span-2"><span className="label-xs">Project name</span><Input placeholder="e.g., West Bay Tower CCTV Upgrade" /></label>
-            <label><span className="label-xs">Customer</span><Select><SelectTrigger><SelectValue placeholder="Choose customer" /></SelectTrigger><SelectContent>{d.customers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></label>
-            <label><span className="label-xs">Site</span><Select><SelectTrigger><SelectValue placeholder="Choose site" /></SelectTrigger><SelectContent>{d.sites.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></label>
-            <label><span className="label-xs">Contract value (QAR)</span><Input type="number" defaultValue={100000} /></label>
-            <label><span className="label-xs">Project Manager</span><Select><SelectTrigger><SelectValue placeholder="Choose PM" /></SelectTrigger><SelectContent>{d.employees.filter((e) => e.department === "Projects").map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></label>
-            <label><span className="label-xs">Planned start</span><Input type="date" /></label>
-            <label><span className="label-xs">Planned end</span><Input type="date" /></label>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNewOpen(false)}>Cancel</Button>
-            <Button className="bg-signal text-white hover:bg-signal/90" onClick={() => { setNewOpen(false); toast.success("Project created (demo)."); }}>Create project</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NewProjectDialog open={newOpen} onOpenChange={setNewOpen} />
     </div>
+  );
+}
+
+function NewProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const d = useData();
+  const nav = useNavigate();
+  const today = new Date().toISOString().slice(0, 10);
+  const blank = {
+    name: "", customerId: "", siteId: "", contractValue: 100000,
+    pmId: d.employees.find((e) => e.department === "Projects")?.id ?? "",
+    plannedStart: today, plannedEnd: new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10),
+  };
+  const [form, setForm] = useState(blank);
+  useEffect(() => { if (open) setForm(blank); }, [open]);
+  const customerSites = d.sites.filter((s) => s.customerId === form.customerId);
+
+  const submit = () => {
+    if (!form.name.trim()) { toast.error("Project name is required"); return; }
+    if (!form.customerId) { toast.error("Choose a customer"); return; }
+    if (!form.pmId) { toast.error("Choose a project manager"); return; }
+    const num = `${d.numberingFormats.project.replace(/000$/, "")}${String(40 + d.projects.length).padStart(3, "0")}`;
+    const np = d.addProject({
+      number: num, name: form.name.trim(), customerId: form.customerId, siteId: form.siteId || d.sites.find((s) => s.customerId === form.customerId)?.id || d.sites[0].id,
+      phase: "Project Setup", scope: "Scope to be defined.",
+      contractValue: Number(form.contractValue) || 0, approvedVariations: 0,
+      estimatedCost: Math.round((Number(form.contractValue) || 0) * 0.65), committedCost: 0, actualCost: 0,
+      invoiced: 0, collected: 0, retention: Math.round((Number(form.contractValue) || 0) * 0.05),
+      plannedStart: form.plannedStart, plannedEnd: form.plannedEnd,
+      pmId: form.pmId, salespersonId: d.employees.find((e) => e.department === "Sales")?.id ?? "E-006", teamIds: [],
+      plannedProgress: 0, actualProgress: 0, materialReadiness: 0,
+    });
+    onOpenChange(false);
+    toast.success(`Project ${np.number} created.`);
+    nav({ to: "/projects/$id", params: { id: np.id } });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl border-[rgba(133,164,204,0.14)] bg-[#091321]">
+        <DialogHeader><DialogTitle>New Project</DialogTitle></DialogHeader>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <label className="col-span-2"><span className="label-xs">Project name</span><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., West Bay Tower CCTV Upgrade" /></label>
+          <label><span className="label-xs">Customer</span>
+            <Select value={form.customerId} onValueChange={(v) => setForm({ ...form, customerId: v, siteId: "" })}>
+              <SelectTrigger><SelectValue placeholder="Choose customer" /></SelectTrigger>
+              <SelectContent>{d.customers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label><span className="label-xs">Site</span>
+            <Select value={form.siteId} onValueChange={(v) => setForm({ ...form, siteId: v })} disabled={!form.customerId}>
+              <SelectTrigger><SelectValue placeholder="Choose site" /></SelectTrigger>
+              <SelectContent>{(customerSites.length ? customerSites : d.sites).map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label><span className="label-xs">Contract value (QAR)</span><Input type="number" value={form.contractValue} onChange={(e) => setForm({ ...form, contractValue: Number(e.target.value) })} /></label>
+          <label><span className="label-xs">Project Manager</span>
+            <Select value={form.pmId} onValueChange={(v) => setForm({ ...form, pmId: v })}>
+              <SelectTrigger><SelectValue placeholder="Choose PM" /></SelectTrigger>
+              <SelectContent>{d.employees.filter((e) => e.department === "Projects").map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label><span className="label-xs">Planned start</span><Input type="date" value={form.plannedStart} onChange={(e) => setForm({ ...form, plannedStart: e.target.value })} /></label>
+          <label><span className="label-xs">Planned end</span><Input type="date" value={form.plannedEnd} onChange={(e) => setForm({ ...form, plannedEnd: e.target.value })} /></label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button className="bg-signal text-white hover:bg-signal/90" onClick={submit}>Create project</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ROLES, useData, useUI } from "@/lib/data-context";
+import { ROLES, ROLE_NAV_ALLOW, useData, useUI } from "@/lib/data-context";
+import { buildAlerts } from "@/lib/alerts";
 import { toast } from "sonner";
 import { MonoChip } from "./common";
 
@@ -57,6 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isField = path.startsWith("/field");
+  const { density } = useUI();
 
   useEffect(() => { setMobileOpen(false); }, [path]);
 
@@ -92,7 +94,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="relative flex min-w-0 flex-1 flex-col">
         <TopBar onMenu={() => setMobileOpen(true)} />
-        <main className="mx-auto w-full max-w-[1680px] flex-1 px-3 pb-24 pt-4 md:px-6 md:pb-8 md:pt-5">{children}</main>
+        <main className={cn(
+          "mx-auto w-full max-w-[1680px] flex-1 px-3 pb-24 md:px-6 md:pb-8",
+          density === "compact" ? "pt-2 md:pt-3 [&_.panel]:p-3 space-y-2" : "pt-4 md:pt-5",
+        )}>{children}</main>
         <MobileTabBar />
       </div>
     </div>
@@ -100,6 +105,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 }
 
 function Logo({ compact }: { compact?: boolean }) {
+  const d = useData();
+  const [line1, ...rest] = d.companyProfile.name.split(" ");
+  const line2 = rest.join(" ") || "CCTV Company";
   return (
     <div className={cn("flex items-center gap-2.5", compact && "justify-center")}>
       <div className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl"
@@ -111,8 +119,8 @@ function Logo({ compact }: { compact?: boolean }) {
       </div>
       {!compact && (
         <div className="min-w-0 flex-1">
-          <div className="text-[13.5px] font-bold leading-tight tracking-[0.06em] text-white">SecureX</div>
-          <div className="text-[8.5px] font-semibold uppercase tracking-[0.22em] text-[#66778D]">CCTV Company</div>
+          <div className="truncate text-[13.5px] font-bold leading-tight tracking-[0.06em] text-white">{line1}</div>
+          <div className="truncate text-[8.5px] font-semibold uppercase tracking-[0.22em] text-[#66778D]">{line2}</div>
         </div>
       )}
     </div>
@@ -122,6 +130,8 @@ function Logo({ compact }: { compact?: boolean }) {
 function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean; onToggle: () => void; onNavigate?: () => void }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { role } = useUI();
+  const allow = ROLE_NAV_ALLOW[role];
+  const visibleGroups = allow ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((n) => allow.includes(n.to)) })).filter((g) => g.items.length > 0) : NAV_GROUPS;
   return (
     <>
       <div className={cn("px-3.5 pb-3 pt-4", collapsed && "px-2")}>
@@ -135,7 +145,7 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
       </div>
 
       <nav className="flex-1 space-y-3.5 overflow-y-auto px-2 py-2">
-        {NAV_GROUPS.map((g) => (
+        {visibleGroups.map((g) => (
           <div key={g.group}>
             {!collapsed && <div className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#4A5B71]">{g.group}</div>}
             <div className="space-y-[3px]">
@@ -207,10 +217,12 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
 
 function TopBar({ onMenu }: { onMenu: () => void }) {
   const { role, setRole, density, setDensity } = useUI();
+  const d = useData();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const nav = useNavigate();
   const parts = useMemo(() => path.split("/").filter(Boolean), [path]);
   const title = PAGE_TITLES[parts[0] ?? ""] ?? (parts[0] ?? "Command Center");
+  const unread = useMemo(() => buildAlerts(d).filter((n) => !d.readNotificationIds.includes(n.id)).length, [d]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[rgba(133,164,204,0.10)] bg-[#06101D]/85 backdrop-blur-xl">
@@ -240,7 +252,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
           <span className="font-mono text-[9px] uppercase">{density === "compact" ? "Cmp" : "Cmf"}</span>
         </IconBtn>
         <IconBtn onClick={() => nav({ to: "/notifications" })} title="Notifications">
-          <span className="relative"><Bell className="h-4 w-4" /><span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#FF4664]" /></span>
+          <span className="relative"><Bell className="h-4 w-4" />{unread > 0 && <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#FF4664]" />}</span>
         </IconBtn>
         <IconBtn onClick={() => toast("Help center opens shortly.")} title="Help"><HelpCircle className="h-4 w-4" /></IconBtn>
         <div className="ml-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[rgba(47,131,255,0.3)] bg-[rgba(47,131,255,0.14)] text-[11px] font-semibold text-signal">YE</div>
@@ -361,16 +373,17 @@ function GlobalSearch() {
 
 function QuickCreate() {
   const nav = useNavigate();
+  const d = useData();
+  const open = (type: string, to: string) => { d.requestCreate(type); nav({ to: to as never }); };
   const items = [
-    { l: "New lead", go: () => nav({ to: "/sales" }) },
-    
-    { l: "New site survey", go: () => nav({ to: "/surveys" }) },
-    { l: "New project", go: () => nav({ to: "/projects" }) },
+    { l: "New lead", go: () => open("lead", "/sales") },
+    { l: "New site survey", go: () => open("survey", "/surveys") },
+    { l: "New project", go: () => open("project", "/projects") },
     { l: "New task", go: () => nav({ to: "/projects" }) },
     { l: "New site visit", go: () => nav({ to: "/calendar" }) },
-    { l: "New service ticket", go: () => nav({ to: "/service" }) },
-    { l: "New purchase request", go: () => nav({ to: "/procurement" }) },
-    { l: "Upload document", go: () => nav({ to: "/documents" }) },
+    { l: "New service ticket", go: () => open("ticket", "/service") },
+    { l: "New purchase request", go: () => open("purchaseRequest", "/procurement") },
+    { l: "Upload document", go: () => open("document", "/documents") },
   ];
   return (
     <DropdownMenu>

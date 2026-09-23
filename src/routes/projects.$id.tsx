@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Printer, Circle, ChevronRight, MoreHorizontal, LayoutGrid, Wrench, Coins, ShieldCheck, FolderOpen, Flag, Camera, Package as PackageIcon, ClipboardCheck, TrendingDown, Users, MessageSquare, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +57,9 @@ function ProjectDetail() {
   ] as const, []);
   const [section, setSection] = useState<string>("overview");
   const [tab, setTab] = useState("overview");
+  const [editOpen, setEditOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [varOpen, setVarOpen] = useState(false);
   const activeSection = SECTIONS.find((s) => s.id === section) || SECTIONS[0];
   const goTo = (sub: string) => {
     const sec = SECTIONS.find((s) => s.subs.some((x) => x.v === sub));
@@ -98,7 +101,7 @@ function ProjectDetail() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t hairline">
-          <Button size="sm" className="bg-signal text-signal-foreground hover:bg-signal/90 h-8" onClick={() => toast.success("Project updated (demo)")}>Update Project</Button>
+          <Button size="sm" className="bg-signal text-signal-foreground hover:bg-signal/90 h-8" onClick={() => setEditOpen(true)}>Update Project</Button>
           <Button size="sm" variant="outline" className="h-8" onClick={() => goTo("tasks")}>Add Task</Button>
           <Button size="sm" variant="outline" className="h-8" onClick={() => goTo("site")}>Add Site Report</Button>
           <Button size="sm" variant="outline" className="h-8" onClick={() => goTo("comm")}>Client Update</Button>
@@ -107,14 +110,14 @@ function ProjectDetail() {
               <Button size="sm" variant="ghost" className="h-8 gap-1"><MoreHorizontal className="w-4 h-4" /> More</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem onClick={() => toast.success("Progress report generated (demo)")}><Printer className="w-3.5 h-3.5 mr-2" />Progress Report</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.print()}><Printer className="w-3.5 h-3.5 mr-2" />Progress Report</DropdownMenuItem>
               <DropdownMenuItem onClick={() => goTo("docs")}>Upload Document</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast("Issue drafted (demo)")}>Add Issue</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast("Issue logged in Activity Log (demo).")}>Add Issue</DropdownMenuItem>
               <DropdownMenuItem onClick={() => goTo("vars")}>Add Variation</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast("Site visit scheduled (demo)")}>Schedule Visit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => goTo("site")}>Schedule Visit</DropdownMenuItem>
               <DropdownMenuItem onClick={() => goTo("handover")}>Handover Checklist</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => toast("Archived (demo)")} className="text-critical focus:text-critical">Archive Project</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setArchiveOpen(true)} className="text-critical focus:text-critical">Archive Project</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -273,16 +276,21 @@ function ProjectDetail() {
         <TabsContent value="devices" className="mt-4"><DevicesTab devices={projectDevices} /></TabsContent>
 
         <TabsContent value="docs" className="mt-4"><Card className="p-0">
-          <div className="p-3 flex items-center justify-between"><h3 className="font-display font-semibold text-lg">Documents</h3><Button size="sm" onClick={() => toast.success("Document uploaded (demo)")}>Upload</Button></div>
+          <div className="p-3 flex items-center justify-between"><h3 className="font-display font-semibold text-lg">Documents</h3><Button size="sm" onClick={() => { d.addDocument({ name: `${p.number} Document ${projectDocs.length + 1}.pdf`, category: "Drawings", projectId: p.id, revision: "R1", status: "Draft", uploadedOn: new Date().toISOString().slice(0,10), tags: [] }); toast.success("Document uploaded."); }}>Upload</Button></div>
           <table className="w-full text-sm"><thead className="text-[11px] uppercase text-muted-foreground bg-muted/40"><tr>{["Document","Category","Revision","Status","Uploaded"].map((h) => <th key={h} className="text-left py-2 px-3">{h}</th>)}</tr></thead>
             <tbody>{projectDocs.map((doc) => (<tr key={doc.id} className="border-t hairline"><td className="py-2 px-3">{doc.name}</td><td className="py-2 px-3 text-xs">{doc.category}</td><td className="py-2 px-3 num text-xs">{doc.revision}</td><td className="py-2 px-3"><StatusPill status={doc.status} tone={doc.status === "Approved" ? "success" : "warning"} /></td><td className="py-2 px-3 num text-xs">{fmtDate(doc.uploadedOn)}</td></tr>))}</tbody>
           </table>
         </Card></TabsContent>
 
         <TabsContent value="vars" className="mt-4"><Card className="p-4">
-          <div className="flex items-center justify-between mb-3"><h3 className="font-display font-semibold text-lg">Variations</h3><Button size="sm" onClick={() => toast.success("Variation drafted (demo)")}>New variation</Button></div>
-          <table className="w-full text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Number","Description","Amount","Status","Date"].map((h) => <th key={h} className="text-left py-2">{h}</th>)}</tr></thead>
-            <tbody>{projectVars.map((v) => (<tr key={v.id} className="border-t hairline"><td className="py-2 num">{v.number}</td><td className="py-2">{v.description}</td><td className="py-2 num">{fmtQAR(v.amount)}</td><td className="py-2"><StatusPill status={v.status} tone={v.status==="Approved"?"success":v.status==="Rejected"?"critical":"info"} /></td><td className="py-2 num text-xs">{fmtDate(v.date)}</td></tr>))}</tbody>
+          <div className="flex items-center justify-between mb-3"><h3 className="font-display font-semibold text-lg">Variations</h3><Button size="sm" onClick={() => setVarOpen(true)}>New variation</Button></div>
+          <table className="w-full text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Number","Description","Amount","Status","Date",""].map((h) => <th key={h} className="text-left py-2">{h}</th>)}</tr></thead>
+            <tbody>{projectVars.map((v) => (<tr key={v.id} className="border-t hairline">
+              <td className="py-2 num">{v.number}</td><td className="py-2">{v.description}</td><td className="py-2 num">{fmtQAR(v.amount)}</td>
+              <td className="py-2"><StatusPill status={v.status} tone={v.status==="Approved"?"success":v.status==="Rejected"?"critical":"info"} /></td>
+              <td className="py-2 num text-xs">{fmtDate(v.date)}</td>
+              <td className="py-2">{v.status === "Submitted" && <Button size="sm" variant="ghost" onClick={() => { d.updateVariation(v.id, { status: "Approved" }); toast.success(`${v.number} approved.`); }}>Approve</Button>}</td>
+            </tr>))}</tbody>
           </table>
         </Card></TabsContent>
 
@@ -344,7 +352,71 @@ function ProjectDetail() {
           onJump={goTo}
         />
       </div>
+
+      <EditProjectDialog open={editOpen} onOpenChange={setEditOpen} project={p} />
+      <NewVariationDialog open={varOpen} onOpenChange={setVarOpen} projectId={p.id} nextNumber={`VO-${String(projectVars.length + 1).padStart(2, "0")}`} />
+      <AlertDialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>Archive this project?</AlertDialogTitle><AlertDialogDescription>The project will be moved to Cancelled phase and removed from active portfolio views. This can be reversed from the Update Project dialog.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => { d.updateProject(p.id, { phase: "Cancelled" }); setArchiveOpen(false); toast.success("Project archived."); }}>Archive</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+}
+
+function EditProjectDialog({ open, onOpenChange, project }: { open: boolean; onOpenChange: (o: boolean) => void; project: import("@/lib/mock-data").Project }) {
+  const d = useData();
+  const [form, setForm] = useState({ name: project.name, phase: project.phase, plannedEnd: project.plannedEnd, contractValue: project.contractValue });
+  useEffect(() => { if (open) setForm({ name: project.name, phase: project.phase, plannedEnd: project.plannedEnd, contractValue: project.contractValue }); }, [open, project]);
+  const PHASES: import("@/lib/mock-data").ProjectPhase[] = ["Project Setup","Design and Planning","Client Approval","Mobilization","Procurement","Material Delivery","Installation","Configuration","Testing","Training","Inspection and Compliance","Handover","Warranty","AMC","On Hold","Delayed","Awaiting Client","Awaiting Materials","Rework","Cancelled"];
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Update Project</DialogTitle></DialogHeader>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <label className="col-span-2"><span className="text-xs text-muted-foreground">Project name</span><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
+          <label><span className="text-xs text-muted-foreground">Phase</span>
+            <Select value={form.phase} onValueChange={(v) => setForm({ ...form, phase: v as never })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{PHASES.map((ph) => <SelectItem key={ph} value={ph}>{ph}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label><span className="text-xs text-muted-foreground">Planned end</span><Input type="date" value={form.plannedEnd} onChange={(e) => setForm({ ...form, plannedEnd: e.target.value })} /></label>
+          <label className="col-span-2"><span className="text-xs text-muted-foreground">Contract value (QAR)</span><Input type="number" value={form.contractValue} onChange={(e) => setForm({ ...form, contractValue: Number(e.target.value) })} /></label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => { d.updateProject(project.id, form); onOpenChange(false); toast.success("Project updated."); }}>Save changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function NewVariationDialog({ open, onOpenChange, projectId, nextNumber }: { open: boolean; onOpenChange: (o: boolean) => void; projectId: string; nextNumber: string }) {
+  const d = useData();
+  const [form, setForm] = useState({ description: "", amount: 0 });
+  useEffect(() => { if (open) setForm({ description: "", amount: 0 }); }, [open]);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>New Variation — {nextNumber}</DialogTitle></DialogHeader>
+        <div className="space-y-3 text-sm">
+          <label className="block"><span className="text-xs text-muted-foreground">Description</span><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="e.g., Additional 4 cameras at loading dock" /></label>
+          <label className="block"><span className="text-xs text-muted-foreground">Amount (QAR)</span><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })} /></label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => {
+            if (!form.description.trim()) { toast.error("Description required"); return; }
+            d.addVariation({ projectId, number: nextNumber, description: form.description.trim(), amount: form.amount, status: "Submitted", date: new Date().toISOString().slice(0, 10) });
+            onOpenChange(false);
+            toast.success(`Variation ${nextNumber} submitted.`);
+          }}>Submit variation</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

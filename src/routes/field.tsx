@@ -12,11 +12,13 @@ export const Route = createFileRoute("/field")({
   component: FieldOps,
 });
 
+const ME = "E-010";
+
 function FieldOps() {
   const d = useData();
   const [tab, setTab] = useState<"today"|"projects"|"tasks"|"materials"|"me">("today");
-  const [checkedIn, setCheckedIn] = useState(false);
-  const myTasks = d.tasks.filter((t) => t.assigneeId === "E-010").slice(0, 5);
+  const checkedIn = d.onSiteEmployeeIds.includes(ME);
+  const myTasks = d.tasks.filter((t) => t.assigneeId === ME && t.status !== "Completed").slice(0, 5);
   const todayProject = d.projects.find((p) => p.id === "P-041")!;
 
   return (
@@ -47,9 +49,9 @@ function FieldOps() {
               <div className="text-[12px] flex items-center gap-1.5 text-[#A8B7CA] mt-1.5"><MapPin className="w-3.5 h-3.5" /> Industrial Area, Al Wakrah</div>
               <div className="mt-4 flex gap-2">
                 {!checkedIn ? (
-                  <Button className="flex-1 h-11 rounded-xl bg-[#2F83FF] text-white text-[14px] font-medium hover:bg-[#2F83FF]/90" onClick={() => { setCheckedIn(true); toast.success("Checked in at 07:45"); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
+                  <Button className="flex-1 h-11 rounded-xl bg-[#2F83FF] text-white text-[14px] font-medium hover:bg-[#2F83FF]/90" onClick={() => { d.setCheckedIn(ME, true); toast.success("Checked in at " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
                 ) : (
-                  <Button variant="outline" className="flex-1 h-11 rounded-xl border-[rgba(133,164,204,0.22)] text-[14px]" onClick={() => { setCheckedIn(false); toast("Checked out."); }}><LogOut className="w-4 h-4 mr-1.5" />Check out</Button>
+                  <Button variant="outline" className="flex-1 h-11 rounded-xl border-[rgba(133,164,204,0.22)] text-[14px]" onClick={() => { d.setCheckedIn(ME, false); toast("Checked out."); }}><LogOut className="w-4 h-4 mr-1.5" />Check out</Button>
                 )}
                 <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-[rgba(133,164,204,0.22)]" onClick={() => toast.success("Photo captured (demo)")}><Camera className="w-4 h-4" /></Button>
               </div>
@@ -63,8 +65,8 @@ function FieldOps() {
                 <div className="flex items-start justify-between gap-2"><div className="text-[14px] font-medium">{t.title}</div><StatusPill status={t.priority} tone={t.priority==="Critical"?"critical":t.priority==="High"?"warning":"neutral"} /></div>
                 <div className="mt-2 flex items-center justify-between text-[11.5px] text-[#66778D]"><span>{t.phase}</span><span className="num">Due {fmtDate(t.due)}</span></div>
                 <div className="mt-3 flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1 h-10 rounded-lg border-[rgba(133,164,204,0.2)] text-[12.5px]" onClick={() => toast.success("Task started")}>Start</Button>
-                  <Button size="sm" className="flex-1 h-10 rounded-lg bg-[#20D39A] text-[#06101D] font-medium text-[12.5px] hover:bg-[#20D39A]/90" onClick={() => toast.success("Task completed")}><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Complete</Button>
+                  <Button size="sm" variant="outline" className="flex-1 h-10 rounded-lg border-[rgba(133,164,204,0.2)] text-[12.5px]" onClick={() => { d.updateTask(t.id, { status: "In Progress" }); toast.success("Task started"); }}>Start</Button>
+                  <Button size="sm" className="flex-1 h-10 rounded-lg bg-[#20D39A] text-[#06101D] font-medium text-[12.5px] hover:bg-[#20D39A]/90" onClick={() => { d.updateTask(t.id, { status: "Completed", progress: 100 }); toast.success("Task completed"); }}><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Complete</Button>
                 </div>
               </div>
             ))}</div>

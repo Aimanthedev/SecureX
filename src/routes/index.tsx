@@ -6,6 +6,7 @@ import {
   Segmented, QuickAction, AlertCard, TableShell, axisProps, ChartTooltip, ACCENT,
 } from "@/components/app/common";
 import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
+import { buildAlerts } from "@/lib/alerts";
 import {
   ArrowRight, Wallet, TrendingUp, Banknote, HardHat, Camera, ClipboardCheck, Package,
   FileSignature, CircleDollarSign, AlertTriangle, Plus, FileBarChart, Radio, Building2,
@@ -22,7 +23,8 @@ export const Route = createFileRoute("/")({
   component: CommandCenter,
 });
 
-const MONTHS = ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = ALL_MONTHS.slice(1, 8);
 
 function CommandCenter() {
   const d = useData();
@@ -44,16 +46,16 @@ function CommandCenter() {
   const inProgressCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "In Progress").length;
   const completedCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "Completed").length;
 
-  const execData = useMemo(
-    () => MONTHS.map((m, i) => ({
+  const execData = useMemo(() => {
+    const months = range === "m" ? ALL_MONTHS.slice(5, 8) : range === "y" ? ALL_MONTHS : MONTHS;
+    return months.map((m, i) => ({
       m,
       planned: 12 + i * 2 + ((i * 13) % 4),
       actual: 9 + i * 2 + ((i * 7) % 5),
       completed: 120 + i * 26,
       delayed: 60 - i * 5 + ((i * 11) % 14),
-    })),
-    [],
-  );
+    }));
+  }, [range]);
 
   const distribution = useMemo(() => {
     const byPhase: Record<string, number> = {};
@@ -67,28 +69,11 @@ function CommandCenter() {
     return known.filter((x) => x.value > 0);
   }, [d.projects]);
 
-  const alerts = useMemo(() => {
-    const items: { severity: "critical" | "warning"; title: string; owner: string; sub: string; action: string; go: () => void }[] = [];
-    projectsWithHealth.forEach(({ p, h }) => {
-      h.drivers.filter((x) => x.severity !== "info").forEach((dr) => {
-        items.push({
-          severity: dr.severity as "critical" | "warning",
-          title: dr.text,
-          sub: `${p.number} · ${p.name}`,
-          owner: d.employees.find((e) => e.id === p.pmId)?.name || "—",
-          action: "Open project",
-          go: () => nav({ to: "/projects/$id", params: { id: p.id } }),
-        });
-      });
-    });
-    d.purchaseOrders.filter((po) => po.deliveryStatus === "Overdue").forEach((po) =>
-      items.push({ severity: "critical", title: `PO ${po.number} overdue`, sub: po.supplier, owner: "Procurement", action: "Open PO", go: () => nav({ to: "/procurement" }) }));
-    d.amc.filter((a) => a.renewalStatus === "Expiring Soon" || a.renewalStatus === "Expired").forEach((a) => {
-      const days = daysFromToday(a.end);
-      items.push({ severity: days < 0 ? "critical" : "warning", title: `AMC ${a.number} ${days < 0 ? "expired" : `expires in ${days} days`}`, sub: d.customers.find((c) => c.id === a.customerId)?.name || "", owner: "Service", action: "Open AMC", go: () => nav({ to: "/service" }) });
-    });
-    return items.sort((a, b) => (a.severity === "critical" ? -1 : 1) - (b.severity === "critical" ? -1 : 1)).slice(0, 6);
-  }, [projectsWithHealth, d, nav]);
+  const alerts = useMemo(() => buildAlerts(d).slice(0, 6).map((a) => ({
+    severity: a.severity === "info" ? "warning" as const : a.severity,
+    title: a.title, sub: a.sub, owner: a.owner, action: "Open",
+    go: () => { if (a.path) nav({ to: a.path as never }); },
+  })), [d, nav]);
 
   const totalCameras = d.devices.length;
   const tested = d.devices.filter((x) => x.status === "Tested" || x.status === "Handed Over").length;
@@ -261,7 +246,7 @@ function CommandCenter() {
           <Panel className="rise rise-4">
             <PanelHead title="Quick Actions" sub="Most used operations" icon={<Plus className="h-4 w-4" />} />
             <div className="grid grid-cols-4 gap-2">
-              <QuickAction icon={<HardHat className="h-5 w-5" />} label="New Project" accent="blue" onClick={() => nav({ to: "/projects" })} />
+              <QuickAction icon={<HardHat className="h-5 w-5" />} label="New Project" accent="blue" onClick={() => { d.requestCreate("project"); nav({ to: "/projects" }); }} />
               <QuickAction icon={<Camera className="h-5 w-5" />} label="Site Update" accent="cyan" onClick={() => nav({ to: "/field" })} />
               <QuickAction icon={<FileBarChart className="h-5 w-5" />} label="Report" accent="purple" onClick={() => nav({ to: "/reports" })} />
               <QuickAction icon={<AlertTriangle className="h-5 w-5" />} label="Alert" accent="red" onClick={() => nav({ to: "/notifications" })} />

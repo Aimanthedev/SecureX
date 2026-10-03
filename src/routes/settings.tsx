@@ -11,6 +11,10 @@ export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [
     { title: "Settings | SecureX CCTV COMPANY" },
     { name: "description", content: "Company profile, numbering formats, appearance, language and data preferences." },
+    { property: "og:title", content: "Settings | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Company profile, numbering formats, appearance, language and data preferences." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: SettingsPage,
 });

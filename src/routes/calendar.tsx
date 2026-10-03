@@ -7,6 +7,10 @@ export const Route = createFileRoute("/calendar")({
   head: () => ({ meta: [
     { title: "Calendar | SecureX CCTV COMPANY" },
     { name: "description", content: "Unified schedule of surveys, milestones, installs and service visits." },
+    { property: "og:title", content: "Calendar | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Unified schedule of surveys, milestones, installs and service visits." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: CalPage,
 });

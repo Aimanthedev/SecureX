@@ -18,7 +18,14 @@ import { GripVertical, Trash2, TrendingUp, Target, Clock, Trophy } from "lucide-
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 
 export const Route = createFileRoute("/sales")({
-  head: () => ({ meta: [{ title: "Sales | SecureX CCTV COMPANY" }, { name: "description", content: "Lead pipeline, forecasts, and follow-ups." }] }),
+  head: () => ({ meta: [
+    { title: "Sales | SecureX CCTV COMPANY" },
+    { name: "description", content: "Lead pipeline, forecasts, and follow-ups." },
+    { property: "og:title", content: "Sales | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Lead pipeline, forecasts, and follow-ups." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: SalesPage,
 });
 
@@ -252,7 +259,7 @@ function PipelineBoard() {
           {LEAD_STAGES.map((stage) => {
             const leads = d.leads.filter((l) => l.stage === stage);
             return (
-              <div key={stage} onDragOver={(e) => e.preventDefault()} onDrop={() => onDrop(stage)} className="shrink-0 w-72 rounded-xl border border-border bg-[rgba(13,25,41,0.5)] p-2">
+              <div key={stage} onDragOver={(e) => e.preventDefault()} onDrop={() => onDrop(stage)} className="shrink-0 w-72 rounded-xl border border-border bg-surface p-2">
                 <div className="flex items-center justify-between px-1 py-1 mb-2">
                   <div className="label-xs">{stage}</div>
                   <div className="text-[10px] text-muted-foreground num">{leads.length} · {fmtQAR(stageValue(stage), { compact: true })}</div>

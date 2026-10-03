@@ -12,6 +12,10 @@ export const Route = createFileRoute("/documents")({
   head: () => ({ meta: [
     { title: "Documents | SecureX CCTV COMPANY" },
     { name: "description", content: "Contracts, drawings, reports and compliance documents across the company." },
+    { property: "og:title", content: "Documents | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Contracts, drawings, reports and compliance documents across the company." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: DocsPage,
 });

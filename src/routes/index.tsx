@@ -17,7 +17,9 @@ export const Route = createFileRoute("/")({
     { title: "Command Center | SecureX CCTV COMPANY" },
     { name: "description", content: "Live operations command center for SecureX CCTV COMPANY — projects, pipeline, collections and field execution." },
     { property: "og:title", content: "Command Center | SecureX CCTV COMPANY" },
-    { property: "og:description", content: "Live operations command center for SecureX CCTV COMPANY." },
+    { property: "og:description", content: "Live operations command center for SecureX CCTV COMPANY — projects, pipeline, collections and field execution." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: CommandCenter,
 });

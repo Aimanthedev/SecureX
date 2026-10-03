@@ -170,16 +170,16 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
         {!collapsed ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-2.5 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[#0B1524] p-2 text-left transition-colors hover:border-[rgba(47,131,255,0.35)]">
+              <button className="flex w-full items-center gap-2.5 rounded-xl border border-sidebar-border bg-sidebar-accent p-2 text-left transition-colors hover:border-sidebar-primary/35">
                 <span className="relative">
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[rgba(47,131,255,0.16)] text-[11px] font-semibold text-signal">YE</span>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0B1524] bg-[#20D39A]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar-accent bg-success" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[11.5px] font-medium text-white">Yousef Al-Emadi</span>
-                  <span className="block truncate text-[10px] text-[#66778D]">{role}</span>
+                  <span className="block truncate text-[10px] text-sidebar-foreground">{role}</span>
                 </span>
-                <ChevronRight className="h-3.5 w-3.5 text-[#66778D]" />
+                <ChevronRight className="h-3.5 w-3.5 text-sidebar-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">
@@ -246,7 +246,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
           <span className="relative"><Bell className="h-4 w-4" /><span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#FF4664]" /></span>
         </IconBtn>
         <IconBtn onClick={() => toast("Help center opens shortly.")} title="Help"><HelpCircle className="h-4 w-4" /></IconBtn>
-        <div className="ml-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[rgba(47,131,255,0.3)] bg-[rgba(47,131,255,0.14)] text-[11px] font-semibold text-signal">YE</div>
+        <div className="ml-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal/30 bg-signal-soft text-[11px] font-semibold text-signal">YE</div>
       </div>
     </header>
   );
@@ -378,8 +378,7 @@ function QuickCreate() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-semibold text-white shadow-[0_12px_28px_-14px_rgba(47,131,255,0.95)] transition-transform hover:-translate-y-[1px]"
-          style={{ background: "linear-gradient(135deg,#2F83FF,#1B6BE8)" }}>
+        <button className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[image:var(--action-gradient)] px-3 text-[12.5px] font-semibold text-signal-foreground shadow-[0_12px_28px_-14px_var(--glow)] transition-transform hover:-translate-y-[1px]">
           <Plus className="h-4 w-4" /><span className="hidden sm:inline">Create</span>
         </button>
       </DropdownMenuTrigger>

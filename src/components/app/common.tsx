@@ -10,16 +10,16 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 export type Accent = "blue" | "cyan" | "purple" | "magenta" | "green" | "amber" | "red";
 
 export const ACCENT: Record<Accent, { hex: string; from: string; to: string; soft: string; ring: string }> = {
-  blue:    { hex: "#2F83FF", from: "rgba(47,131,255,0.28)",  to: "rgba(47,131,255,0)",  soft: "rgba(47,131,255,0.12)",  ring: "rgba(47,131,255,0.45)" },
-  cyan:    { hex: "#18D5FF", from: "rgba(24,213,255,0.26)",  to: "rgba(24,213,255,0)",  soft: "rgba(24,213,255,0.12)",  ring: "rgba(24,213,255,0.42)" },
-  purple:  { hex: "#9654FF", from: "rgba(150,84,255,0.28)",  to: "rgba(150,84,255,0)",  soft: "rgba(150,84,255,0.12)",  ring: "rgba(150,84,255,0.45)" },
-  magenta: { hex: "#E447C4", from: "rgba(228,71,196,0.26)",  to: "rgba(228,71,196,0)",  soft: "rgba(228,71,196,0.12)",  ring: "rgba(228,71,196,0.42)" },
-  green:   { hex: "#20D39A", from: "rgba(32,211,154,0.26)",  to: "rgba(32,211,154,0)",  soft: "rgba(32,211,154,0.12)",  ring: "rgba(32,211,154,0.42)" },
-  amber:   { hex: "#FFAA2C", from: "rgba(255,170,44,0.26)",  to: "rgba(255,170,44,0)",  soft: "rgba(255,170,44,0.12)",  ring: "rgba(255,170,44,0.42)" },
-  red:     { hex: "#FF4664", from: "rgba(255,70,100,0.28)",  to: "rgba(255,70,100,0)",  soft: "rgba(255,70,100,0.12)",  ring: "rgba(255,70,100,0.45)" },
+  blue:    { hex: "var(--chart-2)", from: "color-mix(in oklab, var(--chart-2) 28%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--chart-2) 12%, transparent)", ring: "color-mix(in oklab, var(--chart-2) 45%, transparent)" },
+  cyan:    { hex: "var(--cyan)", from: "color-mix(in oklab, var(--cyan) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--cyan) 12%, transparent)", ring: "color-mix(in oklab, var(--cyan) 42%, transparent)" },
+  purple:  { hex: "var(--purple)", from: "color-mix(in oklab, var(--purple) 28%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--purple) 12%, transparent)", ring: "color-mix(in oklab, var(--purple) 45%, transparent)" },
+  magenta: { hex: "var(--magenta)", from: "color-mix(in oklab, var(--magenta) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--magenta) 12%, transparent)", ring: "color-mix(in oklab, var(--magenta) 42%, transparent)" },
+  green:   { hex: "var(--success)", from: "color-mix(in oklab, var(--success) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--success) 12%, transparent)", ring: "color-mix(in oklab, var(--success) 42%, transparent)" },
+  amber:   { hex: "var(--warning)", from: "color-mix(in oklab, var(--warning) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--warning) 12%, transparent)", ring: "color-mix(in oklab, var(--warning) 42%, transparent)" },
+  red:     { hex: "var(--critical)", from: "color-mix(in oklab, var(--critical) 28%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--critical) 12%, transparent)", ring: "color-mix(in oklab, var(--critical) 45%, transparent)" },
 };
 
-export const CHART_COLORS = ["#2F83FF", "#18D5FF", "#9654FF", "#E447C4", "#20D39A", "#FFAA2C"];
+export const CHART_COLORS = ["var(--chart-2)", "var(--cyan)", "var(--purple)", "var(--magenta)", "var(--success)", "var(--warning)"];
 
 export function MonoChip({ children, className }: { children: React.ReactNode; className?: string }) {
   return <span className={cn("mono-chip", className)}>{children}</span>;
@@ -53,7 +53,7 @@ export function Panel({ children, className, pad = true, accent, texture }: {
   return (
     <div
       className={cn("panel relative overflow-hidden", pad && "p-4 md:p-5", className)}
-      style={accent ? { borderColor: ACCENT[accent].ring.replace("0.4", "0.3") } : undefined}
+       style={accent ? { borderColor: ACCENT[accent].ring } : undefined}
     >
       {texture === "grid" && <div className="pointer-events-none absolute inset-0 grid-fade" />}
       {texture === "dots" && <div className="pointer-events-none absolute inset-0 dot-fade" />}
@@ -125,8 +125,8 @@ export function MetricCard({ label, value, delta, sub, icon, accent = "blue", sp
             <span
               className="num rounded-md px-1.5 py-0.5 font-medium"
               style={{
-                background: delta.startsWith("-") ? "rgba(255,70,100,0.12)" : "rgba(32,211,154,0.12)",
-                color: delta.startsWith("-") ? "#FF4664" : "#20D39A",
+                 background: delta.startsWith("-") ? "var(--critical-soft)" : "var(--success-soft)",
+                 color: delta.startsWith("-") ? "var(--critical)" : "var(--success)",
               }}
             >
               {delta}

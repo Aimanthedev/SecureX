@@ -170,16 +170,16 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
         {!collapsed ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-2.5 rounded-xl border border-[rgba(133,164,204,0.10)] bg-[#0B1524] p-2 text-left transition-colors hover:border-[rgba(47,131,255,0.35)]">
+              <button className="flex w-full items-center gap-2.5 rounded-xl border border-sidebar-border bg-sidebar-accent p-2 text-left transition-colors hover:border-sidebar-primary/35">
                 <span className="relative">
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[rgba(47,131,255,0.16)] text-[11px] font-semibold text-signal">YE</span>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0B1524] bg-[#20D39A]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar-accent bg-success" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[11.5px] font-medium text-white">Yousef Al-Emadi</span>
-                  <span className="block truncate text-[10px] text-[#66778D]">{role}</span>
+                  <span className="block truncate text-[10px] text-sidebar-foreground">{role}</span>
                 </span>
-                <ChevronRight className="h-3.5 w-3.5 text-[#66778D]" />
+                <ChevronRight className="h-3.5 w-3.5 text-sidebar-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">

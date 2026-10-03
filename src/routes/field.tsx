@@ -35,8 +35,8 @@ function FieldOps() {
             <div className="font-semibold text-lg tracking-[-0.02em]">Suresh Kumar</div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium" style={{ background: checkedIn ? "rgba(32,211,154,0.12)" : "rgba(133,164,204,0.08)", borderColor: checkedIn ? "rgba(32,211,154,0.4)" : "rgba(133,164,204,0.16)", color: checkedIn ? "#20D39A" : "#A8B7CA" }}>
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: checkedIn ? "#20D39A" : "#66778D" }} />
+            <span className={checkedIn ? "inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success-soft px-2.5 py-1 text-[11px] font-medium text-success" : "inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground"}>
+              <span className={checkedIn ? "h-1.5 w-1.5 rounded-full bg-success" : "h-1.5 w-1.5 rounded-full bg-muted-foreground"} />
               {checkedIn ? "On site" : "Off site"}
             </span>
             <Link to="/" className="text-[11px] text-muted-foreground hover:text-foreground">Exit</Link>
@@ -54,7 +54,7 @@ function FieldOps() {
               <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-muted-foreground"><MapPin className="w-3.5 h-3.5" /> Industrial Area, Al Wakrah</div>
               <div className="mt-4 flex gap-2">
                 {!checkedIn ? (
-                  <Button className="flex-1 h-11 rounded-xl bg-[#2F83FF] text-white text-[14px] font-medium hover:bg-[#2F83FF]/90" onClick={() => { setCheckedIn(true); toast.success("Checked in at 07:45"); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
+                  <Button className="flex-1 h-11 rounded-xl bg-signal text-signal-foreground text-[14px] font-medium hover:bg-signal/90" onClick={() => { setCheckedIn(true); toast.success("Checked in at 07:45"); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
                 ) : (
                   <Button variant="outline" className="flex-1 h-11 rounded-xl border-[rgba(133,164,204,0.22)] text-[14px]" onClick={() => { setCheckedIn(false); toast("Checked out."); }}><LogOut className="w-4 h-4 mr-1.5" />Check out</Button>
                 )}
@@ -71,7 +71,7 @@ function FieldOps() {
                 <div className="mt-2 flex items-center justify-between text-[11.5px] text-muted-foreground"><span>{t.phase}</span><span className="num">Due {fmtDate(t.due)}</span></div>
                 <div className="mt-3 flex gap-2">
                   <Button size="sm" variant="outline" className="flex-1 h-10 rounded-lg border-[rgba(133,164,204,0.2)] text-[12.5px]" onClick={() => toast.success("Task started")}>Start</Button>
-                  <Button size="sm" className="flex-1 h-10 rounded-lg bg-[#20D39A] text-[#06101D] font-medium text-[12.5px] hover:bg-[#20D39A]/90" onClick={() => toast.success("Task completed")}><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Complete</Button>
+                  <Button size="sm" className="flex-1 h-10 rounded-lg bg-success text-success-foreground font-medium text-[12.5px] hover:bg-success/90" onClick={() => toast.success("Task completed")}><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Complete</Button>
                 </div>
               </div>
             ))}</div>
@@ -80,10 +80,10 @@ function FieldOps() {
           <div className="panel-flat p-4">
             <div className="mb-3 text-[13px] font-medium uppercase tracking-wide text-muted-foreground">Quick actions</div>
             <div className="grid grid-cols-2 gap-2.5">
-              <Button variant="outline" className="h-12 rounded-xl border-[rgba(255,170,44,0.3)] bg-[rgba(255,170,44,0.08)] text-[#FFAA2C] text-[13px]" onClick={() => toast.success("Issue raised.")}><AlertTriangle className="w-4 h-4 mr-1.5" />Raise issue</Button>
-              <Button variant="outline" className="h-12 rounded-xl border-[rgba(24,213,255,0.3)] bg-[rgba(24,213,255,0.08)] text-[#18D5FF] text-[13px]" onClick={() => toast.success("Evidence uploaded.")}><Camera className="w-4 h-4 mr-1.5" />Upload evidence</Button>
-              <Button variant="outline" className="h-12 rounded-xl border-[rgba(150,84,255,0.3)] bg-[rgba(150,84,255,0.08)] text-[#9654FF] text-[13px]" onClick={() => toast.success("Signature captured.")}><PenSquare className="w-4 h-4 mr-1.5" />Client sign</Button>
-              <Button variant="outline" className="h-12 rounded-xl border-[rgba(47,131,255,0.3)] bg-[rgba(47,131,255,0.08)] text-[#2F83FF] text-[13px]" onClick={() => toast("Material request sent")}><Package className="w-4 h-4 mr-1.5" />Request material</Button>
+              <Button variant="outline" className="h-12 rounded-xl border-warning/30 bg-warning-soft text-warning text-[13px]" onClick={() => toast.success("Issue raised.")}><AlertTriangle className="w-4 h-4 mr-1.5" />Raise issue</Button>
+              <Button variant="outline" className="h-12 rounded-xl border-cyan/30 bg-cyan/10 text-cyan text-[13px]" onClick={() => toast.success("Evidence uploaded.")}><Camera className="w-4 h-4 mr-1.5" />Upload evidence</Button>
+              <Button variant="outline" className="h-12 rounded-xl border-purple/30 bg-purple/10 text-purple text-[13px]" onClick={() => toast.success("Signature captured.")}><PenSquare className="w-4 h-4 mr-1.5" />Client sign</Button>
+              <Button variant="outline" className="h-12 rounded-xl border-signal/30 bg-signal-soft text-signal text-[13px]" onClick={() => toast("Material request sent")}><Package className="w-4 h-4 mr-1.5" />Request material</Button>
             </div>
           </div>
         </div>

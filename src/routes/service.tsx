@@ -10,6 +10,10 @@ export const Route = createFileRoute("/service")({
   head: () => ({ meta: [
     { title: "Service and AMC | SecureX CCTV COMPANY" },
     { name: "description", content: "AMC contracts, service tickets, SLA tracking and preventive maintenance checklists." },
+    { property: "og:title", content: "Service and AMC | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "AMC contracts, service tickets, SLA tracking and preventive maintenance checklists." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: ServicePage,
 });

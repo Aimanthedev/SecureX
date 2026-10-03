@@ -14,12 +14,14 @@ import { toast } from "sonner";
 import type { ProjectHealth } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/projects/")({
-  head: () => ({
-    meta: [
-      { title: "Projects | SecureX CCTV COMPANY" },
-      { name: "description", content: "Live portfolio view of every CCTV project — health, progress, materials and cameras across sites." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Projects | SecureX CCTV COMPANY" },
+    { name: "description", content: "Live portfolio view of CCTV projects, materials and cameras across sites." },
+    { property: "og:title", content: "Projects | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Live portfolio view of CCTV projects, materials and cameras across sites." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ProjectsList,
 });
 

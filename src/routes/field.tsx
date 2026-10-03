@@ -8,7 +8,14 @@ import { Home, ClipboardList, Package, User, HardHat, MapPin, CheckCircle2, Aler
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/field")({
-  head: () => ({ meta: [{ title: "Field Operations | SecureX CCTV COMPANY" }] }),
+  head: () => ({ meta: [
+    { title: "Field Operations | SecureX CCTV COMPANY" },
+    { name: "description", content: "Technician tasks, site check-ins and field materials." },
+    { property: "og:title", content: "Field Operations | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Technician tasks, site check-ins and field materials." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: FieldOps,
 });
 

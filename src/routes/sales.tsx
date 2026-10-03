@@ -18,7 +18,14 @@ import { GripVertical, Trash2, TrendingUp, Target, Clock, Trophy } from "lucide-
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 
 export const Route = createFileRoute("/sales")({
-  head: () => ({ meta: [{ title: "Sales | SecureX CCTV COMPANY" }, { name: "description", content: "Lead pipeline, forecasts, and follow-ups." }] }),
+  head: () => ({ meta: [
+    { title: "Sales | SecureX CCTV COMPANY" },
+    { name: "description", content: "Lead pipeline, forecasts, and follow-ups." },
+    { property: "og:title", content: "Sales | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Lead pipeline, forecasts, and follow-ups." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: SalesPage,
 });
 

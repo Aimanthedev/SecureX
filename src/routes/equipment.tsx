@@ -9,7 +9,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 export const Route = createFileRoute("/equipment")({
   head: () => ({ meta: [
     { title: "Equipment | SecureX CCTV COMPANY" },
-    { name: "description", content: "Catalogue and serialized register of every camera, recorder and network device." },
+    { name: "description", content: "Catalogue and serialized register of cameras, recorders and network devices." },
+    { property: "og:title", content: "Equipment | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Catalogue and serialized register of cameras, recorders and network devices." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: EquipmentPage,
 });

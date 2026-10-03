@@ -6,6 +6,10 @@ export const Route = createFileRoute("/employees")({
   head: () => ({ meta: [
     { title: "Employees | SecureX CCTV COMPANY" },
     { name: "description", content: "Workload, availability and open task assignments for the field and office team." },
+    { property: "og:title", content: "Employees | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Workload, availability and open task assignments for the field and office team." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: EmployeesPage,
 });

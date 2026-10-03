@@ -5,7 +5,14 @@ import { fmtQAR, fmtDate } from "@/lib/format";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/customers/$id")({
-  head: () => ({ meta: [{ title: "Customer | SecureX CCTV COMPANY" }] }),
+  head: () => ({ meta: [
+    { title: "Customer | SecureX CCTV COMPANY" },
+    { name: "description", content: "Customer account, sites, projects and outstanding balances." },
+    { property: "og:title", content: "Customer | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Customer account, sites, projects and outstanding balances." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CustomerDetail,
 });
 

@@ -9,6 +9,10 @@ export const Route = createFileRoute("/notifications")({
   head: () => ({ meta: [
     { title: "Notifications | SecureX CCTV COMPANY" },
     { name: "description", content: "Critical, warning and informational signals across the platform." },
+    { property: "og:title", content: "Notifications | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Critical, warning and informational signals across the platform." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: NotifPage,
 });

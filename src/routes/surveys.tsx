@@ -10,7 +10,14 @@ import { toast } from "sonner";
 import { CalendarClock, Camera, FileCheck2, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/surveys")({
-  head: () => ({ meta: [{ title: "Site Surveys | SecureX CCTV COMPANY" }] }),
+  head: () => ({ meta: [
+    { title: "Site Surveys | SecureX CCTV COMPANY" },
+    { name: "description", content: "Site survey schedules, site details and assessment results." },
+    { property: "og:title", content: "Site Surveys | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Site survey schedules, site details and assessment results." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: SurveysPage,
 });
 

@@ -16,6 +16,7 @@ import { Route as SalesRouteImport } from './routes/sales'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as MoiRouteImport } from './routes/moi'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as EmployeesRouteImport } from './routes/employees'
@@ -60,6 +61,11 @@ const ProcurementRoute = ProcurementRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoiRoute = MoiRouteImport.update({
+  id: '/moi',
+  path: '/moi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FieldRoute = FieldRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/employees': typeof EmployeesRoute
   '/equipment': typeof EquipmentRoute
   '/field': typeof FieldRoute
+  '/moi': typeof MoiRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/employees': typeof EmployeesRoute
   '/equipment': typeof EquipmentRoute
   '/field': typeof FieldRoute
+  '/moi': typeof MoiRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/employees': typeof EmployeesRoute
   '/equipment': typeof EquipmentRoute
   '/field': typeof FieldRoute
+  '/moi': typeof MoiRoute
   '/notifications': typeof NotificationsRoute
   '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/employees'
     | '/equipment'
     | '/field'
+    | '/moi'
     | '/notifications'
     | '/procurement'
     | '/reports'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/employees'
     | '/equipment'
     | '/field'
+    | '/moi'
     | '/notifications'
     | '/procurement'
     | '/reports'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/employees'
     | '/equipment'
     | '/field'
+    | '/moi'
     | '/notifications'
     | '/procurement'
     | '/reports'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   EmployeesRoute: typeof EmployeesRoute
   EquipmentRoute: typeof EquipmentRoute
   FieldRoute: typeof FieldRoute
+  MoiRoute: typeof MoiRoute
   NotificationsRoute: typeof NotificationsRoute
   ProcurementRoute: typeof ProcurementRoute
   ReportsRoute: typeof ReportsRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moi': {
+      id: '/moi'
+      path: '/moi'
+      fullPath: '/moi'
+      preLoaderRoute: typeof MoiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/field': {
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmployeesRoute: EmployeesRoute,
   EquipmentRoute: EquipmentRoute,
   FieldRoute: FieldRoute,
+  MoiRoute: MoiRoute,
   NotificationsRoute: NotificationsRoute,
   ProcurementRoute: ProcurementRoute,
   ReportsRoute: ReportsRoute,

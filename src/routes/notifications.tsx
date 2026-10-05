@@ -43,7 +43,7 @@ function NotifPage() {
         title="Notifications"
         subtitle="Signals across the platform, derived from live operational data"
         actions={
-          <Button size="sm" variant="outline" className="border-input bg-transparent" onClick={() => { setList(list.map((n) => ({ ...n, read: true }))); toast("All marked read."); }}>
+          <Button size="sm" variant="outline" className="border-input bg-transparent" onClick={() => { d.markAllNotificationsRead(all.map((n) => n.id)); toast("All marked read."); }}>
             Mark all read
           </Button>
         }

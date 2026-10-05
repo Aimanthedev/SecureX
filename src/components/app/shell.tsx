@@ -217,6 +217,7 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
 
 function TopBar({ onMenu }: { onMenu: () => void }) {
   const { role, setRole, density, setDensity, theme, setTheme } = useUI();
+  const d = useData();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const nav = useNavigate();
   const parts = useMemo(() => path.split("/").filter(Boolean), [path]);

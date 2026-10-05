@@ -56,7 +56,7 @@ function FieldOps() {
               <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-muted-foreground"><MapPin className="w-3.5 h-3.5" /> Industrial Area, Al Wakrah</div>
               <div className="mt-4 flex gap-2">
                 {!checkedIn ? (
-                  <Button className="flex-1 h-11 rounded-xl bg-signal text-signal-foreground text-[14px] font-medium hover:bg-signal/90" onClick={() => { setCheckedIn(true); toast.success("Checked in at 07:45"); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
+                  <Button className="flex-1 h-11 rounded-xl bg-signal text-signal-foreground text-[14px] font-medium hover:bg-signal/90" onClick={() => { d.setCheckedIn(ME, true); toast.success("Checked in at " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
                 ) : (
                   <Button variant="outline" className="flex-1 h-11 rounded-xl border-[rgba(133,164,204,0.22)] text-[14px]" onClick={() => { d.setCheckedIn(ME, false); toast("Checked out."); }}><LogOut className="w-4 h-4 mr-1.5" />Check out</Button>
                 )}

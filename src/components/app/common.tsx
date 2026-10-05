@@ -10,16 +10,16 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 export type Accent = "blue" | "cyan" | "purple" | "magenta" | "green" | "amber" | "red";
 
 export const ACCENT: Record<Accent, { hex: string; from: string; to: string; soft: string; ring: string }> = {
-  blue:    { hex: "#2F83FF", from: "rgba(47,131,255,0.28)",  to: "rgba(47,131,255,0)",  soft: "rgba(47,131,255,0.12)",  ring: "rgba(47,131,255,0.45)" },
-  cyan:    { hex: "#18D5FF", from: "rgba(24,213,255,0.26)",  to: "rgba(24,213,255,0)",  soft: "rgba(24,213,255,0.12)",  ring: "rgba(24,213,255,0.42)" },
-  purple:  { hex: "#9654FF", from: "rgba(150,84,255,0.28)",  to: "rgba(150,84,255,0)",  soft: "rgba(150,84,255,0.12)",  ring: "rgba(150,84,255,0.45)" },
-  magenta: { hex: "#E447C4", from: "rgba(228,71,196,0.26)",  to: "rgba(228,71,196,0)",  soft: "rgba(228,71,196,0.12)",  ring: "rgba(228,71,196,0.42)" },
-  green:   { hex: "#20D39A", from: "rgba(32,211,154,0.26)",  to: "rgba(32,211,154,0)",  soft: "rgba(32,211,154,0.12)",  ring: "rgba(32,211,154,0.42)" },
-  amber:   { hex: "#FFAA2C", from: "rgba(255,170,44,0.26)",  to: "rgba(255,170,44,0)",  soft: "rgba(255,170,44,0.12)",  ring: "rgba(255,170,44,0.42)" },
-  red:     { hex: "#FF4664", from: "rgba(255,70,100,0.28)",  to: "rgba(255,70,100,0)",  soft: "rgba(255,70,100,0.12)",  ring: "rgba(255,70,100,0.45)" },
+  blue:    { hex: "var(--chart-2)", from: "color-mix(in oklab, var(--chart-2) 28%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--chart-2) 12%, transparent)", ring: "color-mix(in oklab, var(--chart-2) 45%, transparent)" },
+  cyan:    { hex: "var(--cyan)", from: "color-mix(in oklab, var(--cyan) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--cyan) 12%, transparent)", ring: "color-mix(in oklab, var(--cyan) 42%, transparent)" },
+  purple:  { hex: "var(--purple)", from: "color-mix(in oklab, var(--purple) 28%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--purple) 12%, transparent)", ring: "color-mix(in oklab, var(--purple) 45%, transparent)" },
+  magenta: { hex: "var(--magenta)", from: "color-mix(in oklab, var(--magenta) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--magenta) 12%, transparent)", ring: "color-mix(in oklab, var(--magenta) 42%, transparent)" },
+  green:   { hex: "var(--success)", from: "color-mix(in oklab, var(--success) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--success) 12%, transparent)", ring: "color-mix(in oklab, var(--success) 42%, transparent)" },
+  amber:   { hex: "var(--warning)", from: "color-mix(in oklab, var(--warning) 26%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--warning) 12%, transparent)", ring: "color-mix(in oklab, var(--warning) 42%, transparent)" },
+  red:     { hex: "var(--critical)", from: "color-mix(in oklab, var(--critical) 28%, transparent)", to: "transparent", soft: "color-mix(in oklab, var(--critical) 12%, transparent)", ring: "color-mix(in oklab, var(--critical) 45%, transparent)" },
 };
 
-export const CHART_COLORS = ["#2F83FF", "#18D5FF", "#9654FF", "#E447C4", "#20D39A", "#FFAA2C"];
+export const CHART_COLORS = ["var(--chart-2)", "var(--cyan)", "var(--purple)", "var(--magenta)", "var(--success)", "var(--warning)"];
 
 export function MonoChip({ children, className }: { children: React.ReactNode; className?: string }) {
   return <span className={cn("mono-chip", className)}>{children}</span>;
@@ -53,7 +53,7 @@ export function Panel({ children, className, pad = true, accent, texture }: {
   return (
     <div
       className={cn("panel relative overflow-hidden", pad && "p-4 md:p-5", className)}
-      style={accent ? { borderColor: ACCENT[accent].ring.replace("0.4", "0.3") } : undefined}
+       style={accent ? { borderColor: ACCENT[accent].ring } : undefined}
     >
       {texture === "grid" && <div className="pointer-events-none absolute inset-0 grid-fade" />}
       {texture === "dots" && <div className="pointer-events-none absolute inset-0 dot-fade" />}
@@ -125,8 +125,8 @@ export function MetricCard({ label, value, delta, sub, icon, accent = "blue", sp
             <span
               className="num rounded-md px-1.5 py-0.5 font-medium"
               style={{
-                background: delta.startsWith("-") ? "rgba(255,70,100,0.12)" : "rgba(32,211,154,0.12)",
-                color: delta.startsWith("-") ? "#FF4664" : "#20D39A",
+                 background: delta.startsWith("-") ? "var(--critical-soft)" : "var(--success-soft)",
+                 color: delta.startsWith("-") ? "var(--critical)" : "var(--success)",
               }}
             >
               {delta}
@@ -249,7 +249,7 @@ export function StatusPill({ status, tone = "neutral" }: {
   const key = map[tone];
   if (!key) {
     return (
-      <span className="inline-flex whitespace-nowrap rounded-full border border-[rgba(133,164,204,0.16)] bg-[rgba(133,164,204,0.07)] px-2.5 py-[3px] text-[11px] font-medium text-muted-foreground">
+      <span className="inline-flex whitespace-nowrap rounded-full border border-border bg-muted px-2.5 py-[3px] text-[11px] font-medium text-muted-foreground">
         {status}
       </span>
     );
@@ -332,7 +332,7 @@ export function Segmented<T extends string>({ value, onChange, options, size = "
   value: T; onChange: (v: T) => void; options: { value: T; label: string; icon?: React.ReactNode }[]; size?: "sm" | "md";
 }) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-xl border border-[rgba(133,164,204,0.12)] bg-[#091321] p-1">
+    <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface p-1">
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -344,7 +344,7 @@ export function Segmented<T extends string>({ value, onChange, options, size = "
               size === "sm" ? "px-2.5 py-1 text-[11.5px]" : "px-3.5 py-1.5 text-[12.5px]",
               active
                 ? "bg-signal text-white shadow-[0_8px_22px_-10px_var(--glow)]"
-                : "text-muted-foreground hover:bg-[rgba(133,164,204,0.07)] hover:text-foreground",
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
             {o.icon}
@@ -367,7 +367,7 @@ export function AlertCard({ severity, title, meta, action, onAction }: {
   const accent: Accent = severity === "critical" ? "red" : severity === "warning" ? "amber" : severity === "success" ? "green" : "blue";
   const a = ACCENT[accent];
   return (
-    <div className="panel-flat relative overflow-hidden p-3.5 pl-4 transition-colors hover:border-[rgba(133,164,204,0.24)]">
+    <div className="panel-flat relative overflow-hidden p-3.5 pl-4 transition-colors hover:border-input">
       <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: a.hex, boxShadow: `0 0 14px ${a.ring}` }} />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -400,7 +400,7 @@ export function AlertCard({ severity, title, meta, action, onAction }: {
 /* ── Table shell ─────────────────────────────────────────────── */
 export function TableShell({ children, className, maxHeight }: { children: React.ReactNode; className?: string; maxHeight?: number }) {
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-[rgba(133,164,204,0.12)] bg-[#091321]", className)}>
+    <div className={cn("overflow-hidden rounded-2xl border border-border bg-surface", className)}>
       <div className="overflow-auto" style={maxHeight ? { maxHeight } : undefined}>
         <table className="data-table">{children}</table>
       </div>
@@ -421,7 +421,7 @@ export function Donut({ data, size = 180, thickness = 18, centerLabel, centerVal
     <div className="flex flex-wrap items-center gap-5">
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={thickness} stroke="rgba(133,164,204,0.08)" fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={thickness} stroke="var(--chart-track)" fill="none" />
           {data.map((d, i) => {
             const len = (d.value / total) * c;
             const el = (
@@ -506,7 +506,7 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
 
 /* ── Chart helpers ───────────────────────────────────────────── */
 export const axisProps = {
-  tick: { fill: "#66778D", fontSize: 11 },
+  tick: { fill: "var(--muted-foreground)", fontSize: 11 },
   axisLine: false as const,
   tickLine: false as const,
 };
@@ -514,7 +514,7 @@ export const axisProps = {
 export function ChartTooltip({ active, payload, label, formatter }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-[rgba(133,164,204,0.18)] bg-[#0D1929]/95 px-3 py-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.9)] backdrop-blur">
+    <div className="rounded-xl border border-input bg-popover/95 px-3 py-2 shadow-xl backdrop-blur">
       {label !== undefined && <div className="label-xs mb-1.5">{label}</div>}
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-[12px]">

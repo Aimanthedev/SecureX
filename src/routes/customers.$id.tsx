@@ -7,7 +7,14 @@ import { Phone, Mail } from "lucide-react";
 import { getProjectOutstanding } from "@/lib/project-selectors";
 
 export const Route = createFileRoute("/customers/$id")({
-  head: () => ({ meta: [{ title: "Customer | SecureX CCTV COMPANY" }] }),
+  head: () => ({ meta: [
+    { title: "Customer | SecureX CCTV COMPANY" },
+    { name: "description", content: "Customer account, sites, projects and outstanding balances." },
+    { property: "og:title", content: "Customer | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Customer account, sites, projects and outstanding balances." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CustomerDetail,
 });
 

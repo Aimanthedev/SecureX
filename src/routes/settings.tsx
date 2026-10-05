@@ -13,6 +13,10 @@ export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [
     { title: "Settings | SecureX CCTV COMPANY" },
     { name: "description", content: "Company profile, numbering formats, appearance, language and data preferences." },
+    { property: "og:title", content: "Settings | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Company profile, numbering formats, appearance, language and data preferences." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: SettingsPage,
 });
@@ -49,10 +53,10 @@ function SettingsPage() {
           <Panel accent="blue" texture="grid">
             <PanelHead title="Company Profile" sub="Legal identity and formatting defaults" accent="blue" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label="Company name"><Input value={d.companyProfile.name} onChange={(e) => d.setCompanyProfile({ name: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Currency"><Input value={d.companyProfile.currency} onChange={(e) => d.setCompanyProfile({ currency: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Tax rate"><Input value={d.companyProfile.taxRate} onChange={(e) => d.setCompanyProfile({ taxRate: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Date format"><Input value={d.companyProfile.dateFormat} onChange={(e) => d.setCompanyProfile({ dateFormat: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
+              <Field label="Company name"><Input defaultValue="SecureX CCTV COMPANY" className="border-input bg-card" /></Field>
+              <Field label="Currency"><Input defaultValue="QAR" className="border-input bg-card" /></Field>
+              <Field label="Tax rate"><Input defaultValue="0%" className="border-input bg-card" /></Field>
+              <Field label="Date format"><Input defaultValue="dd MMM yyyy" className="border-input bg-card" /></Field>
             </div>
             <div className="mt-4"><Button size="sm" onClick={() => toast.success("Company profile saved.")} className="bg-signal text-white hover:bg-signal/90">Save</Button></div>
           </Panel>
@@ -62,10 +66,10 @@ function SettingsPage() {
           <Panel accent="cyan" texture="grid">
             <PanelHead title="Numbering Formats" sub="Document series conventions" accent="cyan" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label="Project number format"><Input value={d.numberingFormats.project} onChange={(e) => d.setNumberingFormats({ project: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Work order format"><Input value={d.numberingFormats.workOrder} onChange={(e) => d.setNumberingFormats({ workOrder: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="Purchase order format"><Input value={d.numberingFormats.purchaseOrder} onChange={(e) => d.setNumberingFormats({ purchaseOrder: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
-              <Field label="AMC format"><Input value={d.numberingFormats.amc} onChange={(e) => d.setNumberingFormats({ amc: e.target.value })} className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]" /></Field>
+              <Field label="Project number format"><Input defaultValue="AHC-PRO-2026-000" className="border-input bg-card" /></Field>
+              <Field label="Work order format"><Input defaultValue="AHC-WO-2026-000" className="border-input bg-card" /></Field>
+              <Field label="Purchase order format"><Input defaultValue="AHC-PO-2026-000" className="border-input bg-card" /></Field>
+              <Field label="AMC format"><Input defaultValue="AHC-AMC-2026-000" className="border-input bg-card" /></Field>
             </div>
             <div className="mt-4"><Button size="sm" onClick={() => toast.success("Numbering formats saved.")} className="bg-signal text-white hover:bg-signal/90">Save</Button></div>
           </Panel>
@@ -77,7 +81,7 @@ function SettingsPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field label="Theme">
                 <Select value={theme} onValueChange={(v) => setTheme(v as never)}>
-                  <SelectTrigger className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="border-input bg-card"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -94,7 +98,7 @@ function SettingsPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field label="Language">
                 <Select value={lang} onValueChange={(v) => { setLang(v as never); toast("Language preference saved."); }}>
-                  <SelectTrigger className="border-[rgba(133,164,204,0.16)] bg-[#0D1929]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="border-input bg-card"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="ar">العربية (RTL stub)</SelectItem>
@@ -109,8 +113,8 @@ function SettingsPage() {
           <Panel accent="amber" texture="dots">
             <PanelHead title="Notification Preferences" sub="Alert triggers" accent="amber" />
             <ul className="space-y-2 text-sm">
-              {Object.keys(d.notificationPrefs).map((n) => (
-                <li key={n} className="flex items-center justify-between rounded-lg border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.03)] px-3 py-2">
+              {["Failed test alerts", "Overdue PO alerts", "AMC expiring alerts", "Client approval reminders", "Payment collection reminders"].map((n) => (
+                <li key={n} className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
                   <span className="text-foreground/90">{n}</span>
                   <input type="checkbox" checked={d.notificationPrefs[n]} onChange={() => d.toggleNotificationPref(n)} className="accent-signal" />
                 </li>
@@ -122,11 +126,7 @@ function SettingsPage() {
         <TabsContent value="da" className="mt-3">
           <Panel accent="green" texture="dots">
             <PanelHead title="Data Management" sub="Export and portability" accent="green" />
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => exportAllData(d)}>Export all data (JSON)</Button>
-              <Button variant="outline" className="border-[rgba(255,70,100,0.3)] bg-transparent text-[#FF4664] hover:bg-[rgba(255,70,100,0.08)]" onClick={() => setResetOpen(true)}>Reset demo data</Button>
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground">Reset clears everything you've created or changed locally and restores the original demo dataset shipped with the app.</p>
+            <Button variant="outline" className="border-input bg-transparent" onClick={() => toast("Export prepared (demo).")}>Export all data</Button>
           </Panel>
         </TabsContent>
       </Tabs>

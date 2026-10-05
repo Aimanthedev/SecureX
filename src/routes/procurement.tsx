@@ -14,6 +14,10 @@ export const Route = createFileRoute("/procurement")({
   head: () => ({ meta: [
     { title: "Procurement | SecureX CCTV COMPANY" },
     { name: "description", content: "Purchase requests, purchase orders and sourcing pipeline across every project." },
+    { property: "og:title", content: "Procurement | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Purchase requests, purchase orders and sourcing pipeline across every project." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: ProcurementPage,
 });

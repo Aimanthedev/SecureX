@@ -14,6 +14,10 @@ export const Route = createFileRoute("/documents")({
   head: () => ({ meta: [
     { title: "Documents | SecureX CCTV COMPANY" },
     { name: "description", content: "Contracts, drawings, reports and compliance documents across the company." },
+    { property: "og:title", content: "Documents | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Contracts, drawings, reports and compliance documents across the company." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: DocsPage,
 });
@@ -48,7 +52,7 @@ function DocsPage() {
       </div>
 
       <div className="rise rise-2 mb-3">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search documents…" className="h-9 w-72 border-[rgba(133,164,204,0.16)] bg-[#0D1929]" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search documents…" className="h-9 w-72 border-input bg-card" />
       </div>
 
       <Tabs defaultValue="all" className="rise rise-3">
@@ -80,7 +84,14 @@ function DocsPage() {
         </TabsContent>
 
         <TabsContent value="missing" className="mt-3">
-          <MissingDocs />
+          <div className="space-y-2">
+            {["Handover pack for AHC-PRO-2026-041", "As-built drawings for AHC-PRO-2026-044", "MoI approval letter for AHC-PRO-2026-038"].map((m) => (
+              <div key={m} className="panel-flat flex items-center justify-between p-3">
+                <span className="text-sm text-foreground">{m}</span>
+                <Button size="sm" variant="outline" className="border-input" onClick={() => toast("Placeholder created")}>Add placeholder</Button>
+              </div>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="expiring" className="mt-3">

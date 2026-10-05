@@ -13,7 +13,11 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/equipment")({
   head: () => ({ meta: [
     { title: "Equipment | SecureX CCTV COMPANY" },
-    { name: "description", content: "Catalogue and serialized register of every camera, recorder and network device." },
+    { name: "description", content: "Catalogue and serialized register of cameras, recorders and network devices." },
+    { property: "og:title", content: "Equipment | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Catalogue and serialized register of cameras, recorders and network devices." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: EquipmentPage,
 });
@@ -57,7 +61,7 @@ function EquipmentPage() {
         </TabsList>
 
         <TabsContent value="cat" className="mt-3">
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search SKU, brand, model…" className="h-9 w-72 mb-3 border-[rgba(133,164,204,0.16)] bg-[#0D1929]" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search SKU, brand, model…" className="h-9 w-72 mb-3 border-input bg-card" />
           <TableShell>
             <thead>
               <tr>

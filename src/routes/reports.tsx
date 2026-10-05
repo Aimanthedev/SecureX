@@ -13,6 +13,10 @@ export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [
     { title: "Reports | SecureX CCTV COMPANY" },
     { name: "description", content: "Executive, project, sales, financial and compliance analytics across the business." },
+    { property: "og:title", content: "Reports | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Executive, project, sales, financial and compliance analytics across the business." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: ReportsPage,
 });
@@ -46,16 +50,8 @@ function ReportsPage() {
         subtitle="Business answers, not decoration"
         actions={
           <>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => toast("Saved view")}>Save view</Button>
-            <Button variant="outline" size="sm" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => {
-              const header = ["Project", "Customer", "Phase", "Contract Value", "Collected", "Outstanding"];
-              const rows = d.projects.map((p) => [p.number, d.customers.find((c) => c.id === p.customerId)?.name ?? "", p.phase, getProjectCurrentValue(d.selectorCtx, p.id), getProjectCollected(d.selectorCtx, p.id), getProjectOutstanding(d.selectorCtx, p.id)]);
-              const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
-              const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a"); a.href = url; a.download = "reports-export.csv"; a.click(); URL.revokeObjectURL(url);
-              toast.success("CSV exported.");
-            }}>Export CSV</Button>
+            <Button variant="outline" size="sm" className="border-input bg-transparent" onClick={() => toast("Saved view")}>Save view</Button>
+            <Button variant="outline" size="sm" className="border-input bg-transparent" onClick={() => toast("CSV exported (demo)")}>Export CSV</Button>
             <Button size="sm" className="bg-signal text-white hover:bg-signal/90" onClick={() => window.print()}>Print</Button>
           </>
         }

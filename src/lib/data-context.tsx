@@ -479,12 +479,20 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   const [density, setDensity] = useState<"compact"|"comfortable">("comfortable");
   const setTheme = useCallback((t: ThemeMode) => {
     setThemeState(t);
-    if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", t === "dark");
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", t === "dark");
+      document.documentElement.style.colorScheme = t;
+      window.localStorage.setItem("securex-theme", t);
+    }
   }, []);
   const setRole = useCallback((r: Role) => setRoleState(r), []);
   React.useEffect(() => {
-    if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    const saved = window.localStorage.getItem("securex-theme");
+    const initial = saved === "light" || saved === "dark" ? saved : "dark";
+    setThemeState(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+    document.documentElement.style.colorScheme = initial;
+  }, []);
   return <UIContext.Provider value={{ theme, setTheme, role, setRole, lang, setLang, density, setDensity }}>{children}</UIContext.Provider>;
 }
 export function useUI() {

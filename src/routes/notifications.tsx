@@ -11,6 +11,10 @@ export const Route = createFileRoute("/notifications")({
   head: () => ({ meta: [
     { title: "Notifications | SecureX CCTV COMPANY" },
     { name: "description", content: "Critical, warning and informational signals across the platform." },
+    { property: "og:title", content: "Notifications | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Critical, warning and informational signals across the platform." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: NotifPage,
 });
@@ -39,7 +43,7 @@ function NotifPage() {
         title="Notifications"
         subtitle="Signals across the platform, derived from live operational data"
         actions={
-          <Button size="sm" variant="outline" className="border-[rgba(133,164,204,0.18)] bg-transparent" onClick={() => { d.markAllNotificationsRead(all.map((n) => n.id)); toast("All marked read."); }}>
+          <Button size="sm" variant="outline" className="border-input bg-transparent" onClick={() => { setList(list.map((n) => ({ ...n, read: true }))); toast("All marked read."); }}>
             Mark all read
           </Button>
         }

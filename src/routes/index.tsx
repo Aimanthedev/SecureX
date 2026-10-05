@@ -19,7 +19,9 @@ export const Route = createFileRoute("/")({
     { title: "Command Center | SecureX CCTV COMPANY" },
     { name: "description", content: "Live operations command center for SecureX CCTV COMPANY — projects, pipeline, collections and field execution." },
     { property: "og:title", content: "Command Center | SecureX CCTV COMPANY" },
-    { property: "og:description", content: "Live operations command center for SecureX CCTV COMPANY." },
+    { property: "og:description", content: "Live operations command center for SecureX CCTV COMPANY — projects, pipeline, collections and field execution." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: CommandCenter,
 });
@@ -125,12 +127,12 @@ function CommandCenter() {
             <div className="h-[248px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={execData} barGap={4} onClick={(e: any) => e?.activeLabel && setMonth(e.activeLabel)}>
-                  <CartesianGrid stroke="rgba(133,164,204,0.07)" vertical={false} />
+                  <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="m" {...axisProps} />
                   <YAxis {...axisProps} width={34} />
                   <Tooltip cursor={{ fill: "rgba(47,131,255,0.06)" }} content={<ChartTooltip formatter={(v: number) => `${v} milestones`} />} />
                   <Bar dataKey="planned" name="Planned" radius={[6, 6, 0, 0]} maxBarSize={16}>
-                    {execData.map((r) => <Cell key={r.m} fill="rgba(133,164,204,0.16)" />)}
+                    {execData.map((r) => <Cell key={r.m} fill="var(--chart-track)" />)}
                   </Bar>
                   <Bar dataKey="actual" name="Actual" radius={[6, 6, 0, 0]} maxBarSize={16}>
                     {execData.map((r) => <Cell key={r.m} fill={r.m === month ? "#2F83FF" : "rgba(47,131,255,0.35)"} />)}
@@ -151,22 +153,22 @@ function CommandCenter() {
                 right={<button onClick={() => nav({ to: "/projects" })} className="text-[11.5px] font-medium text-signal hover:underline">View all</button>}
               />
             </div>
-            <div className="divide-y divide-[rgba(133,164,204,0.07)]">
+            <div className="divide-y divide-border">
               {recent.map((r, i) => {
                 const a = ACCENT[r.accent];
                 const Icon = r.icon;
                 return (
-                  <div key={i} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[rgba(47,131,255,0.05)] md:px-5">
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/60 md:px-5">
                     <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border" style={{ background: a.soft, borderColor: a.ring, color: a.hex }}>
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-medium">{r.activity}</div>
-                      <div className="truncate text-[11px] text-[#66778D]">{r.title} · {r.owner}</div>
+                      <div className="truncate text-[11px] text-muted-foreground">{r.title} · {r.owner}</div>
                     </div>
                     <div className="num hidden w-28 shrink-0 text-right text-[12.5px] font-semibold sm:block">{r.value}</div>
                     <div className="hidden shrink-0 sm:block"><StatusPill status={r.status} tone={r.tone} /></div>
-                    <div className="w-16 shrink-0 text-right text-[10.5px] text-[#66778D]">{r.time}</div>
+                    <div className="w-16 shrink-0 text-right text-[10.5px] text-muted-foreground">{r.time}</div>
                   </div>
                 );
               })}
@@ -198,7 +200,7 @@ function CommandCenter() {
                       <td className="num ta-right font-semibold">{fmtQAR(getProjectCurrentValue(d.selectorCtx, p.id), { compact: true })}</td>
                       <td><HealthBadge label={h.label} /></td>
                       <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>
-                      <td><ArrowRight className="h-3.5 w-3.5 text-[#66778D]" /></td>
+                      <td><ArrowRight className="h-3.5 w-3.5 text-muted-foreground" /></td>
                     </tr>
                   );
                 })}
@@ -290,7 +292,7 @@ function CommandCenter() {
                 { l: "Tested", v: tested, a: "magenta" as const },
                 { l: "Failed", v: d.devices.filter((x) => x.testResult === "Fail").length, a: "red" as const },
               ].map((s) => (
-                <div key={s.l} className="flex items-center justify-between rounded-xl border border-[rgba(133,164,204,0.10)] bg-[rgba(133,164,204,0.04)] px-3 py-2 text-[11.5px]">
+                <div key={s.l} className="flex items-center justify-between rounded-xl border border-border bg-muted/50 px-3 py-2 text-[11.5px]">
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: ACCENT[s.a].hex, boxShadow: `0 0 8px ${ACCENT[s.a].hex}` }} />
                     {s.l}
@@ -309,7 +311,7 @@ function CommandCenter() {
 function Legend({ color, label, value }: { color: string; label: string; value: string }) {
   return (
     <div>
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#66778D]">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <span className="h-2 w-2 rounded-full" style={{ background: color }} />{label}
       </div>
       <div className="num mt-1 text-[15px] font-semibold">{value}</div>

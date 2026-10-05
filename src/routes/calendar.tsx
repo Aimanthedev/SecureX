@@ -8,6 +8,10 @@ export const Route = createFileRoute("/calendar")({
   head: () => ({ meta: [
     { title: "Calendar | SecureX CCTV COMPANY" },
     { name: "description", content: "Unified schedule of surveys, milestones, installs and service visits." },
+    { property: "og:title", content: "Calendar | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Unified schedule of surveys, milestones, installs and service visits." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
   ] }),
   component: CalPage,
 });
@@ -92,17 +96,24 @@ function CalPage() {
         <StatTile label="AMC Visits" value={counts.visit} accent="purple" />
       </div>
 
-      {view === "month" && (
-        <Panel className="rise rise-2" texture="grid" accent="cyan">
-          <PanelHead
-            title={`${MONTH_NAMES[month]} ${year}`}
-            sub="Scheduled activity across the portfolio"
-            accent="cyan"
-            right={
-              <div className="flex items-center gap-1.5 text-xs">
-                <button className="rounded-md border border-[rgba(133,164,204,0.16)] px-2 py-1 hover:bg-[rgba(133,164,204,0.08)]" onClick={() => setCursor(new Date(year, month - 1, 1))}>‹</button>
-                <button className="rounded-md border border-[rgba(133,164,204,0.16)] px-2 py-1 hover:bg-[rgba(133,164,204,0.08)]" onClick={() => setCursor(new Date(today))}>Today</button>
-                <button className="rounded-md border border-[rgba(133,164,204,0.16)] px-2 py-1 hover:bg-[rgba(133,164,204,0.08)]" onClick={() => setCursor(new Date(year, month + 1, 1))}>›</button>
+      <Panel className="rise rise-2" texture="grid" accent="cyan">
+        <PanelHead title="July 2026" sub="Scheduled activity across the portfolio" accent="cyan" />
+        <div className="grid grid-cols-7 gap-1.5 text-xs">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dw) => (
+            <div key={dw} className="label-xs p-1 text-center">{dw}</div>
+          ))}
+          {days.map((day) => (
+            <div key={day.iso} className="aspect-square rounded-xl border border-border bg-muted/40 p-1.5 overflow-hidden">
+              <div className="num text-[10px] text-muted-foreground">{day.day}</div>
+              <div className="mt-1 space-y-0.5">
+                {day.events.map((e, i) => {
+                  const c = COLOR[e.kind] || COLOR.visit;
+                  return (
+                    <div key={i} className="truncate rounded px-1 text-[9px] font-medium" style={{ background: c.bg, color: c.text }}>
+                      {e.label}
+                    </div>
+                  );
+                })}
               </div>
             }
           />

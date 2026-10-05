@@ -29,7 +29,14 @@ import {
 } from "@/lib/project-selectors";
 
 export const Route = createFileRoute("/projects/$id")({
-  head: () => ({ meta: [{ title: "Project | SecureX CCTV COMPANY" }] }),
+  head: () => ({ meta: [
+    { title: "Project | SecureX CCTV COMPANY" },
+    { name: "description", content: "Project status, milestones, materials, cameras and testing in one cockpit." },
+    { property: "og:title", content: "Project | SecureX CCTV COMPANY" },
+    { property: "og:description", content: "Project status, milestones, materials, cameras and testing in one cockpit." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ProjectDetail,
 });
 

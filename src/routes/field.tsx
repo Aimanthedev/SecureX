@@ -72,8 +72,8 @@ function FieldOps() {
                 <div className="flex items-start justify-between gap-2"><div className="text-[14px] font-medium">{t.title}</div><StatusPill status={t.priority} tone={t.priority==="Critical"?"critical":t.priority==="High"?"warning":"neutral"} /></div>
                 <div className="mt-2 flex items-center justify-between text-[11.5px] text-muted-foreground"><span>{t.phase}</span><span className="num">Due {fmtDate(t.due)}</span></div>
                 <div className="mt-3 flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1 h-10 rounded-lg border-[rgba(133,164,204,0.2)] text-[12.5px]" onClick={() => toast.success("Task started")}>Start</Button>
-                  <Button size="sm" className="flex-1 h-10 rounded-lg bg-success text-success-foreground font-medium text-[12.5px] hover:bg-success/90" onClick={() => toast.success("Task completed")}><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Complete</Button>
+                  <Button size="sm" variant="outline" className="flex-1 h-10 rounded-lg border-[rgba(133,164,204,0.2)] text-[12.5px]" onClick={() => { d.updateTask(t.id, { status: "In Progress" }); toast.success("Task started"); }}>Start</Button>
+                  <Button size="sm" className="flex-1 h-10 rounded-lg bg-success text-success-foreground font-medium text-[12.5px] hover:bg-success/90" onClick={() => { d.updateTask(t.id, { status: "Completed", progress: 100 }); toast.success("Task completed"); }}><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Complete</Button>
                 </div>
               </div>
             ))}</div>

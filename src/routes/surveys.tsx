@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import { PageHeader, MonoChip, StatusPill, WorkStatusBadge, MetricCard, Panel, PanelHead, TableShell, type WorkStatus } from "@/components/app/common";
 import { fmtDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -25,6 +27,11 @@ function SurveysPage() {
   const d = useData();
   const [view, setView] = useState("list");
   const [detail, setDetail] = useState<string | null>(null);
+  const [newOpen, setNewOpen] = useState(false);
+
+  useEffect(() => {
+    if (d.pendingCreate?.type === "survey") { setNewOpen(true); d.clearPendingCreate(); }
+  }, [d.pendingCreate]);
 
   const upcoming = d.surveys.filter((s) => s.status === "Scheduled" || s.status === "Requested").length;
   const completedSurveys = d.surveys.filter((s) => s.completeness >= 100).length;
@@ -35,7 +42,7 @@ function SurveysPage() {
 
   return (
     <div>
-      <PageHeader title="Site Surveys" subtitle="Camera point capture threads into BOQ, devices, and testing" actions={<Button size="sm" className="bg-signal text-white" onClick={() => toast.success("Survey scheduled (demo)")}>New survey</Button>} />
+      <PageHeader title="Site Surveys" subtitle="Camera point capture threads into BOQ, devices, and testing" actions={<Button size="sm" className="bg-signal text-white" onClick={() => setNewOpen(true)}>New survey</Button>} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <MetricCard label="Survey Schedule" value={upcoming} sub="requested or scheduled" icon={<CalendarClock className="w-4 h-4" />} accent="blue" motif="grid" />
@@ -117,12 +124,65 @@ function SurveysPage() {
                     <tr key={p.id}><td><MonoChip>{p.id}</MonoChip></td><td>{p.building}</td><td>{p.floor}</td><td>{p.zone}</td><td>{p.cameraType}</td><td>{p.mountPos}</td><td className="num">{p.mountHeight}</td><td className="num">{p.cableLen}m</td><td className="text-muted-foreground">{p.notes || "-"}</td></tr>
                   ))}</tbody>
                 </TableShell>
-                <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>Close</Button><Button className="bg-signal text-white" onClick={() => toast.success("Report printed (demo).")}>Print report</Button></DialogFooter>
+                <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>Close</Button><Button className="bg-signal text-white" onClick={() => window.print()}>Print report</Button></DialogFooter>
               </>
             );
           })()}
         </DialogContent>
       </Dialog>
+
+      <NewSurveyDialog open={newOpen} onOpenChange={setNewOpen} />
     </div>
+  );
+}
+
+function NewSurveyDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const d = useData();
+  const blank = { customerId: "", siteId: "", type: "Full site survey", engineerId: d.employees.find((e) => e.department === "Engineering")?.id ?? "", scheduled: new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10) };
+  const [form, setForm] = useState(blank);
+  useEffect(() => { if (open) setForm(blank); }, [open]);
+  const sites = d.sites.filter((s) => s.customerId === form.customerId);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>New Survey</DialogTitle></DialogHeader>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <label><span className="text-xs text-muted-foreground">Customer</span>
+            <Select value={form.customerId} onValueChange={(v) => setForm({ ...form, customerId: v, siteId: "" })}>
+              <SelectTrigger><SelectValue placeholder="Choose customer" /></SelectTrigger>
+              <SelectContent>{d.customers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label><span className="text-xs text-muted-foreground">Site</span>
+            <Select value={form.siteId} onValueChange={(v) => setForm({ ...form, siteId: v })}>
+              <SelectTrigger><SelectValue placeholder="Choose site" /></SelectTrigger>
+              <SelectContent>{(sites.length ? sites : d.sites).map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label><span className="text-xs text-muted-foreground">Survey type</span><Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} /></label>
+          <label><span className="text-xs text-muted-foreground">Engineer</span>
+            <Select value={form.engineerId} onValueChange={(v) => setForm({ ...form, engineerId: v })}>
+              <SelectTrigger><SelectValue placeholder="Choose engineer" /></SelectTrigger>
+              <SelectContent>{d.employees.filter((e) => e.department === "Engineering").map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+          <label className="col-span-2"><span className="text-xs text-muted-foreground">Scheduled date</span><Input type="date" value={form.scheduled} onChange={(e) => setForm({ ...form, scheduled: e.target.value })} /></label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button className="bg-signal text-white" onClick={() => {
+            if (!form.customerId) { toast.error("Choose a customer"); return; }
+            const s = d.addSurvey({
+              number: `AHC-SUR-2026-${String(100 + d.surveys.length).padStart(3, "0")}`,
+              customerId: form.customerId, siteId: form.siteId || d.sites.find((x) => x.customerId === form.customerId)!.id,
+              type: form.type, engineerId: form.engineerId, scheduled: form.scheduled, status: "Requested",
+              completeness: 0, reportStatus: "Draft", points: [], existingSystem: "To be assessed on site.", proposedSummary: "",
+            });
+            onOpenChange(false);
+            toast.success(`Survey ${s.number} scheduled.`);
+          }}>Schedule survey</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

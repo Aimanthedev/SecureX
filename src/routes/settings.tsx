@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader, Panel, PanelHead } from "@/components/app/common";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useUI } from "@/lib/data-context";
+import { useData, useUI } from "@/lib/data-context";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [
@@ -30,6 +32,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function SettingsPage() {
   const { theme, setTheme, lang, setLang } = useUI();
+  const d = useData();
+  const [resetOpen, setResetOpen] = useState(false);
   return (
     <div>
       <PageHeader
@@ -54,6 +58,7 @@ function SettingsPage() {
               <Field label="Tax rate"><Input defaultValue="0%" className="border-input bg-card" /></Field>
               <Field label="Date format"><Input defaultValue="dd MMM yyyy" className="border-input bg-card" /></Field>
             </div>
+            <div className="mt-4"><Button size="sm" onClick={() => toast.success("Company profile saved.")} className="bg-signal text-white hover:bg-signal/90">Save</Button></div>
           </Panel>
         </TabsContent>
 
@@ -66,6 +71,7 @@ function SettingsPage() {
               <Field label="Purchase order format"><Input defaultValue="AHC-PO-2026-000" className="border-input bg-card" /></Field>
               <Field label="AMC format"><Input defaultValue="AHC-AMC-2026-000" className="border-input bg-card" /></Field>
             </div>
+            <div className="mt-4"><Button size="sm" onClick={() => toast.success("Numbering formats saved.")} className="bg-signal text-white hover:bg-signal/90">Save</Button></div>
           </Panel>
         </TabsContent>
 
@@ -110,7 +116,7 @@ function SettingsPage() {
               {["Failed test alerts", "Overdue PO alerts", "AMC expiring alerts", "Client approval reminders", "Payment collection reminders"].map((n) => (
                 <li key={n} className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
                   <span className="text-foreground/90">{n}</span>
-                  <input type="checkbox" defaultChecked className="accent-signal" />
+                  <input type="checkbox" checked={d.notificationPrefs[n]} onChange={() => d.toggleNotificationPref(n)} className="accent-signal" />
                 </li>
               ))}
             </ul>
@@ -124,6 +130,32 @@ function SettingsPage() {
           </Panel>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset demo data?</AlertDialogTitle>
+            <AlertDialogDescription>This clears every local edit, created record and preference and restores the original SecureX demo dataset. This cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { d.resetDemoData(); setResetOpen(false); toast.success("Demo data reset to defaults."); }}>Reset</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
+}
+
+function exportAllData(d: ReturnType<typeof useData>) {
+  const payload = {
+    customers: d.customers, projects: d.projects, leads: d.leads, tickets: d.tickets,
+    amc: d.amc, documents: d.documents, products: d.products, employees: d.employees,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "securex-data-export.json"; a.click();
+  URL.revokeObjectURL(url);
+  toast.success("Data exported.");
 }

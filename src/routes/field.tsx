@@ -19,11 +19,13 @@ export const Route = createFileRoute("/field")({
   component: FieldOps,
 });
 
+const ME = "E-010";
+
 function FieldOps() {
   const d = useData();
   const [tab, setTab] = useState<"today"|"projects"|"tasks"|"materials"|"me">("today");
-  const [checkedIn, setCheckedIn] = useState(false);
-  const myTasks = d.tasks.filter((t) => t.assigneeId === "E-010").slice(0, 5);
+  const checkedIn = d.onSiteEmployeeIds.includes(ME);
+  const myTasks = d.tasks.filter((t) => t.assigneeId === ME && t.status !== "Completed").slice(0, 5);
   const todayProject = d.projects.find((p) => p.id === "P-041")!;
 
   return (
@@ -56,7 +58,7 @@ function FieldOps() {
                 {!checkedIn ? (
                   <Button className="flex-1 h-11 rounded-xl bg-signal text-signal-foreground text-[14px] font-medium hover:bg-signal/90" onClick={() => { setCheckedIn(true); toast.success("Checked in at 07:45"); }}><LogIn className="w-4 h-4 mr-1.5" />Check in</Button>
                 ) : (
-                  <Button variant="outline" className="flex-1 h-11 rounded-xl border-[rgba(133,164,204,0.22)] text-[14px]" onClick={() => { setCheckedIn(false); toast("Checked out."); }}><LogOut className="w-4 h-4 mr-1.5" />Check out</Button>
+                  <Button variant="outline" className="flex-1 h-11 rounded-xl border-[rgba(133,164,204,0.22)] text-[14px]" onClick={() => { d.setCheckedIn(ME, false); toast("Checked out."); }}><LogOut className="w-4 h-4 mr-1.5" />Check out</Button>
                 )}
                 <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-[rgba(133,164,204,0.22)]" onClick={() => toast.success("Photo captured (demo)")}><Camera className="w-4 h-4" /></Button>
               </div>

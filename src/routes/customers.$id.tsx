@@ -3,6 +3,8 @@ import { useData } from "@/lib/data-context";
 import { PageHeader, MonoChip, StatusPill, Panel, PanelHead, StatTile, TableShell, EmptyState } from "@/components/app/common";
 import { fmtQAR, fmtDate } from "@/lib/format";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Phone, Mail } from "lucide-react";
+import { getProjectOutstanding } from "@/lib/project-selectors";
 
 export const Route = createFileRoute("/customers/$id")({
   head: () => ({ meta: [
@@ -31,7 +33,10 @@ function CustomerDetail() {
   }
   const projs = d.projects.filter((p) => p.customerId === c.id);
   const sites = d.sites.filter((s) => s.customerId === c.id);
-  const outstanding = projs.reduce((s, p) => s + (p.invoiced - p.collected), 0);
+  const outstanding = projs.reduce((s, p) => s + getProjectOutstanding(d.selectorCtx, p.id), 0);
+  const custAmc = d.amc.filter((a) => a.customerId === c.id);
+  const custTickets = d.tickets.filter((t) => t.customerId === c.id);
+  const custDocs = d.documents.filter((doc) => doc.customerId === c.id || projs.some((p) => p.id === doc.projectId));
 
   return (
     <div>
@@ -107,11 +112,70 @@ function CustomerDetail() {
           </TableShell>
         </TabsContent>
 
-        {["contacts", "amc", "tickets", "documents"].map((t) => (
-          <TabsContent key={t} value={t} className="mt-4">
-            <EmptyState title={`No ${t} records to display`} />
-          </TabsContent>
-        ))}
+        <TabsContent value="contacts" className="mt-4">
+          <Panel accent="cyan">
+            <PanelHead title="Primary Contact" accent="cyan" />
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="min-w-0">
+                <div className="font-medium text-foreground">{c.contact}</div>
+                <div className="text-xs text-muted-foreground">{c.industry}</div>
+              </div>
+              <a href={`tel:${c.phone.replace(/\s/g, "")}`} className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(133,164,204,0.16)] px-2.5 py-1.5 text-xs text-signal hover:bg-[rgba(47,131,255,0.08)]"><Phone className="h-3.5 w-3.5" />{c.phone}</a>
+              <a href={`mailto:${c.email}`} className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(133,164,204,0.16)] px-2.5 py-1.5 text-xs text-signal hover:bg-[rgba(47,131,255,0.08)]"><Mail className="h-3.5 w-3.5" />{c.email}</a>
+            </div>
+          </Panel>
+        </TabsContent>
+
+        <TabsContent value="amc" className="mt-4">
+          {custAmc.length === 0 ? <EmptyState title="No AMC contracts for this account" /> : (
+            <TableShell>
+              <thead><tr>{["Contract", "Equipment", "Start", "End", "Value", "Renewal"].map((h) => <th key={h} className="text-left">{h}</th>)}</tr></thead>
+              <tbody>{custAmc.map((a) => (
+                <tr key={a.id}>
+                  <td><MonoChip>{a.number}</MonoChip></td>
+                  <td className="text-xs text-muted-foreground">{a.equipment}</td>
+                  <td className="num text-xs">{fmtDate(a.start)}</td>
+                  <td className="num text-xs">{fmtDate(a.end)}</td>
+                  <td className="num">{fmtQAR(a.value, { compact: true })}</td>
+                  <td><StatusPill status={a.renewalStatus} tone={a.renewalStatus === "Active" ? "success" : a.renewalStatus === "Expiring Soon" ? "warning" : a.renewalStatus === "Expired" ? "critical" : "info"} /></td>
+                </tr>
+              ))}</tbody>
+            </TableShell>
+          )}
+        </TabsContent>
+
+        <TabsContent value="tickets" className="mt-4">
+          {custTickets.length === 0 ? <EmptyState title="No service tickets for this account" /> : (
+            <TableShell>
+              <thead><tr>{["Ticket", "Title", "Priority", "Opened", "Status"].map((h) => <th key={h} className="text-left">{h}</th>)}</tr></thead>
+              <tbody>{custTickets.map((t) => (
+                <tr key={t.id}>
+                  <td><MonoChip>{t.number}</MonoChip></td>
+                  <td className="text-xs text-muted-foreground">{t.title}</td>
+                  <td><StatusPill status={t.priority} tone={t.priority === "Critical" ? "critical" : t.priority === "High" ? "warning" : "neutral"} /></td>
+                  <td className="num text-xs">{fmtDate(t.opened)}</td>
+                  <td><StatusPill status={t.status} tone={t.status === "Closed" ? "success" : t.status === "In Progress" ? "info" : "warning"} /></td>
+                </tr>
+              ))}</tbody>
+            </TableShell>
+          )}
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          {custDocs.length === 0 ? <EmptyState title="No documents for this account" /> : (
+            <TableShell>
+              <thead><tr>{["Name", "Category", "Status", "Uploaded"].map((h) => <th key={h} className="text-left">{h}</th>)}</tr></thead>
+              <tbody>{custDocs.map((doc) => (
+                <tr key={doc.id}>
+                  <td className="text-foreground">{doc.name}</td>
+                  <td className="text-xs text-muted-foreground">{doc.category}</td>
+                  <td><StatusPill status={doc.status} tone={doc.status === "Approved" ? "success" : doc.status === "Expired" ? "critical" : "warning"} /></td>
+                  <td className="num text-xs">{fmtDate(doc.uploadedOn)}</td>
+                </tr>
+              ))}</tbody>
+            </TableShell>
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );

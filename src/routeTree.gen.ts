@@ -9,25 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SurveysRouteImport } from './routes/surveys'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ServiceRouteImport } from './routes/service'
-import { Route as SalesRouteImport } from './routes/sales'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as ProcurementRouteImport } from './routes/procurement'
-import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as MoiRouteImport } from './routes/moi'
-import { Route as FieldRouteImport } from './routes/field'
-import { Route as EquipmentRouteImport } from './routes/equipment'
-import { Route as EmployeesRouteImport } from './routes/employees'
-import { Route as DocumentsRouteImport } from './routes/documents'
-import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as EquipmentRouteImport } from './routes/equipment'
 import { Route as FieldRouteImport } from './routes/field'
+import { Route as MoiRouteImport } from './routes/moi'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -70,24 +58,19 @@ const FieldRoute = FieldRouteImport.update({
   path: '/field',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MoiRoute = MoiRouteImport.update({
   id: '/moi',
   path: '/moi',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FieldRoute = FieldRouteImport.update({
-  id: '/field',
-  path: '/field',
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EquipmentRoute = EquipmentRouteImport.update({
-  id: '/equipment',
-  path: '/equipment',
+const ProcurementRoute = ProcurementRouteImport.update({
+  id: '/procurement',
+  path: '/procurement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -325,13 +308,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FieldRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/moi': {
       id: '/moi'
       path: '/moi'
@@ -339,18 +315,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoiRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/field': {
-      id: '/field'
-      path: '/field'
-      fullPath: '/field'
-      preLoaderRoute: typeof FieldRouteImport
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/equipment': {
-      id: '/equipment'
-      path: '/equipment'
-      fullPath: '/equipment'
-      preLoaderRoute: typeof EquipmentRouteImport
+    '/procurement': {
+      id: '/procurement'
+      path: '/procurement'
+      fullPath: '/procurement'
+      preLoaderRoute: typeof ProcurementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {

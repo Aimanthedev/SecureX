@@ -47,6 +47,7 @@ function ProjectsList() {
   const [healthFilter, setHealthFilter] = useState<string>("all");
   const [view, setView] = useState<"grid" | "table" | "kanban" | "timeline">("grid");
   const [newOpen, setNewOpen] = useState(false);
+  const [track, setTrack] = useState<"standard" | "moi">("standard");
 
   const withHealth = useMemo(
     () => d.projects.map((p) => ({ p, h: d.computeHealth(p, d.approvals, d.devices, d.materials) })),
@@ -89,6 +90,8 @@ function ProjectsList() {
         }
       />
 
+      <div className="mb-4"><Segmented value={track} onChange={setTrack} options={[{ value: "standard", label: "Standard Projects" }, { value: "moi", label: "MOI-Approved Projects" }]} /></div>
+      {track === "moi" ? <MoiProjectsView /> : <>
       <div className="rise rise-1 mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <StatTile label="Active" value={counts.active} accent="blue" />
         <StatTile label="At Risk" value={counts.atRisk} accent="red" />

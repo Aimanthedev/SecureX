@@ -19,6 +19,7 @@ const NAV_GROUPS = [
   { group: "Main", items: [
     { to: "/", label: "Command Center", icon: LayoutDashboard },
     { to: "/projects", label: "Projects", icon: HardHat },
+    { to: "/moi", label: "MOI Compliance", icon: ShieldCheck },
     { to: "/field", label: "Field Operations", icon: Wrench },
     { to: "/calendar", label: "Calendar", icon: Calendar },
   ]},
@@ -38,7 +39,6 @@ const NAV_GROUPS = [
   ]},
   { group: "Intelligence", items: [
     { to: "/reports", label: "Reports", icon: BarChart3 },
-    { to: "/notifications", label: "Notifications", icon: Bell },
   ]},
   { group: "System", items: [
     { to: "/settings", label: "Settings", icon: Settings },
@@ -49,7 +49,7 @@ const PAGE_TITLES: Record<string, string> = {
   "": "Command Center", projects: "Projects", field: "Field Operations", calendar: "Calendar",
   sales: "Sales", surveys: "Site Surveys", customers: "Customers",
   equipment: "Equipment", procurement: "Procurement", employees: "Employees", documents: "Documents",
-  service: "Service and AMC", reports: "Reports", notifications: "Notifications", settings: "Settings",
+  service: "Service and AMC", moi: "MOI Compliance", reports: "Reports", notifications: "Notifications", settings: "Settings",
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {

@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Printer, Circle, ChevronRight, MoreHorizontal, LayoutGrid, Wrench, Coins, ShieldCheck, FolderOpen, Flag, Camera, Package as PackageIcon, ClipboardCheck, TrendingDown, Users, MessageSquare, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MOI_PROJECTS } from "@/lib/moi-data";
+import { MoiProjectPanel } from "@/components/app/moi-project-panel";
 
 export const Route = createFileRoute("/projects/$id")({
   head: () => ({ meta: [
@@ -50,6 +52,7 @@ function ProjectDetail() {
   const projectTests = d.testRecords.filter((t) => t.projectId === p.id);
   const projectHandover = d.handoverItems.filter((h) => h.projectId === p.id);
   const projectCompliance = d.complianceItems.filter((c) => c.projectId === p.id);
+  const moiRec = MOI_PROJECTS.find((m) => m.projectId === p.id);
   const SECTIONS = useMemo(() => [
     { id: "overview",   label: "Overview",   icon: LayoutGrid,     subs: [{ v: "overview", l: "Summary" }] },
     { id: "execution",  label: "Execution",  icon: Wrench,         subs: [
@@ -61,7 +64,8 @@ function ProjectDetail() {
     { id: "quality",    label: "Quality",    icon: ShieldCheck,    subs: [{ v: "testing", l: "Testing" }, { v: "comp", l: "Compliance" }] },
     { id: "documents",  label: "Documents",  icon: FolderOpen,     subs: [{ v: "docs", l: "Project Documents" }, { v: "comm", l: "Client Communication" }, { v: "log", l: "Activity Log" }] },
     { id: "handover",   label: "Handover",   icon: Flag,           subs: [{ v: "handover", l: "Readiness Checklist" }] },
-  ] as const, []);
+    ...(moiRec ? [{ id: "moi", label: "MOI / Compliance", icon: ShieldCheck, subs: [{ v: "moi", l: "MOI / SSD" }] }] : []),
+  ], [moiRec]);
   const [section, setSection] = useState<string>("overview");
   const [tab, setTab] = useState("overview");
   const activeSection = SECTIONS.find((s) => s.id === section) || SECTIONS[0];
@@ -327,6 +331,7 @@ function ProjectDetail() {
           <div className="space-y-2">{projectCompliance.map((c) => (<div key={c.id} className="flex items-center gap-3 p-2 border hairline rounded-md"><StatusPill status={c.status} tone={c.status==="Approved"?"success":c.status==="Rejected"?"critical":c.status==="Submitted"?"info":"warning"} /><div className="flex-1 text-sm">{c.item}</div><div className="text-xs text-muted-foreground">{c.owner}</div>{c.expires && <div className="text-xs num text-muted-foreground">expires {fmtDate(c.expires)}</div>}<Button size="sm" variant="ghost" onClick={() => { d.toggleCompliance(c.id); toast("Status toggled."); }}>Toggle</Button></div>))}</div>
         </Card></TabsContent>
 
+        {moiRec && <TabsContent value="moi" className="mt-4"><MoiProjectPanel m={moiRec} /></TabsContent>}
         <TabsContent value="handover" className="mt-4"><HandoverTab items={projectHandover} /></TabsContent>
 
         <TabsContent value="log" className="mt-4"><Card className="p-4"><h3 className="font-display font-semibold text-lg mb-3">Activity Log</h3>

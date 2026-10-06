@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts, type ErrorComponentProps } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter, useRouterState, HeadContent, Scripts, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -74,11 +74,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAuthScreen = pathname.startsWith("/login");
   return (
     <QueryClientProvider client={queryClient}>
       <UIProvider>
         <DataProvider>
-          <AppShell><Outlet /></AppShell>
+          {isAuthScreen ? (
+            <Outlet />
+          ) : (
+            <AppShell><Outlet /></AppShell>
+          )}
           <Toaster position="top-right" richColors />
         </DataProvider>
       </UIProvider>

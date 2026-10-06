@@ -74,11 +74,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAuthScreen = pathname.startsWith("/login");
   return (
     <QueryClientProvider client={queryClient}>
       <UIProvider>
         <DataProvider>
-          <AppShell><Outlet /></AppShell>
+          {isAuthScreen ? (
+            <Outlet />
+          ) : (
+            <AppShell><Outlet /></AppShell>
+          )}
           <Toaster position="top-right" richColors />
         </DataProvider>
       </UIProvider>

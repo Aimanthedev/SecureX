@@ -1,3 +1,4 @@
+import { MOI_PROJECTS, MOI_WORKFLOW, docTone, daysLeftLabel } from "@/lib/moi-data";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
@@ -38,6 +39,30 @@ const phaseMotif: Record<string, "grid" | "camera" | "nodes" | "channels" | "wav
   "Handover": "nodes",
   "Installation": "camera",
 };
+
+function MoiProjectsView() {
+  return (
+    <div className="space-y-4">
+      <div className="panel-flat p-3"><div className="label-xs mb-2">MOI workflow</div><div className="flex flex-wrap gap-1.5">{MOI_WORKFLOW.map((s) => <StatusPill key={s} status={s} tone="neutral" />)}</div></div>
+      <TableShell><table className="w-full text-sm">
+        <thead><tr>{["Project", "MOI status", "Submission owner", "Required docs", "Inspection date", "Certificate status", "Expiry / renewal", "Compliance risk", "Next MOI action"].map((h) => <th key={h} className="py-2 px-3 text-left text-[11px] uppercase text-muted-foreground whitespace-nowrap">{h}</th>)}</tr></thead>
+        <tbody>{MOI_PROJECTS.map((m) => (
+          <tr key={m.id} className="border-t hairline hover:bg-muted/40">
+            <td className="py-2 px-3 whitespace-nowrap"><div>{m.projectId ? <Link to="/projects/$id" params={{ id: m.projectId }} className="hover:underline">{m.name}</Link> : m.name}</div><MonoChip>{m.code}</MonoChip></td>
+            <td className="py-2 px-3 whitespace-nowrap"><StatusPill status={m.stage} tone="info" /></td>
+            <td className="py-2 px-3 whitespace-nowrap">{m.coordinator}</td>
+            <td className="py-2 px-3 whitespace-nowrap num">{m.docsReady} / {m.docsTotal}</td>
+            <td className="py-2 px-3 whitespace-nowrap">{m.inspectionDate ? fmtDate(m.inspectionDate) : "—"}</td>
+            <td className="py-2 px-3 whitespace-nowrap"><StatusPill status={m.certStatus} tone={docTone(m.certStatus)} /></td>
+            <td className="py-2 px-3 whitespace-nowrap">{daysLeftLabel(m.expiry)}</td>
+            <td className="py-2 px-3 whitespace-nowrap"><StatusPill status={m.risk} tone={docTone(m.risk)} /></td>
+            <td className="py-2 px-3 text-xs text-muted-foreground">{m.nextAction}</td>
+          </tr>
+        ))}</tbody>
+      </table></TableShell>
+    </div>
+  );
+}
 
 function ProjectsList() {
   const d = useData();
@@ -305,6 +330,7 @@ function ProjectsList() {
         </div>
       )}
 
+      </>}
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent className="max-w-2xl border-border bg-surface">
           <DialogHeader><DialogTitle>New Project</DialogTitle></DialogHeader>

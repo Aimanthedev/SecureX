@@ -50,7 +50,7 @@ function LoginPage() {
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-1">
                 <div aria-hidden className="absolute inset-0 -z-10 scale-125 rounded-full opacity-30 blur-xl" style={{ background: "radial-gradient(closest-side, var(--sidebar-primary), transparent)" }} />
-                <img src={logoAsset.url} alt="SecureX logo" className="h-24 w-24 object-contain" />
+                <img src={logoAsset.url} alt="SecureX logo" className="h-24 w-24 rounded-xl object-contain" />
               </div>
               <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border bg-signal-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-signal">
                 <ShieldCheck className="h-3.5 w-3.5" />

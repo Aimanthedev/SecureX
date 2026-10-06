@@ -5,9 +5,7 @@ import {
   MetricCard, Panel, PanelHead, Donut, StatusPill, HealthBadge, MonoChip, WorkStatusBadge, projectStatus,
   Segmented, QuickAction, AlertCard, TableShell, axisProps, ChartTooltip, ACCENT,
 } from "@/components/app/common";
-import { fmtQAR, fmtDate } from "@/lib/format";
-import { buildAlerts } from "@/lib/alerts";
-import { getProjectHealth, getProjectCurrentValue, getProjectInvoiced, getProjectCollected } from "@/lib/project-selectors";
+import { fmtQAR, fmtDate, daysFromToday } from "@/lib/format";
 import {
   ArrowRight, Wallet, TrendingUp, Banknote, HardHat, Camera, ClipboardCheck, Package,
   FileSignature, CircleDollarSign, AlertTriangle, Plus, FileBarChart, Radio, Building2,
@@ -26,8 +24,7 @@ export const Route = createFileRoute("/")({
   component: CommandCenter,
 });
 
-const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const MONTHS = ALL_MONTHS.slice(1, 8);
+const MONTHS = ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
 
 function CommandCenter() {
   const d = useData();
@@ -36,34 +33,34 @@ function CommandCenter() {
   const [range, setRange] = useState<"m" | "q" | "y">("q");
 
   const projectsWithHealth = useMemo(
-    () => d.projects.map((p) => ({ p, h: getProjectHealth(d.selectorCtx, p.id) })),
+    () => d.projects.map((p) => ({ p, h: d.computeHealth(p, d.approvals, d.devices, d.materials) })),
     [d],
   );
   const active = projectsWithHealth.length;
   const atRisk = projectsWithHealth.filter((x) => x.h.label !== "On Track").length;
   const pipeline = d.leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").reduce((s, l) => s + l.value * (l.probability / 100), 0);
-  const revenue = d.projects.reduce((s, p) => s + getProjectCurrentValue(d.selectorCtx, p.id), 0);
-  const invoiced = d.projects.reduce((s, p) => s + getProjectInvoiced(d.selectorCtx, p.id), 0);
-  const collected = d.projects.reduce((s, p) => s + getProjectCollected(d.selectorCtx, p.id), 0);
+  const revenue = d.projects.reduce((s, p) => s + p.contractValue, 0);
+  const invoiced = d.projects.reduce((s, p) => s + p.invoiced, 0);
+  const collected = d.projects.reduce((s, p) => s + p.collected, 0);
   const outstanding = invoiced - collected;
   const inProgressCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "In Progress").length;
   const completedCount = projectsWithHealth.filter((x) => projectStatus(x.p, x.h.label) === "Completed").length;
 
-  const execData = useMemo(() => {
-    const months = range === "m" ? ALL_MONTHS.slice(5, 8) : range === "y" ? ALL_MONTHS : MONTHS;
-    return months.map((m, i) => ({
+  const execData = useMemo(
+    () => MONTHS.map((m, i) => ({
       m,
       planned: 12 + i * 2 + ((i * 13) % 4),
       actual: 9 + i * 2 + ((i * 7) % 5),
       completed: 120 + i * 26,
       delayed: 60 - i * 5 + ((i * 11) % 14),
-    }));
-  }, [range]);
+    })),
+    [],
+  );
 
   const distribution = useMemo(() => {
     const byPhase: Record<string, number> = {};
     d.projects.forEach((p) => { byPhase[p.phase] = (byPhase[p.phase] || 0) + 1; });
-    const order = ["Planning", "Procurement", "Installation", "Testing & Commissioning", "Handover"];
+    const order = ["Installation", "Testing", "Procurement", "Handover", "Maintenance"];
     const colors = ["#2F83FF", "#18D5FF", "#9654FF", "#E447C4", "#20D39A"];
     const known = order.map((name, i) => ({ name, value: byPhase[name] || 0, color: colors[i] }));
     Object.entries(byPhase).filter(([k]) => !order.includes(k)).forEach(([name, value], i) => {
@@ -72,11 +69,28 @@ function CommandCenter() {
     return known.filter((x) => x.value > 0);
   }, [d.projects]);
 
-  const alerts = useMemo(() => buildAlerts({ ...d.selectorCtx, purchaseOrders: d.purchaseOrders, amc: d.amc, tickets: d.tickets, customers: d.customers }).slice(0, 6).map((a) => ({
-    severity: a.severity === "info" ? "warning" as const : a.severity,
-    title: a.title, sub: a.sub, owner: a.owner, action: "Open",
-    go: () => { if (a.path) nav({ to: a.path as never }); },
-  })), [d, nav]);
+  const alerts = useMemo(() => {
+    const items: { severity: "critical" | "warning"; title: string; owner: string; sub: string; action: string; go: () => void }[] = [];
+    projectsWithHealth.forEach(({ p, h }) => {
+      h.drivers.filter((x) => x.severity !== "info").forEach((dr) => {
+        items.push({
+          severity: dr.severity as "critical" | "warning",
+          title: dr.text,
+          sub: `${p.number} · ${p.name}`,
+          owner: d.employees.find((e) => e.id === p.pmId)?.name || "—",
+          action: "Open project",
+          go: () => nav({ to: "/projects/$id", params: { id: p.id } }),
+        });
+      });
+    });
+    d.purchaseOrders.filter((po) => po.deliveryStatus === "Overdue").forEach((po) =>
+      items.push({ severity: "critical", title: `PO ${po.number} overdue`, sub: po.supplier, owner: "Procurement", action: "Open PO", go: () => nav({ to: "/procurement" }) }));
+    d.amc.filter((a) => a.renewalStatus === "Expiring Soon" || a.renewalStatus === "Expired").forEach((a) => {
+      const days = daysFromToday(a.end);
+      items.push({ severity: days < 0 ? "critical" : "warning", title: `AMC ${a.number} ${days < 0 ? "expired" : `expires in ${days} days`}`, sub: d.customers.find((c) => c.id === a.customerId)?.name || "", owner: "Service", action: "Open AMC", go: () => nav({ to: "/service" }) });
+    });
+    return items.sort((a, b) => (a.severity === "critical" ? -1 : 1) - (b.severity === "critical" ? -1 : 1)).slice(0, 6);
+  }, [projectsWithHealth, d, nav]);
 
   const totalCameras = d.devices.length;
   const tested = d.devices.filter((x) => x.status === "Tested" || x.status === "Handed Over").length;
@@ -197,7 +211,7 @@ function CommandCenter() {
                       <td className="text-muted-foreground">{cust?.name}</td>
                       <td><StatusPill status={p.phase} tone="info" /></td>
                       <td><WorkStatusBadge status={projectStatus(p, h.label)} /></td>
-                      <td className="num ta-right font-semibold">{fmtQAR(getProjectCurrentValue(d.selectorCtx, p.id), { compact: true })}</td>
+                      <td className="num ta-right font-semibold">{fmtQAR(p.contractValue, { compact: true })}</td>
                       <td><HealthBadge label={h.label} /></td>
                       <td className="text-[11.5px] text-muted-foreground">{nextMs ? <>{nextMs.title} · <span className="num">{fmtDate(nextMs.planned)}</span></> : "—"}</td>
                       <td><ArrowRight className="h-3.5 w-3.5 text-muted-foreground" /></td>
@@ -249,7 +263,7 @@ function CommandCenter() {
           <Panel className="rise rise-4">
             <PanelHead title="Quick Actions" sub="Most used operations" icon={<Plus className="h-4 w-4" />} />
             <div className="grid grid-cols-4 gap-2">
-              <QuickAction icon={<HardHat className="h-5 w-5" />} label="New Project" accent="blue" onClick={() => { d.requestCreate("project"); nav({ to: "/projects" }); }} />
+              <QuickAction icon={<HardHat className="h-5 w-5" />} label="New Project" accent="blue" onClick={() => nav({ to: "/projects" })} />
               <QuickAction icon={<Camera className="h-5 w-5" />} label="Site Update" accent="cyan" onClick={() => nav({ to: "/field" })} />
               <QuickAction icon={<FileBarChart className="h-5 w-5" />} label="Report" accent="purple" onClick={() => nav({ to: "/reports" })} />
               <QuickAction icon={<AlertTriangle className="h-5 w-5" />} label="Alert" accent="red" onClick={() => nav({ to: "/notifications" })} />

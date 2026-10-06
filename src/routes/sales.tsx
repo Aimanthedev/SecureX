@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {
   PageHeader, StatusPill, MetricCard, Panel, PanelHead, TableShell, AlertCard,
@@ -39,23 +39,6 @@ function SalesPage() {
   const weighted = active.reduce((s, l) => s + l.value * (l.probability / 100), 0);
   const wonThisMonth = d.leads.filter((l) => l.stage === "Won").reduce((s, l) => s + l.value, 0);
   const followupsToday = d.leads.filter((l) => l.nextFollowUp && daysFromToday(l.nextFollowUp) <= 0 && l.stage !== "Won" && l.stage !== "Lost").length;
-
-  useEffect(() => {
-    if (d.pendingCreate?.type === "lead") { setNewOpen(true); d.clearPendingCreate(); }
-  }, [d.pendingCreate]);
-
-  const importLeads = () => {
-    const samples = [
-      { company: "Doha Festival City Mall", contactName: "Rania Al-Suwaidi", phone: "+974 4455 3001", email: "rania@dfc.qa", systemType: "IP CCTV, Analytics", source: "Referral" as const },
-      { company: "Qatar Free Zones Authority", contactName: "Tariq Al-Emadi", phone: "+974 4455 3002", email: "tariq@qfz.qa", systemType: "Access Control", source: "Tender" as const },
-      { company: "Al Khor Community Center", contactName: "Noor Al-Marri", phone: "+974 4455 3003", email: "noor@alkhor.qa", systemType: "IP CCTV", source: "Website" as const },
-    ];
-    samples.forEach((s) => d.addLead({
-      ...s, value: 80000 + Math.round(Math.random() * 400000), salespersonId: d.employees.find((e) => e.department === "Sales")!.id,
-      stage: "New Enquiry", probability: 10, createdAt: new Date().toISOString().slice(0, 10), lastActivity: new Date().toISOString().slice(0, 10), notes: "Imported from CSV (demo).",
-    }));
-    toast.success(`${samples.length} leads imported.`);
-  };
 
   return (
     <div>

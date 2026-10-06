@@ -4,11 +4,7 @@ import { useData } from "@/lib/data-context";
 import { PageHeader, MonoChip, StatusPill, StatTile, TableShell, Panel } from "@/components/app/common";
 import { fmtQAR } from "@/lib/format";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MoreHorizontal } from "lucide-react";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/equipment")({
   head: () => ({ meta: [
@@ -65,7 +61,7 @@ function EquipmentPage() {
           <TableShell>
             <thead>
               <tr>
-                {["SKU", "Category", "Brand", "Model", "Cost", "Price", "Stock", "Reserved", "Reorder", "Status", ""].map((h) => (
+                {["SKU", "Category", "Brand", "Model", "Cost", "Price", "Stock", "Reserved", "Reorder", "Status"].map((h) => (
                   <th key={h} className={["Cost", "Price", "Stock", "Reserved", "Reorder"].includes(h) ? "text-right" : "text-left"}>{h}</th>
                 ))}
               </tr>
@@ -83,15 +79,6 @@ function EquipmentPage() {
                   <td className="num text-right">{p.reserved}</td>
                   <td className="num text-right">{p.reorderLevel}</td>
                   <td><StatusPill status={p.stock <= p.reorderLevel ? "Reorder" : p.status} tone={p.stock <= p.reorderLevel ? "warning" : "success"} /></td>
-                  <td>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild><Button size="sm" variant="ghost"><MoreHorizontal className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => { d.receiveStock(p.id, 10); toast.success(`Received 10 × ${p.sku}.`); }}>Receive stock (+10)</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { if (p.stock <= 0) { toast.error("No stock to issue"); return; } d.issueStock(p.id, 1); toast.success(`Issued 1 × ${p.sku}.`); }}>Issue stock (-1)</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
                 </tr>
               ))}
             </tbody>

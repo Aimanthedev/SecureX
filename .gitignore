@@ -6,7 +6,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-package-lock.json
 
 node_modules
 dist
@@ -25,7 +24,6 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
-.claude/
 .DS_Store
 *.suo
 *.ntvs*

@@ -1,5 +1,5 @@
 import { MOI_PROJECTS, MOI_WORKFLOW, docTone, daysLeftLabel } from "@/lib/moi-data";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useData } from "@/lib/data-context";
 import {

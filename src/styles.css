@@ -69,6 +69,8 @@
   --color-hairline: var(--hairline);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-login-blue: var(--login-blue);
+  --color-login-blue-soft: var(--login-blue-soft);
 }
 
 /* ── SecureX command palette ─────────────────────────────────────── */
@@ -363,6 +365,109 @@
 @keyframes sheen {
   0% { transform: translateX(-120%); }
   100% { transform: translateX(220%); }
+}
+
+/* ── SecureX login experience ───────────────────────────────────── */
+.login-screen {
+  background:
+    radial-gradient(ellipse 70% 58% at 10% 5%, var(--login-brand-glow), transparent 68%),
+    radial-gradient(ellipse 62% 54% at 92% 98%, var(--login-blue-glow), transparent 70%),
+    var(--background);
+}
+.login-atmosphere {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--login-blue) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--login-blue) 7%, transparent) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to right, #000 0%, #000 58%, transparent 94%);
+}
+.login-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  animation: loginDrift 12s ease-in-out infinite alternate;
+}
+.login-orb-brand {
+  left: -10rem;
+  top: 20%;
+  height: 28rem;
+  width: 28rem;
+  background: var(--login-brand-glow);
+}
+.login-orb-blue {
+  bottom: -12rem;
+  left: 42%;
+  height: 34rem;
+  width: 34rem;
+  background: var(--login-blue-glow);
+  animation-delay: -4s;
+}
+.login-scan-lines {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background: repeating-linear-gradient(180deg, transparent 0, transparent 5px, var(--hairline) 6px);
+}
+.login-diagonal {
+  position: absolute;
+  border: 1px solid color-mix(in oklab, var(--login-blue) 16%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--login-blue) 8%, transparent), transparent 58%);
+  transform: rotate(-16deg);
+  backdrop-filter: blur(6px);
+}
+.login-diagonal-one {
+  right: -10%;
+  top: 8%;
+  height: 72%;
+  width: 40%;
+}
+.login-diagonal-two {
+  bottom: -18%;
+  left: 17%;
+  height: 42%;
+  width: 65%;
+}
+.login-logo-frame {
+  background: #FFFFFF;
+  box-shadow: 0 18px 44px -25px rgba(18, 102, 214, 0.48);
+}
+.login-card {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  background: var(--login-card);
+  box-shadow: 0 40px 90px -50px color-mix(in oklab, var(--foreground) 40%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+.login-card-accent {
+  background: linear-gradient(90deg, transparent, var(--primary), var(--login-blue), transparent);
+}
+.login-feature-chip {
+  border-color: color-mix(in oklab, var(--login-blue) 20%, var(--border));
+  background: var(--login-chip);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+.text-login-gradient {
+  color: var(--primary);
+  background: linear-gradient(100deg, var(--primary) 10%, var(--login-blue) 88%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.login-submit {
+  color: var(--primary-foreground);
+  background: linear-gradient(115deg, var(--primary), color-mix(in oklab, var(--primary) 78%, var(--login-blue)));
+  box-shadow: 0 18px 34px -18px color-mix(in oklab, var(--primary) 70%, transparent);
+}
+.login-submit:hover {
+  filter: brightness(1.08);
+}
+@keyframes loginDrift {
+  from { transform: translate3d(0, -2%, 0) scale(0.96); }
+  to { transform: translate3d(6%, 5%, 0) scale(1.06); }
+}
+
+@media (max-width: 1023px) {
+  .login-atmosphere { mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 96%); }
+  .login-diagonal-one { right: -18%; width: 62%; }
 }
 
 /* ── Tables ───────────────────────────────────────────────────────── */

@@ -121,7 +121,14 @@ function Logo({ compact }: { compact?: boolean }) {
 
 function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean; onToggle: () => void; onNavigate?: () => void }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const { role } = useUI();
+  const handleLogout = () => {
+    window.sessionStorage.removeItem("securex-demo-access");
+    window.localStorage.removeItem("securex-demo-access");
+    onNavigate?.();
+    navigate({ to: "/login" });
+  };
   return (
     <>
       <div className={cn("px-3.5 pb-3 pt-4", collapsed && "px-2")}>
@@ -188,7 +195,7 @@ function SidebarInner({ collapsed, onToggle, onNavigate }: { collapsed: boolean;
               <DropdownMenuItem className="text-xs" onClick={() => toast("Profile (demo)")}>Profile</DropdownMenuItem>
               <DropdownMenuItem className="text-xs" onClick={() => toast("Preferences (demo)")}>Preferences</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-xs" onClick={() => toast("Signed out (demo)")}><LogOut className="mr-2 h-3.5 w-3.5" />Log out</DropdownMenuItem>
+              <DropdownMenuItem className="text-xs" onClick={handleLogout}><LogOut className="mr-2 h-3.5 w-3.5" />Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (

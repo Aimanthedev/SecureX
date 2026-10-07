@@ -141,6 +141,12 @@
   --chart-track: rgba(51, 65, 85, 0.12);
   --topbar-bg: rgba(244, 246, 249, 0.88);
   --action-gradient: linear-gradient(135deg, #9D293B, #B63252);
+  --login-blue: #1266D6;
+  --login-blue-soft: rgba(18, 102, 214, 0.10);
+  --login-card: rgba(255, 255, 255, 0.84);
+  --login-chip: rgba(255, 255, 255, 0.62);
+  --login-brand-glow: rgba(157, 41, 59, 0.20);
+  --login-blue-glow: rgba(18, 102, 214, 0.18);
   color-scheme: light;
 }
 
@@ -213,6 +219,12 @@
   --chart-track: rgba(133, 164, 204, 0.08);
   --topbar-bg: rgba(6, 16, 29, 0.85);
   --action-gradient: linear-gradient(135deg, #2F83FF, #1B6BE8);
+  --login-blue: #4B9BFF;
+  --login-blue-soft: rgba(47, 131, 255, 0.13);
+  --login-card: rgba(9, 19, 33, 0.78);
+  --login-chip: rgba(13, 25, 41, 0.56);
+  --login-brand-glow: rgba(157, 41, 59, 0.28);
+  --login-blue-glow: rgba(47, 131, 255, 0.24);
   color-scheme: dark;
 }
 

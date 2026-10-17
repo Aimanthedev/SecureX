@@ -3,3 +3,8 @@
 - [x] Preserve original logo with transparent background.
 - [x] Add brief shield reveal transition with reduced-motion support.
 - [x] Verify sign-in, logout, direct access and mobile layout.
+
+# MOI Compliance redesign
+- [ ] Build four KPI cards, compact metrics and the compliance bento overview.
+- [ ] Refine all eight tabs, including project details and renewal calendar.
+- [ ] Verify demo actions, both themes and small-screen navigation.

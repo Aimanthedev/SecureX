@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the demo sign-in transition inside the login page with CSS animation and a cleanup-safe timer; dashboard routes stay unguarded.
+- Derive login shield animation masks from the original transparent logo asset so the animation preserves the actual brand geometry.

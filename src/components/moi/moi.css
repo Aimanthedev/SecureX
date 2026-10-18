@@ -61,6 +61,7 @@
 .moi-day-selected { box-shadow: inset 0 0 0 1px var(--moi-brand); }
 .moi-day-marker { width: 5px; height: 5px; border-radius: 50%; background: var(--warning); }
 .moi-day-marker-inspection { background: var(--moi-blue); }
+@media(max-width:767px) { .moi-tabs { display: none; } }
 @media(min-width:1450px) { .moi-tabs { grid-template-columns: repeat(8,minmax(0,1fr)); } }
 @media(max-width:767px) {
  .moi-header { grid-template-columns: minmax(0,1fr); }

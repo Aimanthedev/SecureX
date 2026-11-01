@@ -11,3 +11,4 @@
 
 - Keep the demo sign-in transition inside the login page with CSS animation and a cleanup-safe timer; dashboard routes stay unguarded.
 - Derive login shield animation masks from the original transparent logo asset so the animation preserves the actual brand geometry.
+- Keep MOI-only presentation in src/components/moi with scoped theme-token CSS; derive displays from unchanged shared MOI mock records so other modules remain unaffected.

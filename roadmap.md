@@ -5,6 +5,6 @@
 - [x] Verify sign-in, logout, direct access and mobile layout.
 
 # MOI Compliance redesign
-- [ ] Build four KPI cards, compact metrics and the compliance bento overview.
-- [ ] Refine all eight tabs, including project details and renewal calendar.
-- [ ] Verify demo actions, both themes and small-screen navigation.
+- [x] Build four KPI cards, compact metrics and the compliance bento overview.
+- [x] Refine all eight tabs, including project details and renewal calendar.
+- [x] Verify demo actions, both themes and small-screen navigation.
